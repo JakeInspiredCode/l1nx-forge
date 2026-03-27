@@ -35,19 +35,29 @@ function writeStorage(key: string, value: string) {
 export default function Mascot() {
   const pathname = usePathname();
 
-  const [personality, setPersonality] = useState<PersonalityType>(() =>
-    readStorage(PERSONALITY_STORAGE_KEY, "sarcastic-friend") as PersonalityType
-  );
-  const [muted, setMuted] = useState(() => readStorage(MUTED_STORAGE_KEY, "") === "true");
+  // Always start with static defaults so server & client render identically.
+  // localStorage is read in a useEffect after hydration to avoid mismatches.
+  const [personality, setPersonality] = useState<PersonalityType>("sarcastic-friend");
+  const [muted, setMuted] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [expression, setExpression] = useState<MascotExpression>("chill");
   const [currentMessage, setCurrentMessage] = useState<MascotMessage | null>(null);
   const [bouncing, setBouncing] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const queueRef = useRef<MascotMessage[]>([]);
   const lastCardTrigger = useRef(0);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleFired = useRef(false);
+
+  // ── Sync from localStorage after hydration ──
+  useEffect(() => {
+    const storedPersonality = readStorage(PERSONALITY_STORAGE_KEY, "sarcastic-friend") as PersonalityType;
+    const storedMuted = readStorage(MUTED_STORAGE_KEY, "") === "true";
+    setPersonality(storedPersonality);
+    setMuted(storedMuted);
+    setHydrated(true);
+  }, []);
 
   // ── Personality change ──
   const handlePersonalityChange = useCallback((p: PersonalityType) => {
@@ -113,9 +123,9 @@ export default function Mascot() {
     return () => window.removeEventListener(MASCOT_EVENT_NAME, handler);
   }, [personality, muted, enqueue]);
 
-  // ── App-load welcome (once per browser session) ──
+  // ── App-load welcome (once per browser session, after hydration) ──
   useEffect(() => {
-    if (muted) return;
+    if (!hydrated || muted) return;
     try {
       if (sessionStorage.getItem(WELCOMED_SESSION_KEY)) return;
       sessionStorage.setItem(WELCOMED_SESSION_KEY, "1");
@@ -127,7 +137,7 @@ export default function Mascot() {
       enqueue(msg);
     }, 800);
     return () => clearTimeout(t);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Idle detection ──
   useEffect(() => {
@@ -163,6 +173,9 @@ export default function Mascot() {
     const msg = getQuip(personality, "poke");
     enqueue(msg);
   }, [personality, muted, enqueue]);
+
+  // Don't render until client has hydrated — avoids SSR/client HTML mismatches
+  if (!hydrated) return null;
 
   return (
     <div className="fixed bottom-20 right-3 sm:bottom-[88px] sm:right-6 z-30">
