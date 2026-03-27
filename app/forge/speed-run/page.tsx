@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/nav";
 import SpeedRunGame, { SpeedRunSummary, CardResult } from "@/components/forge/speed-run/speed-run-game";
 import SpeedRunResults from "@/components/forge/speed-run/speed-run-results";
+import CardQueue from "@/components/card-queue";
 import { ForgeCard, TOPICS, TopicId } from "@/lib/types";
 import {
   useCards,
@@ -19,7 +20,7 @@ import { sm2 } from "@/lib/sm2";
 type CardTypeFilter = "easy" | "intermediate" | "scenario";
 type TimerOption = 45 | 60 | 90;
 
-type Screen = "setup" | "playing" | "results";
+type Screen = "setup" | "playing" | "results" | "review-misses";
 
 // Weighted random card selection
 function buildCardQueue(
@@ -190,9 +191,11 @@ export default function SpeedRunPage() {
     setScreen("results");
   };
 
+  const [reviewCards, setReviewCards] = useState<ForgeCard[]>([]);
+
   const handleReviewMisses = (missedCards: ForgeCard[]) => {
-    setGameCards(missedCards);
-    setScreen("playing");
+    setReviewCards(missedCards);
+    setScreen("review-misses");
   };
 
   if (screen === "playing") {
@@ -206,6 +209,33 @@ export default function SpeedRunPage() {
             onComplete={handleComplete}
             onExit={() => setScreen("setup")}
             onReviewCard={handleReviewCard}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (screen === "review-misses" && reviewCards.length > 0) {
+    return (
+      <div className="min-h-screen bg-forge-bg">
+        <Nav />
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold mono">Miss Review</h2>
+              <p className="text-sm text-forge-text-dim">{reviewCards.length} cards — no time limit</p>
+            </div>
+            <button
+              onClick={() => setScreen("results")}
+              className="text-sm text-forge-text-dim hover:text-forge-text mono transition-colors"
+            >
+              ← back to results
+            </button>
+          </div>
+          <CardQueue
+            cards={reviewCards}
+            sessionType="topic-drill"
+            onComplete={() => setScreen("results")}
           />
         </main>
       </div>
