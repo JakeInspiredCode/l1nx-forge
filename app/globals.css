@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forge-bg: #0a0a0a;
+  --color-forge-surface: #111111;
+  --color-forge-surface-2: #1a1a1a;
+  --color-forge-border: #222222;
+  --color-forge-border-hover: #333333;
+  --color-forge-accent: #2563eb;
+  --color-forge-accent-dim: #1e3a5f;
+  --color-forge-success: #22c55e;
+  --color-forge-warning: #f59e0b;
+  --color-forge-danger: #ef4444;
+  --color-forge-text: #e5e5e5;
+  --color-forge-text-dim: #888888;
+  --color-forge-text-muted: #555555;
+}
+
+/* Fonts loaded via <link> in layout.tsx — no @font-face needed */
+
+body {
+  background: var(--color-forge-bg);
+  color: var(--color-forge-text);
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+code, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Card flip animation */
+.card-flip {
+  perspective: 1000px;
+}
+.card-flip-inner {
+  position: relative;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+.card-flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+.card-front {
+  backface-visibility: hidden;
+  position: relative;
+}
+.card-back {
+  backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+
+/* Glow effect */
+.forge-glow {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+.forge-glow-success {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+.forge-glow-danger {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-forge-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-forge-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-forge-border-hover); }
+
+/* Markdown content styling */
+.markdown-content h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+.markdown-content h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+.markdown-content h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+.markdown-content p { margin-bottom: 0.5rem; line-height: 1.6; }
+.markdown-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+.markdown-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+.markdown-content li { margin-bottom: 0.25rem; }
+.markdown-content code {
+  background: var(--color-forge-surface-2);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+.markdown-content pre {
+  background: var(--color-forge-surface-2);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+.markdown-content pre code {
+  background: none;
+  padding: 0;
+}
+.markdown-content strong { color: #ffffff; font-weight: 600; }
+.markdown-content blockquote {
+  border-left: 3px solid var(--color-forge-accent);
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: var(--color-forge-text-dim);
+}
+
+
+/* Tier unlock notification */
+@keyframes tierUnlockSlideIn {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { transform: translateY(0); opacity: 1; }
+  90% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+.tier-unlock-toast {
+  animation: tierUnlockSlideIn 3.5s ease-in-out forwards;
+}
+
+/* Badge unlock pulse */
+@keyframes badgePulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px 8px rgba(37, 99, 235, 0.2); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+.badge-unlock {
+  animation: badgePulse 0.6s ease-in-out 2;
+}
