@@ -8,6 +8,7 @@ import { sm2 } from "@/lib/sm2";
 import Flashcard from "./flashcard";
 import StepReveal from "./step-reveal";
 import SessionSummary from "./session-summary";
+import { dispatchMascotEvent, MascotTrigger } from "@/lib/mascot/types";
 import TierUnlockToast from "./tier-unlock-toast";
 
 interface CardQueueProps {
@@ -93,6 +94,13 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     const updatedResults = [...results, newResult];
     setResults(updatedResults);
 
+    // Mascot trigger on card review
+    const triggerMap: Record<number, MascotTrigger> = {
+      0: "card-again", 1: "card-again", 2: "card-hard",
+      3: "card-good", 4: "card-easy", 5: "card-easy",
+    };
+    dispatchMascotEvent(triggerMap[quality], { quality, topicId: card.topicId });
+
     // Checkpoint progress for crash recovery
     saveCheckpoint({
       sessionType,
@@ -125,6 +133,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
       const progressResult = await recomputeProgress({ topicId: card.topicId });
       if (progressResult && progressResult.currentTier > progressResult.previousTier) {
         setTierUnlock({ topicId: card.topicId, newTier: progressResult.currentTier });
+        dispatchMascotEvent("tier-unlocked", { topicId: card.topicId, newTier: progressResult.currentTier });
       }
     } catch (err) {
       console.error("Review mutation error:", err);
@@ -143,7 +152,15 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
           overallScore: undefined,
         });
         await recordSession({ sessionMinutes });
-        await checkBadges({});
+        const badgeResult = await checkBadges({});
+        if (badgeResult?.awarded) {
+          for (const badge of badgeResult.awarded) {
+            dispatchMascotEvent("badge-earned", { badge });
+            if (badge === "streak-3") dispatchMascotEvent("streak-3");
+            if (badge === "streak-7") dispatchMascotEvent("streak-7");
+          }
+        }
+        dispatchMascotEvent("session-complete", { cardCount: cards.length });
         clearCheckpoint();
       } catch (err) {
         console.error("Session save error:", err);

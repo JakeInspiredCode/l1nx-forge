@@ -16,6 +16,7 @@ import {
 } from "@/lib/convex-hooks";
 import { useSpeedRunAdd, useSpeedRunHistory } from "@/lib/convex-hooks";
 import { sm2 } from "@/lib/sm2";
+import { dispatchMascotEvent } from "@/lib/mascot/types";
 
 type CardTypeFilter = "easy" | "intermediate" | "scenario";
 type TimerOption = 45 | 60 | 90;
@@ -187,6 +188,9 @@ export default function SpeedRunPage() {
     if (s.totalPoints > 0) {
       await addPoints({ points: s.totalPoints });
     }
+
+    const accuracy = s.totalCards > 0 ? Math.round((s.correctCards / s.totalCards) * 100) : 0;
+    dispatchMascotEvent("speed-run-complete", { accuracy, totalCards: s.totalCards, bestStreak: s.bestStreak });
 
     setScreen("results");
   };

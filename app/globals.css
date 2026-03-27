@@ -124,3 +124,22 @@ code, pre, .mono {
 .badge-unlock {
   animation: badgePulse 0.6s ease-in-out 2;
 }
+
+/* Mascot speech bubble */
+@keyframes mascotBubbleIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes mascotBubbleOut {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-8px); }
+}
+.mascot-bubble-enter { animation: mascotBubbleIn 0.2s ease-out forwards; }
+.mascot-bubble-exit { animation: mascotBubbleOut 0.2s ease-in forwards; }
+
+/* Mascot bounce */
+@keyframes mascotBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.mascot-bounce { animation: mascotBounce 0.3s ease-in-out; }
