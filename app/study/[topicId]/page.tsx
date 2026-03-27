@@ -3,7 +3,7 @@
 import { useState, useMemo, use } from "react";
 import Nav from "@/components/nav";
 import CardQueue from "@/components/card-queue";
-import { TOPICS, ForgeCard, TopicId } from "@/lib/types";
+import { TOPICS, ForgeCard, TopicId, mapConvexCard } from "@/lib/types";
 import { useCardsByTopic, useDueCards, useNewCards, useAllProgress, useRecomputeProgress } from "@/lib/convex-hooks";
 import { sortByPriority } from "@/lib/sm2";
 import { useRouter } from "next/navigation";
@@ -21,15 +21,7 @@ export default function TopicStudyPage({ params }: { params: Promise<{ topicId: 
   const progress = useAllProgress();
   const tp = progress.find((p) => p.topicId === topicId);
 
-  const mapCard = (c: typeof rawCards[number]): ForgeCard => ({
-    id: c.cardId, topicId: c.topicId as ForgeCard["topicId"],
-    type: c.type as ForgeCard["type"], front: c.front, back: c.back,
-    difficulty: c.difficulty as ForgeCard["difficulty"],
-    tier: c.tier as ForgeCard["tier"], steps: c.steps,
-    easeFactor: c.easeFactor, interval: c.interval,
-    repetitions: c.repetitions, dueDate: c.dueDate,
-    lastReview: c.lastReview ?? null,
-  });
+  const mapCard = mapConvexCard;
 
   const cards = useMemo(() => rawCards.map(mapCard), [rawCards]);
   const dueCards = useMemo(() => rawDue.map(mapCard), [rawDue]);
@@ -142,6 +134,19 @@ export default function TopicStudyPage({ params }: { params: Promise<{ topicId: 
             className="w-full bg-forge-surface border border-forge-border rounded-xl p-4 text-left hover:border-forge-border-hover transition-colors">
             <span className="font-semibold">Full Topic Drill</span>
             <span className="text-sm text-forge-text-dim ml-2">(up to 40 cards, all unlocked tiers)</span>
+          </button>
+          <button
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent("open-floating-coach", {
+                  detail: { mode: "quiz", message: `Quiz me on ${topic.name}. Focus on my weakest cards in this topic.` },
+                })
+              );
+            }}
+            className="w-full bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-left hover:bg-purple-500/15 transition-colors"
+          >
+            <span className="font-semibold text-purple-400">Quiz Me on {topic.name}</span>
+            <span className="text-sm text-forge-text-dim ml-2">AI coach quizzes your weak spots</span>
           </button>
         </div>
       </main>

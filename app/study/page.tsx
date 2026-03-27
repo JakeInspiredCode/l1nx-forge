@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Nav from "@/components/nav";
 import CardQueue from "@/components/card-queue";
-import { TOPICS, ForgeCard } from "@/lib/types";
+import { TOPICS, ForgeCard, mapConvexCard } from "@/lib/types";
 import { useCards, useDueCards, useNewCards, useAllProgress } from "@/lib/convex-hooks";
 import { sortByPriority } from "@/lib/sm2";
 import { useRouter } from "next/navigation";
@@ -20,22 +20,7 @@ export default function StudyPage() {
   const progress = useAllProgress();
   const allNewCards = useNewCards();
 
-  // Map Convex docs to ForgeCard shape for components
-  const mapCard = (c: typeof allCards[number]): ForgeCard => ({
-    id: c.cardId,
-    topicId: c.topicId as ForgeCard["topicId"],
-    type: c.type as ForgeCard["type"],
-    front: c.front,
-    back: c.back,
-    difficulty: c.difficulty as ForgeCard["difficulty"],
-    tier: c.tier as ForgeCard["tier"],
-    steps: c.steps,
-    easeFactor: c.easeFactor,
-    interval: c.interval,
-    repetitions: c.repetitions,
-    dueDate: c.dueDate,
-    lastReview: c.lastReview ?? null,
-  });
+  const mapCard = mapConvexCard;
 
   const dueCards = useMemo(() => dueCardsRaw.map(mapCard), [dueCardsRaw]);
   const newCards = useMemo(() => allNewCards.map(mapCard), [allNewCards]);

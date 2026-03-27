@@ -1,13 +1,11 @@
 import { ForgeCard } from "../types";
 import linux from "./linux";
-import linuxT1Continued from "./linux-t1b";
 import { linuxT2, linuxT3, linuxT4 } from "./linux-advanced";
 import { hardware, networking, fiber, powerCooling, opsProcesses, xaiContext, behavioral } from "./topics";
 
 export function getAllSeedCards(): ForgeCard[] {
   return [
     ...linux,
-    ...linuxT1Continued,
     ...linuxT2,
     ...linuxT3,
     ...linuxT4,

@@ -93,4 +93,19 @@ export default defineSchema({
     answer: v.string(),
   })
     .index("by_storyId", ["storyId"]),
+
+  forgeConversations: defineTable({
+    threadId: v.string(),          // UUID — client-generated
+    mode: v.string(),              // "coach" | "quiz" | "mock-interview"
+    messages: v.array(v.object({
+      role: v.string(),            // "user" | "assistant"
+      content: v.string(),
+      timestamp: v.string(),
+      cardId: v.optional(v.string()), // card being discussed, if any
+    })),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_threadId", ["threadId"])
+    .index("by_updatedAt", ["updatedAt"]),
 });

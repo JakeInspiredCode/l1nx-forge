@@ -103,6 +103,20 @@ export const updateCard = mutation({
   },
 });
 
+export const deleteByTopic = mutation({
+  args: { topicId: v.string() },
+  handler: async (ctx, args) => {
+    const cards = await ctx.db
+      .query("forgeCards")
+      .withIndex("by_topic", (q) => q.eq("topicId", args.topicId))
+      .collect();
+    for (const card of cards) {
+      await ctx.db.delete(card._id);
+    }
+    return cards.length;
+  },
+});
+
 export const seedCards = mutation({
   args: {
     cards: v.array(v.object({

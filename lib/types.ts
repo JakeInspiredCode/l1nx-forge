@@ -96,6 +96,26 @@ export const TOPICS: TopicMeta[] = [
   { id: "behavioral", name: "Behavioral", description: "STAR stories, leadership, teamwork, conflict", priority: 8, icon: "@" },
 ];
 
+// Utility: map a Convex forgeCards doc to a ForgeCard
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapConvexCard(c: any): ForgeCard {
+  return {
+    id: c.cardId,
+    topicId: c.topicId as TopicId,
+    type: c.type as CardType,
+    front: c.front,
+    back: c.back,
+    difficulty: c.difficulty as Difficulty,
+    tier: c.tier as Tier,
+    steps: c.steps,
+    easeFactor: c.easeFactor,
+    interval: c.interval,
+    repetitions: c.repetitions,
+    dueDate: c.dueDate,
+    lastReview: c.lastReview ?? null,
+  };
+}
+
 export const BADGE_DEFS = [
   { id: "first-forge", name: "First Forge", condition: "First session completed", icon: "anvil" },
   { id: "streak-3", name: "Streak 3", condition: "3 consecutive days", icon: "flame-silver" },

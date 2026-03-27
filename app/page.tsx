@@ -7,7 +7,7 @@ import ReadinessRadar from "@/components/readiness-radar";
 import DailyBriefing from "@/components/daily-briefing";
 import DailyPlanDisplay from "@/components/daily-plan";
 import CardQueue from "@/components/card-queue";
-import { TOPICS, ForgeCard } from "@/lib/types";
+import { TOPICS, ForgeCard, mapConvexCard } from "@/lib/types";
 import {
   useCards, useIsSeeded, useSeedCards,
   useAllProgress, useProfile, useDueCards,
@@ -52,16 +52,7 @@ export default function Dashboard() {
     doSeed();
   }, [isSeeded, seeding, seedCards, recomputeProgress]);
 
-  // Map Convex docs to ForgeCard shape
-  const mapCard = (c: typeof rawCards[number]): ForgeCard => ({
-    id: c.cardId, topicId: c.topicId as ForgeCard["topicId"],
-    type: c.type as ForgeCard["type"], front: c.front, back: c.back,
-    difficulty: c.difficulty as ForgeCard["difficulty"],
-    tier: c.tier as ForgeCard["tier"], steps: c.steps,
-    easeFactor: c.easeFactor, interval: c.interval,
-    repetitions: c.repetitions, dueDate: c.dueDate,
-    lastReview: c.lastReview ?? null,
-  });
+  const mapCard = mapConvexCard;
 
   // Generate daily plan from current card data
   const dailyPlan = useMemo(() => {

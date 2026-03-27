@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { ForgeCard, Quality } from "@/lib/types";
@@ -23,19 +23,60 @@ interface ReviewResult {
   topicId: string;
 }
 
+const CHECKPOINT_KEY = "l1nx-session-checkpoint";
+
+interface Checkpoint {
+  sessionType: string;
+  cardIds: string[];
+  completedCount: number;
+  sessionStart: number;
+}
+
+function saveCheckpoint(cp: Checkpoint) {
+  try { sessionStorage.setItem(CHECKPOINT_KEY, JSON.stringify(cp)); } catch {}
+}
+
+function loadCheckpoint(): Checkpoint | null {
+  try {
+    const raw = sessionStorage.getItem(CHECKPOINT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function clearCheckpoint() {
+  try { sessionStorage.removeItem(CHECKPOINT_KEY); } catch {}
+}
+
 export default function CardQueue({ cards, sessionType, onComplete }: CardQueueProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<ReviewResult[]>([]);
   const [finished, setFinished] = useState(false);
   const [sessionStart] = useState(Date.now());
   const [tierUnlock, setTierUnlock] = useState<{ topicId: string; newTier: number } | null>(null);
+  const [showResume, setShowResume] = useState<Checkpoint | null>(null);
+
+  // Check for interrupted session on mount
+  useEffect(() => {
+    const cp = loadCheckpoint();
+    if (cp && cp.sessionType === sessionType && cp.completedCount > 0) {
+      // Verify the card IDs match (same session)
+      const currentIds = cards.map((c) => c.id).join(",");
+      const savedIds = cp.cardIds.join(",");
+      if (currentIds === savedIds && cp.completedCount < cards.length) {
+        setShowResume(cp);
+        return;
+      }
+    }
+    clearCheckpoint();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateCard = useMutation(api.forgeCards.updateCard);
   const addReview = useMutation(api.forgeReviews.add);
   const addPoints = useMutation(api.forgeProfile.addPoints);
   const recomputeProgress = useMutation(api.forgeProgressRecompute.recompute);
   const addSession = useMutation(api.forgeSessions.add);
-  const upsertProfile = useMutation(api.forgeProfile.upsert);
+  const recordSession = useMutation(api.forgeProfile.recordSessionComplete);
+  const checkBadges = useMutation(api.forgeProfile.checkAndAwardBadges);
 
   const handleRate = useCallback(async (quality: Quality, responseTime: number) => {
     const card = cards[currentIndex];
@@ -51,6 +92,14 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     };
     const updatedResults = [...results, newResult];
     setResults(updatedResults);
+
+    // Checkpoint progress for crash recovery
+    saveCheckpoint({
+      sessionType,
+      cardIds: cards.map((c) => c.id),
+      completedCount: updatedResults.length,
+      sessionStart,
+    });
 
     const isLast = currentIndex + 1 >= cards.length;
     if (!isLast) {
@@ -82,7 +131,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     }
 
     if (isLast) {
-      // Session complete — update profile
+      // Session complete — update profile streak + minutes
       const sessionMinutes = Math.round((Date.now() - sessionStart) / 60000);
       try {
         await addSession({
@@ -93,13 +142,16 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
           answers: [],
           overallScore: undefined,
         });
+        await recordSession({ sessionMinutes });
+        await checkBadges({});
+        clearCheckpoint();
       } catch (err) {
         console.error("Session save error:", err);
       }
       setFinished(true);
     }
   }, [cards, currentIndex, results, sessionStart, sessionType,
-      updateCard, addReview, addPoints, recomputeProgress, addSession]);
+      updateCard, addReview, addPoints, recomputeProgress, addSession, recordSession, checkBadges]);
 
   if (finished) {
     return (
@@ -109,6 +161,39 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
         duration={Math.round((Date.now() - sessionStart) / 1000)}
         onClose={onComplete}
       />
+    );
+  }
+
+  if (showResume) {
+    return (
+      <div className="text-center py-20 max-w-md mx-auto">
+        <span className="text-4xl mb-4 block">&#x21bb;</span>
+        <h2 className="text-xl font-semibold mb-2">Resume Session?</h2>
+        <p className="text-forge-text-dim text-sm mb-6">
+          You completed {showResume.completedCount} of {cards.length} cards before leaving.
+          Those cards were already saved — pick up where you left off?
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={() => {
+              setCurrentIndex(showResume.completedCount);
+              setShowResume(null);
+            }}
+            className="px-6 py-3 bg-forge-accent text-white rounded-xl font-medium hover:bg-forge-accent/90 transition-colors"
+          >
+            Resume ({cards.length - showResume.completedCount} remaining)
+          </button>
+          <button
+            onClick={() => {
+              clearCheckpoint();
+              setShowResume(null);
+            }}
+            className="px-6 py-3 bg-forge-surface border border-forge-border rounded-xl font-medium hover:border-forge-border-hover transition-colors"
+          >
+            Start Fresh
+          </button>
+        </div>
+      </div>
     );
   }
 

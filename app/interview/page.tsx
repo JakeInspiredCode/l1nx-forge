@@ -6,16 +6,16 @@ import { api } from "../../convex/_generated/api";
 import Nav from "@/components/nav";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ForgeCard, TOPICS } from "@/lib/types";
+import { ForgeCard, TOPICS, mapConvexCard, Quality } from "@/lib/types";
 import { useCards, useAllProgress } from "@/lib/convex-hooks";
-import { sortByPriority } from "@/lib/sm2";
+import { sm2, sortByPriority } from "@/lib/sm2";
 
 type InterviewState = "setup" | "active" | "scoring" | "review";
 
 interface AnswerEntry {
   card: ForgeCard;
   answer: string;
-  score?: { technical: number; structure: number; ownership: number; feedback: string };
+  score?: { technical: number; structure: number; ownership: number; feedback: string; missedTerms: string[] };
 }
 
 export default function InterviewPage() {
@@ -32,24 +32,20 @@ export default function InterviewPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const addSession = useMutation(api.forgeSessions.add);
+  const updateCard = useMutation(api.forgeCards.updateCard);
+  const recomputeProgress = useMutation(api.forgeProgressRecompute.recompute);
+  const recordSession = useMutation(api.forgeProfile.recordSessionComplete);
+  const checkBadges = useMutation(api.forgeProfile.checkAndAwardBadges);
   const rawCards = useCards();
   const progress = useAllProgress();
 
-  const cards = useMemo(() => rawCards.map((c): ForgeCard => ({
-    id: c.cardId, topicId: c.topicId as ForgeCard["topicId"],
-    type: c.type as ForgeCard["type"], front: c.front, back: c.back,
-    difficulty: c.difficulty as ForgeCard["difficulty"],
-    tier: c.tier as ForgeCard["tier"], steps: c.steps,
-    easeFactor: c.easeFactor, interval: c.interval,
-    repetitions: c.repetitions, dueDate: c.dueDate,
-    lastReview: c.lastReview ?? null,
-  })), [rawCards]);
+  const cards = useMemo(() => rawCards.map(mapConvexCard), [rawCards]);
 
   useEffect(() => {
     if (state === "active") {
       intervalRef.current = setInterval(() => {
         setTimer((t) => {
-          if (t <= 0) { clearInterval(intervalRef.current!); finishInterview(); return 0; }
+          if (t <= 0) { clearInterval(intervalRef.current!); finishInterview(); return 0; } // eslint-disable-line
           return t - 1;
         });
         if (showQuestion) setThinkTimer((t) => Math.max(0, t - 1));
@@ -90,42 +86,109 @@ export default function InterviewPage() {
     const newAnswers = [...answers, entry];
     setAnswers(newAnswers); setCurrentAnswer(""); setThinkTimer(30); setShowQuestion(true);
     if (currentQ + 1 < questions.length) setCurrentQ(currentQ + 1);
-    else finishInterview();
+    else finishInterview(newAnswers);
   };
 
-  const finishInterview = () => {
+  const finishInterview = async (finalAnswers?: AnswerEntry[]) => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    const scored = answers.map((a) => {
-      const keywords = a.card.back.toLowerCase().split(/\s+/).filter((w) => w.length > 4);
-      const answerWords = a.answer.toLowerCase().split(/\s+/);
-      const hits = keywords.filter((k) => answerWords.some((w) => w.includes(k)));
-      const technical = Math.min(5, Math.round((hits.length / Math.max(1, keywords.length * 0.3)) * 5));
-      const hasStructure = a.answer.includes("1") || a.answer.includes("first") || a.answer.includes("then") ? 1 : 0;
-      const structure = Math.min(5, technical > 0 ? 2 + hasStructure + (a.answer.length > 100 ? 1 : 0) : 1);
-      const ownership = a.answer.toLowerCase().includes("i ") ? Math.min(5, 3 + ((a.answer.match(/\bI\b/g)?.length ?? 0) > 3 ? 1 : 0)) : 2;
-      return { ...a, score: { technical, structure, ownership,
-        feedback: `Matched ${hits.length} key terms. ${5 - technical > 0 ? "Review the full answer for missed concepts." : "Strong coverage."}` } };
-    });
-    setAnswers(scored);
+    const toScore = finalAnswers ?? answers;
+    setState("scoring");
 
-    addSession({
-      type: "mock-interview",
-      startTime: new Date(Date.now() - timeLimit * 60000).toISOString(),
-      endTime: new Date().toISOString(),
-      cardIds: questions.map((q) => q.id),
-      answers: scored.map((a) => ({
-        cardId: a.card.id, transcript: a.answer,
-        rubricScores: a.score ? { technical: a.score.technical, structure: a.score.structure, ownership: a.score.ownership } : { technical: 0, structure: 0, ownership: 0 },
-        missedTerms: [],
-      })),
-      overallScore: scored.length > 0
-        ? Math.round(scored.reduce((s, a) => s + (a.score?.technical ?? 0) + (a.score?.structure ?? 0) + (a.score?.ownership ?? 0), 0) / (scored.length * 3))
-        : undefined,
-    });
-    setState("review");
+    try {
+      const res = await fetch("/api/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          answers: toScore.map((a) => ({
+            question: a.card.front,
+            expectedAnswer: a.card.back,
+            userAnswer: a.answer,
+            topicId: a.card.topicId,
+            tier: a.card.tier,
+          })),
+        }),
+      });
+
+      let scored: AnswerEntry[];
+      if (res.ok) {
+        const { scores } = await res.json();
+        scored = toScore.map((a, i) => ({
+          ...a,
+          score: scores[i] ?? { technical: 0, structure: 0, ownership: 0, feedback: "Scoring unavailable.", missedTerms: [] },
+        }));
+      } else {
+        // Fallback: zero scores with error note
+        scored = toScore.map((a) => ({
+          ...a,
+          score: { technical: 0, structure: 0, ownership: 0, feedback: "AI scoring failed — check your ANTHROPIC_API_KEY.", missedTerms: [] },
+        }));
+      }
+      setAnswers(scored);
+
+      await addSession({
+        type: "mock-interview",
+        startTime: new Date(Date.now() - timeLimit * 60000).toISOString(),
+        endTime: new Date().toISOString(),
+        cardIds: questions.map((q) => q.id),
+        answers: scored.map((a) => ({
+          cardId: a.card.id, transcript: a.answer,
+          rubricScores: a.score ? { technical: a.score.technical, structure: a.score.structure, ownership: a.score.ownership } : { technical: 0, structure: 0, ownership: 0 },
+          missedTerms: a.score?.missedTerms ?? [],
+        })),
+        overallScore: scored.length > 0
+          ? Math.round(scored.reduce((s, a) => s + (a.score?.technical ?? 0) + (a.score?.structure ?? 0) + (a.score?.ownership ?? 0), 0) / (scored.length * 3))
+          : undefined,
+      });
+
+      // Update SM-2 state for each answered card based on rubric scores
+      const today = new Date().toISOString().split("T")[0];
+      const affectedTopics = new Set<string>();
+      for (const a of scored) {
+        if (!a.score) continue;
+        const avg = (a.score.technical + a.score.structure + a.score.ownership) / 3;
+        let quality: Quality;
+        if (avg < 1) quality = 0;
+        else if (avg < 2) quality = 2;
+        else if (avg < 3) quality = 3;
+        else if (avg < 4) quality = 4;
+        else quality = 5;
+        const sm2Result = sm2(a.card, quality, 0);
+        await updateCard({ cardId: a.card.id, ...sm2Result, lastReview: today });
+        affectedTopics.add(a.card.topicId);
+      }
+      for (const topicId of affectedTopics) {
+        await recomputeProgress({ topicId });
+      }
+      await recordSession({ sessionMinutes: timeLimit });
+      await checkBadges({});
+
+      setState("review");
+    } catch {
+      // Network error — still show review with zero scores
+      const scored = toScore.map((a) => ({
+        ...a,
+        score: { technical: 0, structure: 0, ownership: 0, feedback: "Scoring request failed — check network.", missedTerms: [] },
+      }));
+      setAnswers(scored);
+      setState("review");
+    }
   };
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  if (state === "scoring") {
+    return (
+      <div className="min-h-screen bg-forge-bg"><Nav />
+        <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 text-center">
+          <div className="mt-16">
+            <div className="text-4xl mb-4 animate-pulse">AI</div>
+            <h2 className="text-xl font-semibold mono mb-2">Scoring your answers...</h2>
+            <p className="text-forge-text-dim text-sm">Claude is evaluating {answers.length} answer{answers.length !== 1 ? "s" : ""} for technical accuracy, structure, and depth.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (state === "setup") {
     return (
@@ -181,7 +244,7 @@ export default function InterviewPage() {
             <span className={`text-lg mono font-bold ${timer < 120 ? "text-forge-danger" : "text-forge-accent"}`}>
               {formatTime(timer)}
             </span>
-            <button onClick={finishInterview} className="text-xs text-forge-danger hover:text-forge-danger/80">End Early</button>
+            <button onClick={() => finishInterview()} className="text-xs text-forge-danger hover:text-forge-danger/80">End Early</button>
           </div>
           <div className="bg-forge-surface border border-forge-border rounded-xl p-6 mb-6">
             <div className="flex items-center gap-2 mb-3">
@@ -241,6 +304,14 @@ export default function InterviewPage() {
                   </div>
                 </details>
                 {a.score?.feedback && <p className="text-xs text-forge-text-dim mt-2">{a.score.feedback}</p>}
+                {a.score?.missedTerms && a.score.missedTerms.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    <span className="text-xs text-forge-text-muted">Missed:</span>
+                    {a.score.missedTerms.map((term, j) => (
+                      <span key={j} className="text-xs bg-forge-danger/10 text-forge-danger/80 px-1.5 py-0.5 rounded">{term}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

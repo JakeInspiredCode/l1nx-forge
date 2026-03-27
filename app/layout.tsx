@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ConvexClientProvider from "@/components/convex-provider";
+import FloatingCoach from "@/components/floating-coach";
 
 export const metadata: Metadata = {
   title: "L1NX — Interview Forge",
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-forge-bg text-forge-text min-h-screen">
         <ConvexClientProvider>
           {children}
+          <FloatingCoach />
         </ConvexClientProvider>
       </body>
     </html>
