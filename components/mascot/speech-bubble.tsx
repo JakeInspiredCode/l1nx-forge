@@ -29,7 +29,7 @@ export default function SpeechBubble({ message, duration, onDismiss }: SpeechBub
   return (
     <div
       className={`
-        absolute right-14 bottom-2 max-w-[200px] sm:max-w-[220px]
+        absolute right-14 bottom-2 max-w-[260px] sm:max-w-[320px]
         bg-forge-surface border border-forge-border rounded-xl
         px-3 py-2 text-xs text-forge-text leading-relaxed
         shadow-lg pointer-events-none

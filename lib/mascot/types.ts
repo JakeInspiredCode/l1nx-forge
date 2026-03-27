@@ -16,7 +16,8 @@ export type MascotTrigger =
   | "speed-run-complete"
   | "tier-unlocked"
   | "session-complete"
-  | "idle-nudge";
+  | "idle-nudge"
+  | "poke";
 
 export type MascotExpression = "happy" | "stern" | "chill" | "smirk";
 
@@ -52,25 +53,25 @@ export const EXPRESSION_MAP: Record<PersonalityType, Record<MascotTrigger, Masco
     "app-load": "stern", "card-again": "stern", "card-hard": "stern",
     "card-good": "chill", "card-easy": "chill", "badge-earned": "happy",
     "streak-3": "chill", "streak-7": "happy", "speed-run-complete": "stern",
-    "tier-unlocked": "happy", "session-complete": "chill", "idle-nudge": "stern",
+    "tier-unlocked": "happy", "session-complete": "chill", "idle-nudge": "stern", "poke": "stern",
   },
   "cheerleader": {
     "app-load": "happy", "card-again": "chill", "card-hard": "chill",
     "card-good": "happy", "card-easy": "happy", "badge-earned": "happy",
     "streak-3": "happy", "streak-7": "happy", "speed-run-complete": "happy",
-    "tier-unlocked": "happy", "session-complete": "happy", "idle-nudge": "chill",
+    "tier-unlocked": "happy", "session-complete": "happy", "idle-nudge": "chill", "poke": "happy",
   },
   "zen-master": {
     "app-load": "chill", "card-again": "chill", "card-hard": "chill",
     "card-good": "chill", "card-easy": "happy", "badge-earned": "happy",
     "streak-3": "chill", "streak-7": "happy", "speed-run-complete": "chill",
-    "tier-unlocked": "happy", "session-complete": "chill", "idle-nudge": "chill",
+    "tier-unlocked": "happy", "session-complete": "chill", "idle-nudge": "chill", "poke": "chill",
   },
   "sarcastic-friend": {
     "app-load": "smirk", "card-again": "smirk", "card-hard": "smirk",
     "card-good": "chill", "card-easy": "smirk", "badge-earned": "happy",
     "streak-3": "smirk", "streak-7": "happy", "speed-run-complete": "smirk",
-    "tier-unlocked": "happy", "session-complete": "smirk", "idle-nudge": "smirk",
+    "tier-unlocked": "happy", "session-complete": "smirk", "idle-nudge": "smirk", "poke": "smirk",
   },
 };
 

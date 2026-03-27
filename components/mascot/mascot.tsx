@@ -158,6 +158,12 @@ export default function Mascot() {
     };
   }, [pathname, muted, personality, enqueue]);
 
+  const handlePoke = useCallback(() => {
+    if (muted) return;
+    const msg = getQuip(personality, "poke");
+    enqueue(msg);
+  }, [personality, muted, enqueue]);
+
   return (
     <div className="fixed bottom-20 right-3 sm:bottom-[88px] sm:right-6 z-30">
       {/* Settings panel */}
@@ -178,20 +184,43 @@ export default function Mascot() {
         onDismiss={handleDismiss}
       />
 
-      {/* Avatar button */}
-      <button
-        onClick={() => setSettingsOpen((v) => !v)}
-        className="block hover:scale-110 active:scale-95 transition-transform"
-        title="Mascot settings"
-        aria-label="Open mascot settings"
-      >
-        <MascotAvatar
-          expression={expression}
-          personality={personality}
-          size={48}
-          bounce={bouncing}
-        />
-      </button>
+      {/* Avatar + gear overlay */}
+      <div className="relative group">
+        {/* Poke the mascot */}
+        <button
+          onClick={handlePoke}
+          className="block hover:scale-110 active:scale-95 transition-transform"
+          title="Say something!"
+          aria-label="Poke mascot"
+        >
+          <MascotAvatar
+            expression={expression}
+            personality={personality}
+            size={48}
+            bounce={bouncing}
+          />
+        </button>
+
+        {/* Gear icon — visible on hover */}
+        <button
+          onClick={() => setSettingsOpen((v) => !v)}
+          className="
+            absolute -top-2 -right-2
+            w-5 h-5 rounded-full
+            bg-forge-surface border border-forge-border
+            flex items-center justify-center
+            opacity-0 group-hover:opacity-100
+            transition-opacity duration-150
+            hover:bg-forge-hover
+          "
+          title="Mascot settings"
+          aria-label="Open mascot settings"
+        >
+          <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor" className="text-forge-muted">
+            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

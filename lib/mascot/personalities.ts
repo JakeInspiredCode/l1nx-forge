@@ -70,6 +70,12 @@ const QUIPS: Record<PersonalityType, Record<MascotTrigger, string[]>> = {
       "Standing around won't pass the interview.",
       "Cards won't review themselves. Move it.",
     ],
+    "poke": [
+      "You poked me. I don't recommend doing that again.",
+      "Was that supposed to motivate me? Because it didn't.",
+      "Eyes forward, recruit. Quit playing with your coach.",
+      "Poke the bear one more time, I dare you.",
+    ],
   },
 
   // ── CHEERLEADER ──
@@ -134,6 +140,12 @@ const QUIPS: Record<PersonalityType, Record<MascotTrigger, string[]>> = {
       "I miss you! Come review some cards!",
       "Just one more card? For me?",
     ],
+    "poke": [
+      "Hehe, you poked me! I love it!!",
+      "Hi hi hi!! Did you just poke me?! So cute!",
+      "You clicked me! Best. Day. Ever!!",
+      "Poke me again, I don't mind one bit!!",
+    ],
   },
 
   // ── ZEN MASTER ──
@@ -196,6 +208,12 @@ const QUIPS: Record<PersonalityType, Record<MascotTrigger, string[]>> = {
       "Stillness has its place. Is this that place?",
       "The cards await your attention, gently.",
       "Return when you are ready. Perhaps now?",
+    ],
+    "poke": [
+      "You seek connection. That is human.",
+      "A gentle touch. The universe acknowledges you.",
+      "Even the teacher enjoys a moment of play.",
+      "You reached out. The path continues.",
     ],
   },
 
@@ -260,6 +278,12 @@ const QUIPS: Record<PersonalityType, Record<MascotTrigger, string[]>> = {
       "Hello? Anyone home? The cards are lonely.",
       "I can see you just sitting there, you know.",
       "This isn't a Netflix break. Cards. Now.",
+    ],
+    "poke": [
+      "Did you just... poke me? Really?",
+      "Oh sure, poke the robot. Classic.",
+      "I'm a study coach, not a toy. But sure, hi.",
+      "Congratulations, you found the button. Award incoming... just kidding.",
     ],
   },
 };
