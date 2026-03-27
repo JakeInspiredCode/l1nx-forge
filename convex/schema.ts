@@ -94,6 +94,30 @@ export default defineSchema({
   })
     .index("by_storyId", ["storyId"]),
 
+  forgeSpeedRuns: defineTable({
+    timestamp: v.string(),
+    topicId: v.string(),               // topic id or "mixed"
+    cardTypeFilter: v.array(v.string()), // ["easy"] | ["intermediate"] | etc.
+    startingTime: v.number(),           // 45 | 60 | 90
+    totalCards: v.number(),
+    correctCards: v.number(),
+    partialCards: v.number(),
+    wrongCards: v.number(),
+    totalPoints: v.number(),
+    bestStreak: v.number(),
+    avgResponseMs: v.number(),
+    cardResults: v.array(v.object({
+      cardId: v.string(),
+      result: v.string(),              // "correct" | "partial" | "wrong"
+      userInput: v.string(),
+      responseMs: v.number(),
+      feedback: v.string(),
+    })),
+  })
+    .index("by_timestamp", ["timestamp"])
+    .index("by_topic", ["topicId"])
+    .index("by_points", ["totalPoints"]),
+
   forgeConversations: defineTable({
     threadId: v.string(),          // UUID — client-generated
     mode: v.string(),              // "coach" | "quiz" | "mock-interview"

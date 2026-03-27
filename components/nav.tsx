@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "◆" },
   { href: "/study", label: "Study", icon: "▶" },
   { href: "/interview", label: "Interview", icon: "◎" },
+  { href: "/forge/speed-run", label: "Speed Run", icon: "⚡" },
   { href: "/progress", label: "Progress", icon: "▲" },
   { href: "/stories", label: "Stories", icon: "◈" },
 ];

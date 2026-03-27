@@ -21,21 +21,24 @@ const RATING_BUTTONS: { label: string; quality: Quality; color: string; key: str
 
 export default function Flashcard({ card, onRate, index, total }: FlashcardProps) {
   const [flipped, setFlipped] = useState(false);
+  const [hasRevealed, setHasRevealed] = useState(false);
   const timerStart = useRef<number>(Date.now());
   const flipTime = useRef<number>(0);
 
   useEffect(() => {
     setFlipped(false);
+    setHasRevealed(false);
     timerStart.current = Date.now();
     flipTime.current = 0;
   }, [card.id]);
 
   const handleFlip = useCallback(() => {
-    if (!flipped) {
+    if (!hasRevealed) {
       flipTime.current = Date.now() - timerStart.current;
-      setFlipped(true);
+      setHasRevealed(true);
     }
-  }, [flipped]);
+    setFlipped((f) => !f);
+  }, [hasRevealed]);
 
   const handleRate = useCallback((quality: Quality) => {
     onRate(quality, flipTime.current);
@@ -45,16 +48,16 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
     const handler = (e: KeyboardEvent) => {
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
-        if (!flipped) handleFlip();
+        handleFlip();
       }
-      if (flipped) {
+      if (hasRevealed) {
         const btn = RATING_BUTTONS.find((b) => b.key === e.key);
         if (btn) handleRate(btn.quality);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [flipped, handleFlip, handleRate]);
+  }, [hasRevealed, handleFlip, handleRate]);
 
   const tierLabel = ["", "T1 Foundation", "T2 Application", "T3 Scenario", "T4 Branching"][card.tier];
   const tierColor = ["", "text-forge-text-dim", "text-forge-accent", "text-forge-warning", "text-forge-danger"][card.tier];
@@ -73,11 +76,11 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
       </div>
 
       {/* Card */}
-      <div className="card-flip" onClick={!flipped ? handleFlip : undefined}>
+      <div className="card-flip cursor-pointer" onClick={handleFlip}>
         <div className={`card-flip-inner ${flipped ? "flipped" : ""}`}>
           {/* Front */}
           <div className="card-front">
-            <div className="bg-forge-surface border border-forge-border rounded-xl p-8 min-h-[320px] flex flex-col cursor-pointer hover:border-forge-border-hover transition-colors">
+            <div className="bg-forge-surface border border-forge-border rounded-xl p-8 min-h-[320px] flex flex-col hover:border-forge-border-hover transition-colors">
               <div className="flex items-center justify-between mb-6">
                 <span className={`text-xs mono ${tierColor}`}>{tierLabel}</span>
                 <span className="text-xs text-forge-text-muted mono">{card.topicId}</span>
@@ -110,8 +113,8 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
         </div>
       </div>
 
-      {/* Rating buttons — only visible when flipped */}
-      {flipped && (
+      {/* Rating buttons — visible once card has been revealed */}
+      {hasRevealed && (
         <div className="mt-6 flex gap-3 justify-center">
           {RATING_BUTTONS.map((btn) => (
             <button

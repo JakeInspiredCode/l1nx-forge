@@ -103,3 +103,17 @@ export function useStories() {
 export function useUpsertStory() {
   return useMutation(api.forgeStories.upsert);
 }
+
+// ── Speed Runs ──
+
+export function useSpeedRunAdd() {
+  return useMutation(api.forgeSpeedRuns.add);
+}
+
+export function useSpeedRunHistory(topicId?: string) {
+  return useQuery(api.forgeSpeedRuns.getHistory, { topicId, limit: 10 }) ?? [];
+}
+
+export function useSpeedRunBestScore(topicId?: string) {
+  return useQuery(api.forgeSpeedRuns.getBestScore, { topicId });
+}
