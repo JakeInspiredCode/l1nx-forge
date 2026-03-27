@@ -93,52 +93,65 @@ type AgentContext = {
 };
 
 const ALLOWED_MODELS = new Set([
-  "claude-sonnet-4-6-20250514",
+  "claude-sonnet-4-6",
   "claude-haiku-4-5-20251001",
   "claude-opus-4-6",
 ]);
 
 export async function POST(req: NextRequest) {
-  const { messages, context, mode, model } = (await req.json()) as {
-    messages: AgentMessage[];
-    context: AgentContext;
-    mode: string;
-    model?: string;
-  };
+  try {
+    const { messages, context, mode, model } = (await req.json()) as {
+      messages: AgentMessage[];
+      context: AgentContext;
+      mode: string;
+      model?: string;
+    };
 
-  const systemPrompt = buildSystemPrompt(context, mode);
-  const resolvedModel = model && ALLOWED_MODELS.has(model) ? model : "claude-opus-4-6";
+    const systemPrompt = buildSystemPrompt(context, mode);
+    const resolvedModel = model && ALLOWED_MODELS.has(model) ? model : "claude-sonnet-4-6";
 
-  const stream = await client.messages.stream({
-    model: resolvedModel,
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
-  });
+    const stream = await client.messages.stream({
+      model: resolvedModel,
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    });
 
-  const encoder = new TextEncoder();
+    const encoder = new TextEncoder();
 
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        if (
-          chunk.type === "content_block_delta" &&
-          chunk.delta.type === "text_delta"
-        ) {
-          controller.enqueue(encoder.encode(chunk.delta.text));
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            if (
+              chunk.type === "content_block_delta" &&
+              chunk.delta.type === "text_delta"
+            ) {
+              controller.enqueue(encoder.encode(chunk.delta.text));
+            }
+          }
+        } catch (streamErr) {
+          controller.enqueue(encoder.encode(`[stream error: ${(streamErr as Error).message}]`));
         }
-      }
-      controller.close();
-    },
-  });
+        controller.close();
+      },
+    });
 
-  return new Response(readable, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Transfer-Encoding": "chunked",
-    },
-  });
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[agent route]", message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }

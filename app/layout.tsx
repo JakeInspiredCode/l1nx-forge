@@ -3,6 +3,7 @@ import "./globals.css";
 import ConvexClientProvider from "@/components/convex-provider";
 import FloatingCoach from "@/components/floating-coach";
 import Mascot from "@/components/mascot/mascot";
+import BadgeBanner from "@/components/badge-banner";
 
 export const metadata: Metadata = {
   title: "L1NX — Interview Forge",
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <FloatingCoach />
           <Mascot />
+          <BadgeBanner />
         </ConvexClientProvider>
       </body>
     </html>

@@ -31,6 +31,7 @@ export default function Dashboard() {
   const recentSpeedRuns = useSpeedRunsRecent(20);
   const [seeding, setSeeding] = useState(false);
   const [trainingCards, setTrainingCards] = useState<ForgeCard[] | null>(null);
+  const [planTopicFilter, setPlanTopicFilter] = useState<string>("all");
 
   // Seed on first load if DB is empty
   useEffect(() => {
@@ -58,11 +59,11 @@ export default function Dashboard() {
 
   const mapCard = mapConvexCard;
 
-  // Generate daily plan from current card data
+  // Generate daily plan from current card data, filtered by topic
   const dailyPlan = useMemo(() => {
     if (rawCards.length === 0) return null;
-    return generateDailyPlan(rawCards, progress);
-  }, [rawCards, progress]);
+    return generateDailyPlan(rawCards, progress, planTopicFilter);
+  }, [rawCards, progress, planTopicFilter]);
 
   const dueCount = dueCards.length;
   const totalCards = rawCards.length;
@@ -157,7 +158,12 @@ export default function Dashboard() {
           {/* Daily plan + quick actions */}
           <div className="lg:col-span-2 space-y-4">
             {/* Daily training plan */}
-            <DailyPlanDisplay plan={dailyPlan} onStartTraining={handleStartTraining} />
+            <DailyPlanDisplay
+              plan={dailyPlan}
+              onStartTraining={handleStartTraining}
+              topicFilter={planTopicFilter}
+              onTopicFilterChange={setPlanTopicFilter}
+            />
 
             {/* Mock interview CTA */}
             <Link href="/interview" className="block">

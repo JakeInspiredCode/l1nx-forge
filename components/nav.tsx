@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/forge/speed-run", label: "Speed Run", icon: "⚡" },
   { href: "/progress", label: "Progress", icon: "▲" },
   { href: "/stories", label: "Stories", icon: "◈" },
+  { href: "/cards", label: "Cards", icon: "📇" },
   { href: "/history", label: "History", icon: "◷" },
 ];
 

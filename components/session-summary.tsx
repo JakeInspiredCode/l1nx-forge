@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ForgeCard, Quality } from "@/lib/types";
 import { useProfile } from "@/lib/convex-hooks";
 
@@ -15,6 +16,65 @@ interface SessionSummaryProps {
   cards: ForgeCard[];
   duration: number;
   onClose?: () => void;
+}
+
+function ReviewCards({ cards }: { cards: ForgeCard[] }) {
+  const [flipped, setFlipped] = useState<Set<string>>(new Set());
+
+  const toggle = (id: string) => {
+    setFlipped((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div className="mb-6">
+      <h3 className="text-sm font-semibold mb-3 text-forge-danger">
+        Needs Review ({cards.length}) <span className="font-normal text-forge-text-muted">— click to flip</span>
+      </h3>
+      <div className="space-y-2">
+        {cards.map((card) => {
+          const isFlipped = flipped.has(card.id);
+          return (
+            <button
+              key={card.id}
+              onClick={() => toggle(card.id)}
+              className={`w-full text-left rounded-lg p-3 text-sm transition-all duration-150 cursor-pointer ${
+                isFlipped
+                  ? "bg-forge-accent/5 border border-forge-accent/20"
+                  : "bg-forge-danger/5 border border-forge-danger/20 hover:border-forge-danger/40"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  {!isFlipped && (
+                    <p className="text-forge-text">{card.front}</p>
+                  )}
+                  {isFlipped && (
+                    <>
+                      <p className="text-forge-text-muted text-xs mb-1.5">{card.front}</p>
+                      <p className="text-forge-text whitespace-pre-wrap">{card.back}</p>
+                      {card.steps && card.steps.length > 0 && (
+                        <ol className="list-decimal list-inside text-forge-text-muted text-xs mt-2 space-y-0.5">
+                          {card.steps.map((s, i) => <li key={i}>{s}</li>)}
+                        </ol>
+                      )}
+                    </>
+                  )}
+                </div>
+                <span className="text-[10px] mono text-forge-text-muted shrink-0 mt-0.5">
+                  {isFlipped ? "▲ front" : "▼ answer"}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export default function SessionSummary({ results, cards, duration, onClose }: SessionSummaryProps) {
@@ -84,16 +144,7 @@ export default function SessionSummary({ results, cards, duration, onClose }: Se
         </div>
 
         {weakCards.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold mb-3 text-forge-danger">Needs Review ({weakCards.length})</h3>
-            <div className="space-y-2">
-              {weakCards.slice(0, 5).map((card) => card && (
-                <div key={card.id} className="bg-forge-danger/5 border border-forge-danger/20 rounded-lg p-3 text-sm">
-                  {card.front.substring(0, 120)}{card.front.length > 120 ? "..." : ""}
-                </div>
-              ))}
-            </div>
-          </div>
+          <ReviewCards cards={weakCards.filter((c): c is ForgeCard => c !== undefined)} />
         )}
 
         <button

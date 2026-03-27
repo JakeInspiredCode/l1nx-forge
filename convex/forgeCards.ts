@@ -136,9 +136,43 @@ export const seedCards = mutation({
     })),
   },
   handler: async (ctx, args) => {
+    let inserted = 0;
     for (const card of args.cards) {
-      await ctx.db.insert("forgeCards", card);
+      // Skip if this cardId already exists (prevent duplicate seeding)
+      const existing = await ctx.db
+        .query("forgeCards")
+        .withIndex("by_cardId", (q) => q.eq("cardId", card.cardId))
+        .first();
+      if (!existing) {
+        await ctx.db.insert("forgeCards", card);
+        inserted++;
+      }
     }
-    return args.cards.length;
+    return inserted;
+  },
+});
+
+// Remove duplicate cards, keeping only the one with the most review progress
+export const dedup = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("forgeCards").collect();
+    const groups = new Map<string, typeof all>();
+    for (const card of all) {
+      const existing = groups.get(card.cardId) ?? [];
+      existing.push(card);
+      groups.set(card.cardId, existing);
+    }
+    let deleted = 0;
+    for (const [, dupes] of groups) {
+      if (dupes.length <= 1) continue;
+      // Keep the card with the most repetitions (most reviewed)
+      dupes.sort((a, b) => (b.repetitions ?? 0) - (a.repetitions ?? 0));
+      for (let i = 1; i < dupes.length; i++) {
+        await ctx.db.delete(dupes[i]._id);
+        deleted++;
+      }
+    }
+    return deleted;
   },
 });

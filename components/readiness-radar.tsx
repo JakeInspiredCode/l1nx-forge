@@ -68,7 +68,7 @@ export default function ReadinessRadar({ progress }: ReadinessRadarProps) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={300}>
-        <RadarChart data={data}>
+        <RadarChart data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
           <PolarGrid stroke="#222222" />
           <PolarAngleAxis dataKey="topic" tick={renderAxisTick} />
           <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />

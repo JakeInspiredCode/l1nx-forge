@@ -13,6 +13,7 @@ import {
   useAddReview,
   useUpdateCard,
   useAddPoints,
+  useCheckBadges,
 } from "@/lib/convex-hooks";
 import { useSpeedRunAdd, useSpeedRunHistory } from "@/lib/convex-hooks";
 import { sm2 } from "@/lib/sm2";
@@ -98,6 +99,7 @@ export default function SpeedRunPage() {
   const addReview = useAddReview();
   const updateCard = useUpdateCard();
   const addPoints = useAddPoints();
+  const checkBadges = useCheckBadges();
   const addSpeedRun = useSpeedRunAdd();
   const highScores = useSpeedRunHistory();
 
@@ -191,6 +193,22 @@ export default function SpeedRunPage() {
 
     const accuracy = s.totalCards > 0 ? Math.round((s.correctCards / s.totalCards) * 100) : 0;
     dispatchMascotEvent("speed-run-complete", { accuracy, totalCards: s.totalCards, bestStreak: s.bestStreak });
+
+    // Check for new badges
+    try {
+      const badgeResult = await checkBadges({
+        speedRunBestStreak: s.bestStreak,
+        speedRunCorrect: s.correctCards,
+        speedRunTotal: s.totalCards,
+      });
+      if (badgeResult?.awarded) {
+        for (const badge of badgeResult.awarded) {
+          dispatchMascotEvent("badge-earned", { badge });
+        }
+      }
+    } catch (e) {
+      console.error("Badge check error:", e);
+    }
 
     setScreen("results");
   };

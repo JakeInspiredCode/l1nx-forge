@@ -46,6 +46,8 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         handleFlip();

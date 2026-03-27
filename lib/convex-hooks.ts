@@ -98,6 +98,10 @@ export function useAddPoints() {
   return useMutation(api.forgeProfile.addPoints);
 }
 
+export function useCheckBadges() {
+  return useMutation(api.forgeProfile.checkAndAwardBadges);
+}
+
 // ── Stories ──
 
 export function useStories() {

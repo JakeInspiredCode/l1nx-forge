@@ -7,10 +7,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 type Mode = "coach" | "quiz" | "mock-interview";
-type ModelId = "claude-sonnet-4-6-20250514" | "claude-haiku-4-5-20251001" | "claude-opus-4-6";
+type ModelId = "claude-sonnet-4-6" | "claude-haiku-4-5-20251001" | "claude-opus-4-6";
 
 const MODEL_OPTIONS: { id: ModelId; label: string }[] = [
-  { id: "claude-sonnet-4-6-20250514", label: "Sonnet 4.6" },
+  { id: "claude-sonnet-4-6", label: "Sonnet 4.6" },
   { id: "claude-haiku-4-5-20251001", label: "Haiku" },
   { id: "claude-opus-4-6", label: "Opus 4.6" },
 ];
@@ -48,15 +48,19 @@ interface AgentChatProps {
 
 export default function AgentChat({ threadId, compact = false, initialMode, initialMessage }: AgentChatProps) {
   const [mode, setMode] = useState<Mode>(initialMode ?? "coach");
-  const [model, setModel] = useState<ModelId>("claude-sonnet-4-6-20250514");
+  const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  // Input panel height in px; null = use CSS default
+  const [inputPanelHeight, setInputPanelHeight] = useState<number>(180);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const autoSentRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ startY: number; startHeight: number } | null>(null);
 
   const context = useQuery(api.forgeAgentContext.get);
   const createThread = useMutation(api.forgeConversations.create);
@@ -169,9 +173,14 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
     }
   }, [initialized, initialMessage, context, streaming]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-scroll
+  // Auto-scroll only if user is already near the bottom
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = containerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    if (distanceFromBottom < 120) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, streaming]);
 
   const switchMode = useCallback(async (newMode: Mode) => {
@@ -221,7 +230,10 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
         signal: controller.signal,
       });
 
-      if (!res.ok) throw new Error("Agent request failed");
+      if (!res.ok) {
+        const errText = await res.text().catch(() => `HTTP ${res.status}`);
+        throw new Error(`${res.status}: ${errText}`);
+      }
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -247,7 +259,7 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
           const updated = [...prev];
           updated[updated.length - 1] = {
             ...assistantMsg,
-            content: "Something went wrong reaching the agent. Check your ANTHROPIC_API_KEY.",
+            content: `Something went wrong: ${(err as Error).message}`,
           };
           return updated;
         });
@@ -264,6 +276,24 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
       send();
     }
   };
+
+  const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragRef.current = { startY: e.clientY, startHeight: inputPanelHeight };
+    const onMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return;
+      const delta = dragRef.current.startY - ev.clientY;
+      const newH = Math.max(100, Math.min(600, dragRef.current.startHeight + delta));
+      setInputPanelHeight(newH);
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [inputPanelHeight]);
 
   const containerClass = compact
     ? "flex flex-col h-full"
@@ -293,7 +323,7 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0" ref={containerRef}>
         {!initialized && (
           <div className="text-forge-text/40 text-sm text-center mt-8">Loading context...</div>
         )}
@@ -335,9 +365,18 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
         <div ref={bottomRef} />
       </div>
 
+      {/* Drag divider */}
+      <div
+        onMouseDown={onDividerMouseDown}
+        className="h-2 shrink-0 cursor-ns-resize flex items-center justify-center group border-t border-white/10 hover:border-forge-accent/40 transition-colors"
+        title="Drag to resize"
+      >
+        <div className="w-8 h-0.5 rounded-full bg-white/10 group-hover:bg-forge-accent/40 transition-colors" />
+      </div>
+
       {/* Input */}
-      <div className="p-3 border-t border-white/10 shrink-0">
-        <div className="flex items-center gap-2 mb-2">
+      <div className="p-3 shrink-0" style={{ height: `${inputPanelHeight}px`, display: "flex", flexDirection: "column" }}>
+        <div className="flex items-center gap-2 mb-2 shrink-0">
           <select
             value={model}
             onChange={(e) => setModel(e.target.value as ModelId)}
@@ -352,7 +391,7 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
           </select>
           <span className="text-[10px] text-forge-text/25">{MODEL_OPTIONS.find((m) => m.id === model)?.label}</span>
         </div>
-        <div className="flex gap-2 items-end">
+        <div className="flex gap-2 flex-1 min-h-0">
           <textarea
             ref={textareaRef}
             value={input}
@@ -360,14 +399,12 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
             onKeyDown={handleKeyDown}
             disabled={streaming || !initialized}
             placeholder={streaming ? "Agent is responding..." : "Message your coach... (Enter to send, Shift+Enter for newline)"}
-            rows={1}
-            className="flex-1 resize-none bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-forge-text placeholder-forge-text/30 focus:outline-none focus:border-forge-accent/50 disabled:opacity-50 max-h-32 overflow-y-auto"
-            style={{ minHeight: "38px" }}
+            className="flex-1 resize-none bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-forge-text placeholder-forge-text/30 focus:outline-none focus:border-forge-accent/50 disabled:opacity-50 overflow-y-auto"
           />
           <button
             onClick={send}
             disabled={streaming || !input.trim() || !initialized}
-            className="px-4 py-2 rounded-lg bg-forge-accent/20 text-forge-accent border border-forge-accent/40 text-sm font-medium hover:bg-forge-accent/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="px-4 py-2 rounded-lg bg-forge-accent/20 text-forge-accent border border-forge-accent/40 text-sm font-medium hover:bg-forge-accent/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 self-end"
           >
             {streaming ? "..." : "Send"}
           </button>

@@ -152,7 +152,8 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
           overallScore: undefined,
         });
         await recordSession({ sessionMinutes });
-        const badgeResult = await checkBadges({});
+        const allGoodOrEasy = updatedResults.every((r) => r.quality >= 3);
+        const badgeResult = await checkBadges({ sessionAllGoodOrEasy: allGoodOrEasy });
         if (badgeResult?.awarded) {
           for (const badge of badgeResult.awarded) {
             dispatchMascotEvent("badge-earned", { badge });
