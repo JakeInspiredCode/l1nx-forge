@@ -48,6 +48,10 @@ export function useReviews() {
   return useQuery(api.forgeReviews.getAll) ?? [];
 }
 
+export function useRecentReviews(limit?: number) {
+  return useQuery(api.forgeReviews.getRecent, { limit }) ?? [];
+}
+
 export function useAddReview() {
   return useMutation(api.forgeReviews.add);
 }
@@ -116,4 +120,8 @@ export function useSpeedRunHistory(topicId?: string) {
 
 export function useSpeedRunBestScore(topicId?: string) {
   return useQuery(api.forgeSpeedRuns.getBestScore, { topicId });
+}
+
+export function useSpeedRunsRecent(limit?: number) {
+  return useQuery(api.forgeSpeedRuns.getRecent, { limit }) ?? [];
 }

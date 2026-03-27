@@ -29,7 +29,7 @@ export default function MascotSettings({ personality, muted, onChange, onToggleM
   return (
     <div
       ref={ref}
-      className="absolute bottom-14 left-0 w-56 bg-forge-surface border border-forge-border rounded-xl shadow-2xl p-3 z-50"
+      className="absolute bottom-14 right-0 w-56 bg-forge-surface border border-forge-border rounded-xl shadow-2xl p-3 z-50"
     >
       <p className="text-[10px] mono text-forge-text-dim uppercase tracking-widest mb-2">Mascot Personality</p>
 

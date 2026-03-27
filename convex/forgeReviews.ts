@@ -18,6 +18,17 @@ export const getByCard = query({
   },
 });
 
+export const getRecent = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("forgeReviews")
+      .withIndex("by_timestamp")
+      .order("desc")
+      .take(args.limit ?? 100);
+  },
+});
+
 export const add = mutation({
   args: {
     cardId: v.string(),

@@ -1,0 +1,274 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import Nav from "@/components/nav";
+import { useRecentSessions, useSpeedRunsRecent, useCards } from "@/lib/convex-hooks";
+import { TOPICS } from "@/lib/types";
+
+const SESSION_LABELS: Record<string, string> = {
+  "daily-training": "Daily Training",
+  "topic-drill": "Topic Drill",
+  "mock-interview": "Mock Interview",
+};
+
+const RESULT_COLOR: Record<string, string> = {
+  correct: "text-forge-success",
+  partial: "text-forge-warning",
+  wrong: "text-forge-danger",
+};
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export default function HistoryPage() {
+  const sessions = useRecentSessions(40);
+  const speedRuns = useSpeedRunsRecent(30);
+  const cards = useCards();
+
+  const [tab, setTab] = useState<"sessions" | "speed-runs">("sessions");
+  const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const cardMap = useMemo(() => {
+    const map = new Map<string, { front: string; topicId: string }>();
+    for (const c of cards) map.set(c.cardId, { front: c.front, topicId: c.topicId });
+    return map;
+  }, [cards]);
+
+  const toggle = (id: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const q = search.toLowerCase().trim();
+
+  const filteredSessions = useMemo(() => {
+    if (!q) return sessions;
+    return sessions.filter((s) =>
+      s.cardIds.some((id) => cardMap.get(id)?.front.toLowerCase().includes(q))
+    );
+  }, [sessions, q, cardMap]);
+
+  const filteredSpeedRuns = useMemo(() => {
+    if (!q) return speedRuns;
+    return speedRuns.filter((r) =>
+      r.cardResults.some((cr: { cardId: string }) =>
+        cardMap.get(cr.cardId)?.front.toLowerCase().includes(q)
+      )
+    );
+  }, [speedRuns, q, cardMap]);
+
+  return (
+    <div className="min-h-screen bg-forge-bg">
+      <Nav />
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold mono mb-1">Session History</h1>
+          <p className="text-sm text-forge-text-dim">
+            Browse past sessions and find specific cards you've reviewed.
+          </p>
+        </div>
+
+        {/* Search */}
+        <input
+          type="text"
+          placeholder='Search by card question — e.g. "what is iSCSI"'
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-forge-surface border border-forge-border rounded-lg px-3 py-2 text-sm mono text-forge-text outline-none focus:border-forge-accent/50 mb-4 placeholder:text-forge-text-muted"
+        />
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-5">
+          {(["sessions", "speed-runs"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-1.5 rounded-lg text-sm mono transition-colors border ${
+                tab === t
+                  ? "bg-forge-accent/20 text-forge-accent border-forge-accent/40"
+                  : "text-forge-text-dim border-forge-border hover:border-forge-border-hover"
+              }`}
+            >
+              {t === "sessions" ? `Sessions (${filteredSessions.length})` : `Speed Runs (${filteredSpeedRuns.length})`}
+            </button>
+          ))}
+        </div>
+
+        {/* Sessions */}
+        {tab === "sessions" && (
+          <div className="space-y-2">
+            {filteredSessions.length === 0 && (
+              <p className="text-forge-text-muted text-sm mono py-12 text-center">
+                {q ? "No sessions match that search." : "No sessions recorded yet."}
+              </p>
+            )}
+            {filteredSessions.map((s, i) => {
+              const id = `session-${i}`;
+              const isOpen = expanded.has(id);
+              const displayCards = q
+                ? s.cardIds.filter((cid) =>
+                    cardMap.get(cid)?.front.toLowerCase().includes(q)
+                  )
+                : s.cardIds;
+
+              return (
+                <div
+                  key={id}
+                  className="bg-forge-surface border border-forge-border rounded-xl overflow-hidden"
+                >
+                  <button
+                    onClick={() => toggle(id)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-forge-surface-2 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs bg-forge-surface-2 border border-forge-border px-2 py-0.5 rounded mono">
+                        {SESSION_LABELS[s.type] ?? s.type}
+                      </span>
+                      <span className="text-sm text-forge-text-dim">
+                        {s.cardIds.length} cards
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-forge-text-muted">
+                        {formatDate(s.startTime)}
+                      </span>
+                      <span className="text-forge-text-dim text-xs">{isOpen ? "▲" : "▼"}</span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-forge-border divide-y divide-forge-border max-h-80 overflow-y-auto">
+                      {displayCards.length === 0 && (
+                        <p className="text-xs text-forge-text-muted px-4 py-3">No cards.</p>
+                      )}
+                      {displayCards.map((cid) => {
+                        const card = cardMap.get(cid);
+                        const topic = TOPICS.find((t) => t.id === card?.topicId);
+                        return (
+                          <div
+                            key={cid}
+                            className="flex items-start justify-between gap-3 px-4 py-2.5"
+                          >
+                            <span className="text-xs text-forge-text leading-relaxed flex-1">
+                              {card?.front ?? cid}
+                            </span>
+                            <span className="text-[10px] text-forge-text-muted mono shrink-0 pt-0.5">
+                              {topic?.name ?? card?.topicId ?? ""}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Speed Runs */}
+        {tab === "speed-runs" && (
+          <div className="space-y-2">
+            {filteredSpeedRuns.length === 0 && (
+              <p className="text-forge-text-muted text-sm mono py-12 text-center">
+                {q ? "No speed runs match that search." : "No speed runs recorded yet."}
+              </p>
+            )}
+            {filteredSpeedRuns.map((r, i) => {
+              const id = `run-${i}`;
+              const isOpen = expanded.has(id);
+              const accuracy =
+                r.totalCards > 0
+                  ? Math.round((r.correctCards / r.totalCards) * 100)
+                  : 0;
+              const topicName =
+                r.topicId === "mixed"
+                  ? "Mixed"
+                  : TOPICS.find((t) => t.id === r.topicId)?.name ?? r.topicId;
+              const displayResults = q
+                ? r.cardResults.filter((cr: { cardId: string }) =>
+                    cardMap.get(cr.cardId)?.front.toLowerCase().includes(q)
+                  )
+                : r.cardResults;
+
+              return (
+                <div
+                  key={id}
+                  className="bg-forge-surface border border-forge-border rounded-xl overflow-hidden"
+                >
+                  <button
+                    onClick={() => toggle(id)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-forge-surface-2 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs bg-forge-surface-2 border border-forge-border px-2 py-0.5 rounded mono">
+                        {topicName}
+                      </span>
+                      <span className="text-sm font-bold mono text-forge-accent">
+                        {r.totalPoints} pts
+                      </span>
+                      <span className="text-xs text-forge-text-dim">{accuracy}% accuracy</span>
+                      <span className="text-xs text-forge-text-muted">{r.totalCards} cards</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-forge-text-muted">
+                        {formatDate(r.timestamp)}
+                      </span>
+                      <span className="text-forge-text-dim text-xs">{isOpen ? "▲" : "▼"}</span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-forge-border divide-y divide-forge-border max-h-80 overflow-y-auto">
+                      {displayResults.map(
+                        (
+                          cr: {
+                            cardId: string;
+                            result: string;
+                            userInput: string;
+                            feedback: string;
+                          },
+                          j: number
+                        ) => {
+                          const card = cardMap.get(cr.cardId);
+                          return (
+                            <div key={j} className="px-4 py-2.5">
+                              <div className="flex items-start justify-between gap-3 mb-0.5">
+                                <span className="text-xs text-forge-text leading-relaxed flex-1">
+                                  {card?.front ?? cr.cardId}
+                                </span>
+                                <span
+                                  className={`text-[10px] mono font-medium shrink-0 pt-0.5 ${RESULT_COLOR[cr.result] ?? "text-forge-text-dim"}`}
+                                >
+                                  {cr.result}
+                                </span>
+                              </div>
+                              {cr.userInput && (
+                                <p className="text-[10px] text-forge-text-muted mono truncate">
+                                  {cr.userInput}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

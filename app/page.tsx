@@ -11,10 +11,11 @@ import { TOPICS, ForgeCard, mapConvexCard } from "@/lib/types";
 import {
   useCards, useIsSeeded, useSeedCards,
   useAllProgress, useProfile, useDueCards,
-  useRecomputeProgress,
+  useRecomputeProgress, useRecentReviews, useRecentSessions, useSpeedRunsRecent,
 } from "@/lib/convex-hooks";
 import { getAllSeedCards } from "@/lib/seeds";
 import { generateDailyPlan } from "@/lib/forge/scheduler";
+import ActivityToday from "@/components/activity-today";
 import Link from "next/link";
 
 export default function Dashboard() {
@@ -25,6 +26,9 @@ export default function Dashboard() {
   const profile = useProfile();
   const dueCards = useDueCards();
   const recomputeProgress = useRecomputeProgress();
+  const recentReviews = useRecentReviews(200);
+  const recentSessions = useRecentSessions(30);
+  const recentSpeedRuns = useSpeedRunsRecent(20);
   const [seeding, setSeeding] = useState(false);
   const [trainingCards, setTrainingCards] = useState<ForgeCard[] | null>(null);
 
@@ -133,6 +137,13 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* Actions today */}
+        <ActivityToday
+          reviews={recentReviews}
+          sessions={recentSessions}
+          speedRuns={recentSpeedRuns}
+        />
 
         {/* Daily briefing */}
         <DailyBriefing progress={progress} dueCount={dueCount} totalCards={totalCards} />

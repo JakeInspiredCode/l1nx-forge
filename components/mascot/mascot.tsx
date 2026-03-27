@@ -159,7 +159,7 @@ export default function Mascot() {
   }, [pathname, muted, personality, enqueue]);
 
   return (
-    <div className="fixed bottom-3 left-3 sm:bottom-6 sm:left-6 z-30">
+    <div className="fixed bottom-20 right-3 sm:bottom-[88px] sm:right-6 z-30">
       {/* Settings panel */}
       {settingsOpen && (
         <MascotSettings
