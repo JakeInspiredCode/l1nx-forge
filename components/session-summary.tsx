@@ -87,7 +87,7 @@ export default function SessionSummary({ results, cards, duration, onClose }: Se
   const weakCards = results
     .filter((r) => r.quality < 3)
     .map((r) => cards.find((c) => c.id === r.cardId))
-    .filter(Boolean);
+    .filter((c, i, arr): c is ForgeCard => c !== undefined && arr.findIndex((x) => x?.id === c.id) === i);
 
   const topicBreakdown: Record<string, { total: number; correct: number }> = {};
   results.forEach((r) => {
@@ -144,7 +144,7 @@ export default function SessionSummary({ results, cards, duration, onClose }: Se
         </div>
 
         {weakCards.length > 0 && (
-          <ReviewCards cards={weakCards.filter((c): c is ForgeCard => c !== undefined)} />
+          <ReviewCards cards={weakCards} />
         )}
 
         <button
