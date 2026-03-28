@@ -10,6 +10,7 @@ interface SpeedRunFeedbackProps {
   feedback: string;
   expectedAnswer?: string;
   onDone: () => void;
+  onOverride?: (newScore: EvalScore) => void;
 }
 
 export default function SpeedRunFeedback({
@@ -19,17 +20,20 @@ export default function SpeedRunFeedback({
   feedback,
   expectedAnswer,
   onDone,
+  onOverride,
 }: SpeedRunFeedbackProps) {
   const [visible, setVisible] = useState(true);
-  const duration = score === "wrong" ? 2000 : score === "partial" ? 1500 : 900;
+  const [overridden, setOverridden] = useState(false);
+  const duration = score === "wrong" ? 4000 : score === "partial" ? 3500 : 900;
 
   useEffect(() => {
+    if (overridden) return; // don't auto-dismiss after override
     const timer = setTimeout(() => {
       setVisible(false);
       setTimeout(onDone, 150);
     }, duration);
     return () => clearTimeout(timer);
-  }, [duration, onDone]);
+  }, [duration, onDone, overridden]);
 
   const config = {
     correct: {
@@ -86,6 +90,21 @@ export default function SpeedRunFeedback({
             {expectedAnswer.split("\n")[0].replace(/`/g, "").slice(0, 120)}
           </p>
         </div>
+      )}
+
+      {score !== "correct" && onOverride && !overridden && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setOverridden(true);
+            onOverride("correct");
+          }}
+          className="mt-2 w-full py-1.5 rounded-lg border text-xs font-medium mono transition-colors
+            bg-forge-success/10 text-forge-success/80 border-forge-success/20
+            hover:bg-forge-success/20 hover:text-forge-success"
+        >
+          Actually correct
+        </button>
       )}
     </div>
   );

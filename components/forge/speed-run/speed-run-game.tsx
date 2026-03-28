@@ -183,6 +183,45 @@ export default function SpeedRunGame({
     setPhase("playing");
   }, [cardIndex, cards.length, timeLeft]);
 
+  const handleOverride = useCallback((newScore: EvalScore) => {
+    if (!lastEval || !currentCard) return;
+    // Undo old score effects and apply new score
+    const oldScore = lastEval.score;
+    const oldMultiplier = getComboMultiplier(oldScore === "correct" ? streak - 1 : streak);
+    const oldPoints = lastEval.points;
+    const oldTimeAdj = lastEval.timeAdj;
+
+    const newMultiplier = getComboMultiplier(streak);
+    const newPoints = calcPoints(newScore, currentCard.tier, newMultiplier);
+    const newTimeAdj = getTimeAdjustment(newScore, streak);
+
+    // Adjust points: remove old, add new
+    setPoints((p) => p - oldPoints + newPoints);
+    // Adjust time: remove old adj, add new adj
+    setTimeLeft((t) => Math.max(0, t - oldTimeAdj + newTimeAdj));
+    // Fix streak
+    if (newScore === "correct" && oldScore !== "correct") {
+      setStreak((s) => s + 1);
+      setBestStreak((b) => Math.max(b, streak + 1));
+    }
+
+    // Update last result
+    setResults((r) => {
+      const updated = [...r];
+      if (updated.length > 0) {
+        updated[updated.length - 1] = { ...updated[updated.length - 1], result: newScore };
+      }
+      return updated;
+    });
+    setLastEval({ ...lastEval, score: newScore, points: newPoints, timeAdj: newTimeAdj });
+
+    // Re-fire SM-2 with corrected quality
+    onReviewCard?.(currentCard.id, scoreToSM2Quality(newScore), 0);
+
+    // Auto-advance after brief delay
+    setTimeout(handleFeedbackDone, 500);
+  }, [lastEval, currentCard, streak, handleFeedbackDone, onReviewCard]);
+
   if (!currentCard && phase !== "done") return null;
 
   return (
@@ -218,8 +257,9 @@ export default function SpeedRunGame({
             points={lastEval.points}
             timeAdjustment={lastEval.timeAdj}
             feedback={lastEval.feedback}
-            expectedAnswer={lastEval.score === "wrong" ? currentCard?.back : undefined}
+            expectedAnswer={lastEval.score !== "correct" ? currentCard?.back : undefined}
             onDone={handleFeedbackDone}
+            onOverride={handleOverride}
           />
           {/* Keep card visible during feedback */}
           {currentCard && (

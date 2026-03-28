@@ -94,12 +94,32 @@ export function evaluateCommand(userInput: string, expectedAnswer: string): Eval
 // ── Keyword evaluation ──
 
 const SYNONYMS: Record<string, string[]> = {
-  directory: ["folder", "dir"],
-  remove: ["delete", "rm"],
-  list: ["show", "display"],
-  process: ["task"],
-  network: ["networking", "net"],
-  file: ["files"],
+  directory: ["folder", "dir", "path"],
+  remove: ["delete", "rm", "erase", "unlink"],
+  list: ["show", "display", "view", "print"],
+  process: ["task", "daemon", "service", "proc"],
+  network: ["networking", "net", "interface"],
+  file: ["files", "document"],
+  permission: ["permissions", "access", "privilege", "privileges"],
+  user: ["users", "account", "accounts"],
+  command: ["commands", "cmd"],
+  configure: ["config", "configuration", "setup", "settings"],
+  install: ["installed", "installing", "installation"],
+  package: ["packages", "pkg"],
+  server: ["servers", "host"],
+  connect: ["connection", "connections", "connected"],
+  execute: ["run", "running", "exec"],
+  system: ["operating", "kernel"],
+  storage: ["disk", "drive", "volume"],
+  monitor: ["monitoring", "watch", "observe"],
+  output: ["stdout", "result", "results"],
+  input: ["stdin"],
+  error: ["stderr", "errors", "fault"],
+  port: ["ports", "socket", "sockets"],
+  firewall: ["iptables", "nftables", "ufw"],
+  log: ["logs", "logging", "syslog", "journal"],
+  container: ["containers", "docker", "podman"],
+  virtual: ["virtualization", "hypervisor"],
 };
 
 function normalize(word: string): string {
@@ -129,13 +149,27 @@ function extractKeywords(text: string): string[] {
   return unique.sort((a, b) => b.length - a.length).slice(0, 5);
 }
 
+/** Rough stem: strip common suffixes so "permissions" matches "permission" etc. */
+function stem(word: string): string {
+  return word
+    .replace(/ies$/, "y")
+    .replace(/tion$/, "te")
+    .replace(/(ing|ed|ly|ment|ness|ous|ive|able|ible|ful|less|ment)$/, "")
+    .replace(/s$/, "");
+}
+
 function wordMatchesKeyword(word: string, keyword: string): boolean {
   if (word === keyword) return true;
+  // Stem comparison
+  if (stem(word) === stem(keyword)) return true;
+  // Fuzzy: allow 1 typo for words longer than 4 chars
+  if (word.length > 4 && keyword.length > 4 && levenshtein(word, keyword) <= 1) return true;
+  // Synonym lookup
   const synonyms = SYNONYMS[keyword] ?? [];
-  if (synonyms.includes(word)) return true;
+  if (synonyms.some((s) => s === word || stem(s) === stem(word))) return true;
   // Check reverse synonyms
   for (const [k, syns] of Object.entries(SYNONYMS)) {
-    if (syns.includes(keyword) && (word === k || syns.includes(word))) return true;
+    if (syns.includes(keyword) && (word === k || syns.some((s) => s === word || stem(s) === stem(word)))) return true;
   }
   return false;
 }
@@ -154,10 +188,10 @@ export function evaluateKeywords(userInput: string, expectedAnswer: string): Eva
   const missed = keywords.filter((kw) => !matched.includes(kw));
   const ratio = matched.length / keywords.length;
 
-  if (ratio >= 1.0) {
+  if (ratio >= 0.8) {
     return { score: "correct", feedback: "All key concepts covered!", needsSelfGrade: false };
   }
-  if (ratio >= 0.5) {
+  if (ratio >= 0.4) {
     return {
       score: "partial",
       feedback: `Missing: ${missed.slice(0, 3).join(", ")}`,

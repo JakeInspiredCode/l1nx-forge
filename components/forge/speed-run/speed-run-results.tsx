@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { SpeedRunSummary } from "./speed-run-game";
 import { ForgeCard } from "@/lib/types";
 
@@ -29,15 +31,21 @@ export default function SpeedRunResults({
   onDashboard,
 }: SpeedRunResultsProps) {
   const [missesExpanded, setMissesExpanded] = useState(false);
+  const [overrides, setOverrides] = useState<Set<string>>(new Set());
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+
+  const overrideCount = overrides.size;
+  const effectiveCorrect = summary.correctCards + overrideCount;
 
   const accuracy = summary.totalCards > 0
-    ? Math.round((summary.correctCards / summary.totalCards) * 100)
+    ? Math.round((effectiveCorrect / summary.totalCards) * 100)
     : 0;
 
   const avgSecs = (summary.avgResponseMs / 1000).toFixed(1);
 
-  const missedResults = summary.cardResults.filter((r) => r.result !== "correct");
-  const missedCards = missedResults
+  const missedResults = summary.cardResults.filter((r) => r.result !== "correct" && !overrides.has(r.cardId));
+  const missedCards = summary.cardResults
+    .filter((r) => r.result !== "correct" && !overrides.has(r.cardId))
     .map((r) => cards.find((c) => c.id === r.cardId))
     .filter(Boolean) as ForgeCard[];
 
@@ -52,7 +60,7 @@ export default function SpeedRunResults({
     if (!card) return;
     if (!tierBreakdown[card.tier]) tierBreakdown[card.tier] = { correct: 0, total: 0 };
     tierBreakdown[card.tier].total++;
-    if (r.result === "correct") tierBreakdown[card.tier].correct++;
+    if (r.result === "correct" || overrides.has(r.cardId)) tierBreakdown[card.tier].correct++;
   });
 
   return (
@@ -71,7 +79,7 @@ export default function SpeedRunResults({
         {/* Stats grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
           <Stat label="Cards" value={summary.totalCards.toString()} />
-          <Stat label="Correct" value={`${summary.correctCards} (${accuracy}%)`} color={accuracy >= 80 ? "text-forge-success" : accuracy >= 60 ? "text-forge-warning" : "text-forge-danger"} />
+          <Stat label="Correct" value={`${effectiveCorrect} (${accuracy}%)`} color={accuracy >= 80 ? "text-forge-success" : accuracy >= 60 ? "text-forge-warning" : "text-forge-danger"} />
           <Stat label="Best Streak" value={`🔥 ${summary.bestStreak}`} />
           <Stat label="Avg Response" value={`${avgSecs}s`} />
         </div>
@@ -106,17 +114,60 @@ export default function SpeedRunResults({
               {missedResults.map((r) => {
                 const card = cards.find((c) => c.id === r.cardId);
                 if (!card) return null;
+                const isExpanded = expandedCardId === r.cardId;
                 return (
                   <div key={r.cardId} className="px-5 py-2.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs text-forge-text flex-1 truncate">{card.front.slice(0, 80)}</p>
-                      <span className={`text-[10px] mono flex-shrink-0 ${r.result === "partial" ? "text-forge-warning" : "text-forge-danger"}`}>
-                        {r.result}
-                      </span>
+                    <div
+                      className="flex items-start justify-between gap-2 cursor-pointer group"
+                      onClick={() => setExpandedCardId(isExpanded ? null : r.cardId)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-forge-text truncate group-hover:text-forge-accent transition-colors">
+                          {card.front.slice(0, 80)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={`text-[10px] mono ${r.result === "partial" ? "text-forge-warning" : "text-forge-danger"}`}>
+                          {r.result}
+                        </span>
+                        <span className="text-[10px] text-forge-text-muted">{isExpanded ? "▲" : "▼"}</span>
+                      </div>
                     </div>
-                    <p className="text-[11px] mono text-forge-text-muted mt-0.5">
-                      you: <span className="text-forge-text-dim">{r.userInput.slice(0, 60) || "—"}</span>
-                    </p>
+
+                    {isExpanded && (
+                      <div className="mt-2 space-y-2">
+                        <div>
+                          <p className="text-[10px] mono text-forge-text-muted mb-1">Your answer:</p>
+                          <p className="text-xs mono text-forge-text-dim bg-forge-surface-2 px-2.5 py-1.5 rounded border border-forge-border/50">
+                            {r.userInput || <span className="italic text-forge-text-muted">no answer</span>}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] mono text-forge-text-muted mb-1">Expected:</p>
+                          <div className="text-xs bg-forge-surface-2 px-2.5 py-1.5 rounded border border-forge-accent/20 markdown-content max-h-[160px] overflow-y-auto">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{card.back}</ReactMarkdown>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOverrides((prev) => new Set(prev).add(r.cardId));
+                            setExpandedCardId(null);
+                          }}
+                          className="w-full py-1.5 rounded-lg border text-[11px] font-medium mono transition-colors
+                            bg-forge-success/10 text-forge-success/70 border-forge-success/20
+                            hover:bg-forge-success/20 hover:text-forge-success"
+                        >
+                          Actually correct
+                        </button>
+                      </div>
+                    )}
+
+                    {!isExpanded && (
+                      <p className="text-[11px] mono text-forge-text-muted mt-0.5">
+                        you: <span className="text-forge-text-dim">{r.userInput.slice(0, 60) || "—"}</span>
+                      </p>
+                    )}
                   </div>
                 );
               })}
