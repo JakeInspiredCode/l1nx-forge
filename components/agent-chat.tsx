@@ -44,9 +44,10 @@ interface AgentChatProps {
   compact?: boolean; // true = floating panel mode
   initialMode?: Mode;      // override starting mode (e.g. from "Quiz me on X" button)
   initialMessage?: string; // auto-send this message after initialization
+  onNewConversation?: () => void; // callback to create a new thread (parent manages threadId)
 }
 
-export default function AgentChat({ threadId, compact = false, initialMode, initialMessage }: AgentChatProps) {
+export default function AgentChat({ threadId, compact = false, initialMode, initialMessage, onNewConversation }: AgentChatProps) {
   const [mode, setMode] = useState<Mode>(initialMode ?? "coach");
   const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -61,6 +62,19 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
   const autoSentRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ startY: number; startHeight: number } | null>(null);
+
+  // Reset state when threadId changes (e.g. new conversation or loading a past thread)
+  useEffect(() => {
+    setInitialized(false);
+    setMessages([]);
+    setInput("");
+    setStreaming(false);
+    autoSentRef.current = false;
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+  }, [threadId]);
 
   const context = useQuery(api.forgeAgentContext.get);
   const createThread = useMutation(api.forgeConversations.create);
@@ -317,7 +331,17 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
             {MODE_CONFIG[m].label}
           </button>
         ))}
-        <span className="ml-auto text-xs text-forge-text/30 self-center hidden sm:block">
+        {onNewConversation && (
+          <button
+            onClick={onNewConversation}
+            disabled={streaming}
+            className="ml-auto px-3 py-1.5 rounded text-xs font-medium text-forge-text/50 border border-white/10 hover:border-forge-accent/40 hover:text-forge-accent/70 transition-colors disabled:opacity-40"
+            title="Start a new conversation"
+          >
+            + New Chat
+          </button>
+        )}
+        <span className={`${onNewConversation ? "ml-2" : "ml-auto"} text-xs text-forge-text/30 self-center hidden sm:block`}>
           {MODE_CONFIG[mode].description}
         </span>
       </div>

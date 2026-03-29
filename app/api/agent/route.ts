@@ -98,6 +98,46 @@ const ALLOWED_MODELS = new Set([
   "claude-opus-4-6",
 ]);
 
+// Rough token estimate: ~4 chars per token. Reserve budget for system prompt + response.
+const MAX_CONTEXT_TOKENS = 180_000;
+const SYSTEM_PROMPT_BUDGET = 10_000;
+const MAX_TOKENS_RESPONSE = 1024;
+const MESSAGE_TOKEN_BUDGET = MAX_CONTEXT_TOKENS - SYSTEM_PROMPT_BUDGET - MAX_TOKENS_RESPONSE;
+
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+/** Trim messages from the front to fit within token budget, preserving recent context. */
+function windowMessages(messages: AgentMessage[]): AgentMessage[] {
+  let totalTokens = 0;
+  for (const m of messages) {
+    totalTokens += estimateTokens(m.content);
+  }
+
+  if (totalTokens <= MESSAGE_TOKEN_BUDGET) return messages;
+
+  // Walk backwards, keeping messages until we hit the budget
+  const kept: AgentMessage[] = [];
+  let budget = MESSAGE_TOKEN_BUDGET;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const cost = estimateTokens(messages[i].content);
+    if (cost > budget) break;
+    budget -= cost;
+    kept.unshift(messages[i]);
+  }
+
+  // Prepend a note so Claude knows history was trimmed
+  if (kept.length < messages.length) {
+    kept.unshift({
+      role: "user",
+      content: "[Earlier conversation history was trimmed to fit context limits.]",
+    });
+  }
+
+  return kept;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { messages, context, mode, model } = (await req.json()) as {
@@ -109,12 +149,13 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = buildSystemPrompt(context, mode);
     const resolvedModel = model && ALLOWED_MODELS.has(model) ? model : "claude-sonnet-4-6";
+    const windowedMessages = windowMessages(messages);
 
     const stream = await client.messages.stream({
       model: resolvedModel,
-      max_tokens: 1024,
+      max_tokens: MAX_TOKENS_RESPONSE,
       system: systemPrompt,
-      messages: messages.map((m) => ({
+      messages: windowedMessages.map((m) => ({
         role: m.role,
         content: m.content,
       })),

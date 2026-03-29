@@ -104,3 +104,16 @@ export const clearThread = mutation({
     return thread._id;
   },
 });
+
+export const deleteThread = mutation({
+  args: { threadId: v.string() },
+  handler: async (ctx, args) => {
+    const thread = await ctx.db
+      .query("forgeConversations")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .first();
+    if (!thread) return null;
+    await ctx.db.delete(thread._id);
+    return thread._id;
+  },
+});

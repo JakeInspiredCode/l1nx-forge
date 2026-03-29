@@ -1,19 +1,65 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import AgentChat from "@/components/agent-chat";
 import Link from "next/link";
 
-// Stable thread ID for the main coach session (one persistent thread per device)
-const COACH_THREAD_ID = "coach-main";
+function generateThreadId(): string {
+  return `coach-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// Default thread ID — used on first visit before any conversations exist
+const DEFAULT_THREAD_ID = "coach-main";
 
 export default function CoachPage() {
   const progress = useQuery(api.forgeProgress.getAll);
   const profile = useQuery(api.forgeProfile.get);
   const [showHistory, setShowHistory] = useState(false);
-  const recentThreads = useQuery(api.forgeConversations.getRecent, { limit: 5 });
+  const recentThreads = useQuery(api.forgeConversations.getRecent, { limit: 10 });
+  const deleteThread = useMutation(api.forgeConversations.deleteThread);
+
+  // Active thread — defaults to most recent thread or the legacy default
+  const [activeThreadId, setActiveThreadId] = useState<string>(DEFAULT_THREAD_ID);
+  const autoResetDone = useRef(false);
+
+  // Auto-reset: if the most recent thread's last message is older than 4 hours, start fresh
+  useEffect(() => {
+    if (autoResetDone.current || !recentThreads) return;
+    autoResetDone.current = true;
+
+    const mostRecent = recentThreads[0];
+    if (!mostRecent || mostRecent.messages.length === 0) return;
+
+    const lastMsg = mostRecent.messages[mostRecent.messages.length - 1];
+    const lastTime = new Date(lastMsg.timestamp).getTime();
+    const hoursSince = (Date.now() - lastTime) / (1000 * 60 * 60);
+
+    if (hoursSince >= 4) {
+      // Stale session — auto-start a new thread
+      setActiveThreadId(generateThreadId());
+    } else {
+      // Resume the most recent thread
+      setActiveThreadId(mostRecent.threadId);
+    }
+  }, [recentThreads]);
+
+  const handleNewConversation = useCallback(() => {
+    setActiveThreadId(generateThreadId());
+  }, []);
+
+  const handleLoadThread = useCallback((threadId: string) => {
+    setActiveThreadId(threadId);
+  }, []);
+
+  const handleDeleteThread = useCallback(async (threadId: string) => {
+    await deleteThread({ threadId });
+    // If the deleted thread was active, start a new one
+    if (threadId === activeThreadId) {
+      setActiveThreadId(generateThreadId());
+    }
+  }, [deleteThread, activeThreadId]);
 
   const weakTopics = progress?.filter((p) => p.weakFlag) ?? [];
   const overallMastery =
@@ -113,7 +159,11 @@ export default function CoachPage() {
 
         {/* Main chat area */}
         <main className="flex-1 min-h-0 flex flex-col">
-          <AgentChat threadId={COACH_THREAD_ID} />
+          <AgentChat
+            key={activeThreadId}
+            threadId={activeThreadId}
+            onNewConversation={handleNewConversation}
+          />
         </main>
 
         {/* History panel */}
@@ -122,20 +172,40 @@ export default function CoachPage() {
             <div className="text-xs font-mono text-forge-text/40 uppercase tracking-wider mb-2">
               Recent Threads
             </div>
-            {recentThreads?.map((t) => (
-              <div
-                key={t.threadId}
-                className="text-xs text-forge-text/50 border border-white/10 rounded p-2 hover:border-white/20 cursor-pointer"
-              >
-                <div className="capitalize font-medium text-forge-text/70">{t.mode}</div>
-                <div className="text-forge-text/30 mt-0.5">
-                  {t.messages.length} messages
+            {recentThreads?.map((t) => {
+              const isActive = t.threadId === activeThreadId;
+              const preview = t.messages.find((m: { role: string }) => m.role === "user")?.content?.slice(0, 60) || "No messages";
+              return (
+                <div
+                  key={t.threadId}
+                  className={`text-xs border rounded p-2 transition-colors group ${
+                    isActive
+                      ? "text-forge-accent border-forge-accent/40 bg-forge-accent/5"
+                      : "text-forge-text/50 border-white/10 hover:border-white/20 cursor-pointer"
+                  }`}
+                  onClick={() => !isActive && handleLoadThread(t.threadId)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="capitalize font-medium text-forge-text/70">{t.mode}</div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteThread(t.threadId);
+                      }}
+                      className="text-forge-text/20 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"
+                      title="Delete thread"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="text-forge-text/40 mt-0.5 truncate">{preview}</div>
+                  <div className="flex justify-between mt-0.5">
+                    <span className="text-forge-text/30">{t.messages.length} msgs</span>
+                    <span className="text-forge-text/25">{t.updatedAt?.slice(0, 10)}</span>
+                  </div>
                 </div>
-                <div className="text-forge-text/25 mt-0.5">
-                  {t.updatedAt?.slice(0, 10)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {(!recentThreads || recentThreads.length === 0) && (
               <div className="text-xs text-forge-text/30">No prior sessions</div>
             )}
