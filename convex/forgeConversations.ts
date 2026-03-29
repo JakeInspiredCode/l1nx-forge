@@ -16,7 +16,7 @@ export const getByThreadId = query({
 export const getRecent = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const limit = args.limit ?? 10;
+    const limit = args.limit ?? 50;
     return await ctx.db
       .query("forgeConversations")
       .withIndex("by_updatedAt")
@@ -30,13 +30,14 @@ export const getRecent = query({
 export const create = mutation({
   args: {
     threadId: v.string(),
-    mode: v.string(),
+    title: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = new Date().toISOString();
     return await ctx.db.insert("forgeConversations", {
       threadId: args.threadId,
-      mode: args.mode,
+      title: args.title,
+      mode: "agent",
       messages: [],
       createdAt: now,
       updatedAt: now,
@@ -65,18 +66,25 @@ export const appendMessage = mutation({
       cardId: args.cardId,
     };
 
-    await ctx.db.patch(thread._id, {
+    const patch: Record<string, unknown> = {
       messages: [...thread.messages, message],
       updatedAt: new Date().toISOString(),
-    });
+    };
+
+    // Auto-title from first user message if no title set
+    if (!thread.title && args.role === "user") {
+      patch.title = args.content.slice(0, 80).replace(/\n/g, " ");
+    }
+
+    await ctx.db.patch(thread._id, patch);
     return thread._id;
   },
 });
 
-export const updateMode = mutation({
+export const renameThread = mutation({
   args: {
     threadId: v.string(),
-    mode: v.string(),
+    title: v.string(),
   },
   handler: async (ctx, args) => {
     const thread = await ctx.db
@@ -84,7 +92,50 @@ export const updateMode = mutation({
       .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
       .first();
     if (!thread) return null;
-    await ctx.db.patch(thread._id, { mode: args.mode });
+    await ctx.db.patch(thread._id, { title: args.title });
+    return thread._id;
+  },
+});
+
+export const truncateFromIndex = mutation({
+  args: {
+    threadId: v.string(),
+    fromIndex: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const thread = await ctx.db
+      .query("forgeConversations")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .first();
+    if (!thread) return null;
+    await ctx.db.patch(thread._id, {
+      messages: thread.messages.slice(0, args.fromIndex),
+      updatedAt: new Date().toISOString(),
+    });
+    return thread._id;
+  },
+});
+
+export const replaceMessages = mutation({
+  args: {
+    threadId: v.string(),
+    messages: v.array(v.object({
+      role: v.string(),
+      content: v.string(),
+      timestamp: v.string(),
+      cardId: v.optional(v.string()),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const thread = await ctx.db
+      .query("forgeConversations")
+      .withIndex("by_threadId", (q) => q.eq("threadId", args.threadId))
+      .first();
+    if (!thread) return null;
+    await ctx.db.patch(thread._id, {
+      messages: args.messages,
+      updatedAt: new Date().toISOString(),
+    });
     return thread._id;
   },
 });

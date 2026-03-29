@@ -6,13 +6,12 @@ import { api } from "@/convex/_generated/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-type Mode = "coach" | "quiz" | "mock-interview";
 type ModelId = "claude-sonnet-4-6" | "claude-haiku-4-5-20251001" | "claude-opus-4-6";
 
-const MODEL_OPTIONS: { id: ModelId; label: string }[] = [
-  { id: "claude-sonnet-4-6", label: "Sonnet 4.6" },
-  { id: "claude-haiku-4-5-20251001", label: "Haiku" },
-  { id: "claude-opus-4-6", label: "Opus 4.6" },
+const MODEL_OPTIONS: { id: ModelId; label: string; short: string }[] = [
+  { id: "claude-sonnet-4-6", label: "Sonnet 4.6", short: "S" },
+  { id: "claude-haiku-4-5-20251001", label: "Haiku", short: "H" },
+  { id: "claude-opus-4-6", label: "Opus 4.6", short: "O" },
 ];
 
 interface Message {
@@ -21,41 +20,45 @@ interface Message {
   timestamp: string;
 }
 
-const MODE_CONFIG: Record<Mode, { label: string; description: string; starter: string }> = {
-  coach: {
-    label: "Coach",
-    description: "Strategy, advice, and Q&A",
-    starter: "I've reviewed your study data. What would you like to work on? I can analyze your weak areas, explain concepts you're struggling with, or help you build a study strategy.",
-  },
-  quiz: {
-    label: "Quiz Me",
-    description: "Agent picks your weakest cards",
-    starter: "Ready to drill your weak spots. I'll pick questions from your struggling areas and evaluate your answers in depth. Say 'go' when you're ready for the first question.",
-  },
-  "mock-interview": {
-    label: "Mock Interview",
-    description: "Conversational interview with follow-ups",
-    starter: "I'm your interviewer today. We'll go through several questions — I'll probe your answers and give feedback after each one. Take a breath, and tell me: are you ready to begin?",
-  },
-};
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+function formatTokens(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return String(n);
+}
 
 interface AgentChatProps {
   threadId: string;
-  compact?: boolean; // true = floating panel mode
-  initialMode?: Mode;      // override starting mode (e.g. from "Quiz me on X" button)
-  initialMessage?: string; // auto-send this message after initialization
-  onNewConversation?: () => void; // callback to create a new thread (parent manages threadId)
+  compact?: boolean;
+  initialMessage?: string;
+  personality?: string;
+  onNewConversation?: () => void;
 }
 
-export default function AgentChat({ threadId, compact = false, initialMode, initialMessage, onNewConversation }: AgentChatProps) {
-  const [mode, setMode] = useState<Mode>(initialMode ?? "coach");
+export default function AgentChat({ threadId, compact = false, initialMessage, personality: personalityProp, onNewConversation }: AgentChatProps) {
+  // Use prop if provided, otherwise read from localStorage (for floating panel)
+  const [localPersonality, setLocalPersonality] = useState<string>("sarcastic-friend");
+  useEffect(() => {
+    if (!personalityProp) {
+      try {
+        const stored = localStorage.getItem("l1nx-mascot-personality");
+        if (stored) setLocalPersonality(stored);
+      } catch {}
+    }
+  }, [personalityProp]);
+  const personality = personalityProp || localPersonality;
+
   const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  // Input panel height in px; null = use CSS default
-  const [inputPanelHeight, setInputPanelHeight] = useState<number>(180);
+  const [inputPanelHeight, setInputPanelHeight] = useState<number>(compact ? 120 : 160);
+  const [hoveredMsg, setHoveredMsg] = useState<number | null>(null);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [lastTurnTokens, setLastTurnTokens] = useState<{ in: number; out: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -63,12 +66,12 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ startY: number; startHeight: number } | null>(null);
 
-  // Reset state when threadId changes (e.g. new conversation or loading a past thread)
   useEffect(() => {
     setInitialized(false);
     setMessages([]);
     setInput("");
     setStreaming(false);
+    setLastTurnTokens(null);
     autoSentRef.current = false;
     if (abortRef.current) {
       abortRef.current.abort();
@@ -79,115 +82,30 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
   const context = useQuery(api.forgeAgentContext.get);
   const createThread = useMutation(api.forgeConversations.create);
   const appendMessage = useMutation(api.forgeConversations.appendMessage);
-  const updateMode = useMutation(api.forgeConversations.updateMode);
+  const truncateFromIndex = useMutation(api.forgeConversations.truncateFromIndex);
   const existingThread = useQuery(api.forgeConversations.getByThreadId, { threadId });
 
-  // Initialize thread + starter message
   useEffect(() => {
     if (initialized || existingThread === undefined) return;
 
     if (existingThread) {
-      // Restore existing conversation — apply initialMode override if present
       setMessages(existingThread.messages as Message[]);
-      if (initialMode && initialMode !== existingThread.mode) {
-        setMode(initialMode);
-        updateMode({ threadId, mode: initialMode });
-        const starter: Message = {
-          role: "assistant",
-          content: MODE_CONFIG[initialMode].starter,
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: `— Switched to ${MODE_CONFIG[initialMode].label} mode —`, timestamp: new Date().toISOString() },
-          starter,
-        ]);
-        appendMessage({ threadId, role: "assistant", content: starter.content });
-      } else {
-        setMode(existingThread.mode as Mode);
-      }
       setInitialized(true);
     } else {
-      // New thread
-      createThread({ threadId, mode }).then(() => {
-        const starter: Message = {
-          role: "assistant",
-          content: MODE_CONFIG[mode].starter,
-          timestamp: new Date().toISOString(),
-        };
-        setMessages([starter]);
-        appendMessage({ threadId, role: "assistant", content: starter.content });
+      createThread({ threadId }).then(() => {
         setInitialized(true);
       });
     }
-  }, [existingThread, initialized, threadId, mode, initialMode, createThread, appendMessage, updateMode]);
+  }, [existingThread, initialized, threadId, createThread]);
 
   // Auto-send initialMessage once initialized
   useEffect(() => {
     if (initialized && initialMessage && !autoSentRef.current && context && !streaming) {
       autoSentRef.current = true;
-      setInput(initialMessage);
-      // Defer to next tick so the input state is set before send reads it
-      setTimeout(() => {
-        setInput("");
-        // Manually trigger the send flow with the initial message
-        const userMsg: Message = { role: "user", content: initialMessage, timestamp: new Date().toISOString() };
-        setMessages((prev) => [...prev, userMsg]);
-        appendMessage({ threadId, role: "user", content: initialMessage });
-        setStreaming(true);
-
-        const apiMessages = [...messages, userMsg]
-          .filter((m) => !m.content.startsWith("— Switched to"))
-          .map((m) => ({ role: m.role, content: m.content }));
-
-        const assistantMsg: Message = { role: "assistant", content: "", timestamp: new Date().toISOString() };
-        setMessages((prev) => [...prev, assistantMsg]);
-
-        const controller = new AbortController();
-        abortRef.current = controller;
-        let assistantContent = "";
-
-        fetch("/api/agent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: apiMessages, context, mode }),
-          signal: controller.signal,
-        })
-          .then(async (res) => {
-            if (!res.ok) throw new Error("Agent request failed");
-            const reader = res.body?.getReader();
-            const decoder = new TextDecoder();
-            if (!reader) throw new Error("No response body");
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              assistantContent += decoder.decode(value, { stream: true });
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { ...assistantMsg, content: assistantContent };
-                return updated;
-              });
-            }
-            appendMessage({ threadId, role: "assistant", content: assistantContent });
-          })
-          .catch((err) => {
-            if ((err as Error).name !== "AbortError") {
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { ...assistantMsg, content: "Something went wrong reaching the agent." };
-                return updated;
-              });
-            }
-          })
-          .finally(() => {
-            setStreaming(false);
-            abortRef.current = null;
-          });
-      }, 0);
+      sendMessage(initialMessage);
     }
   }, [initialized, initialMessage, context, streaming]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-scroll only if user is already near the bottom
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -197,76 +115,66 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
     }
   }, [messages, streaming]);
 
-  const switchMode = useCallback(async (newMode: Mode) => {
-    if (streaming) return;
-    setMode(newMode);
-    updateMode({ threadId, mode: newMode });
+  const streamResponse = useCallback(async (apiMessages: { role: string; content: string }[], onContent: (text: string) => void): Promise<{ outputTokens: number; content: string }> => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    let outputContent = "";
 
-    const starter: Message = {
-      role: "assistant",
-      content: MODE_CONFIG[newMode].starter,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, { role: "assistant", content: `— Switched to ${MODE_CONFIG[newMode].label} mode —`, timestamp: new Date().toISOString() }, starter]);
-    appendMessage({ threadId, role: "assistant", content: starter.content });
-  }, [streaming, threadId, updateMode, appendMessage]);
+    const res = await fetch("/api/agent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: apiMessages, context, model, personality }),
+      signal: controller.signal,
+    });
 
-  const send = useCallback(async () => {
-    const text = input.trim();
-    if (!text || streaming || !context) return;
+    if (!res.ok) {
+      const errText = await res.text().catch(() => `HTTP ${res.status}`);
+      throw new Error(`${res.status}: ${errText}`);
+    }
 
-    const userMsg: Message = { role: "user", content: text, timestamp: new Date().toISOString() };
+    const inputTokens = parseInt(res.headers.get("X-Input-Tokens") ?? "0", 10);
+    const reader = res.body?.getReader();
+    const decoder = new TextDecoder();
+    if (!reader) throw new Error("No response body");
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      outputContent += chunk;
+      onContent(outputContent);
+    }
+
+    const outputTokens = estimateTokens(outputContent);
+    setLastTurnTokens({ in: inputTokens, out: outputTokens });
+    return { outputTokens, content: outputContent };
+  }, [context, model, personality]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || streaming || !context) return;
+
+    const userMsg: Message = { role: "user", content: text.trim(), timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setStreaming(true);
 
-    // Persist user message
-    appendMessage({ threadId, role: "user", content: text });
+    appendMessage({ threadId, role: "user", content: text.trim() });
 
-    // Build messages array for API (exclude system separators)
-    const apiMessages = [...messages, userMsg]
-      .filter((m) => !m.content.startsWith("— Switched to"))
-      .map((m) => ({ role: m.role, content: m.content }));
+    const apiMessages = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
 
-    // Stream response
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    let assistantContent = "";
     const assistantMsg: Message = { role: "assistant", content: "", timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, assistantMsg]);
 
     try {
-      const res = await fetch("/api/agent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages, context, mode, model }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => `HTTP ${res.status}`);
-        throw new Error(`${res.status}: ${errText}`);
-      }
-
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error("No response body");
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        assistantContent += chunk;
+      const result = await streamResponse(apiMessages, (content) => {
         setMessages((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = { ...assistantMsg, content: assistantContent };
+          updated[updated.length - 1] = { ...assistantMsg, content };
           return updated;
         });
-      }
+      });
 
-      // Persist final assistant message
-      appendMessage({ threadId, role: "assistant", content: assistantContent });
+      appendMessage({ threadId, role: "assistant", content: result.content });
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         setMessages((prev) => {
@@ -282,7 +190,11 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [input, streaming, context, messages, mode, model, threadId, appendMessage]);
+  }, [streaming, context, messages, model, threadId, appendMessage, streamResponse]);
+
+  const send = useCallback(() => {
+    sendMessage(input);
+  }, [input, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -291,13 +203,73 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
     }
   };
 
+  const handleCopy = useCallback(async (idx: number) => {
+    await navigator.clipboard.writeText(messages[idx].content);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 1500);
+  }, [messages]);
+
+  const handleDeleteFromHere = useCallback(async (idx: number) => {
+    await truncateFromIndex({ threadId, fromIndex: idx });
+    setMessages((prev) => prev.slice(0, idx));
+  }, [threadId, truncateFromIndex]);
+
+  const handleRegenerate = useCallback(async () => {
+    if (streaming || messages.length < 2) return;
+
+    // Find the last user message
+    let lastUserIdx = messages.length - 1;
+    while (lastUserIdx >= 0 && messages[lastUserIdx].role !== "user") lastUserIdx--;
+    if (lastUserIdx < 0) return;
+
+    const lastUserContent = messages[lastUserIdx].content;
+    const trimmedMessages = messages.slice(0, lastUserIdx);
+
+    // Update DB — remove from the last user message onward
+    await truncateFromIndex({ threadId, fromIndex: lastUserIdx });
+    setMessages(trimmedMessages);
+
+    // Re-send
+    const userMsg: Message = { role: "user", content: lastUserContent, timestamp: new Date().toISOString() };
+    setMessages((prev) => [...prev, userMsg]);
+    setStreaming(true);
+    appendMessage({ threadId, role: "user", content: lastUserContent });
+
+    const apiMessages = [...trimmedMessages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+    const assistantMsg: Message = { role: "assistant", content: "", timestamp: new Date().toISOString() };
+    setMessages((prev) => [...prev, assistantMsg]);
+
+    try {
+      const result = await streamResponse(apiMessages, (content) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { ...assistantMsg, content };
+          return updated;
+        });
+      });
+
+      appendMessage({ threadId, role: "assistant", content: result.content });
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { ...assistantMsg, content: `Error: ${(err as Error).message}` };
+          return updated;
+        });
+      }
+    } finally {
+      setStreaming(false);
+      abortRef.current = null;
+    }
+  }, [streaming, messages, threadId, truncateFromIndex, appendMessage, streamResponse]);
+
   const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     dragRef.current = { startY: e.clientY, startHeight: inputPanelHeight };
     const onMove = (ev: MouseEvent) => {
       if (!dragRef.current) return;
       const delta = dragRef.current.startY - ev.clientY;
-      const newH = Math.max(100, Math.min(600, dragRef.current.startHeight + delta));
+      const newH = Math.max(80, Math.min(500, dragRef.current.startHeight + delta));
       setInputPanelHeight(newH);
     };
     const onUp = () => {
@@ -309,41 +281,55 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
     window.addEventListener("mouseup", onUp);
   }, [inputPanelHeight]);
 
+  const totalTokens = messages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
+
   const containerClass = compact
     ? "flex flex-col h-full"
-    : "flex flex-col h-full max-w-3xl mx-auto";
+    : "flex flex-col h-full";
 
   return (
     <div className={containerClass}>
-      {/* Mode selector */}
-      <div className="flex gap-2 p-3 border-b border-white/10 shrink-0">
-        {(Object.keys(MODE_CONFIG) as Mode[]).map((m) => (
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10 shrink-0">
+        <select
+          value={model}
+          onChange={(e) => setModel(e.target.value as ModelId)}
+          disabled={streaming}
+          className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-forge-text/70 focus:outline-none focus:border-forge-accent/50 disabled:opacity-50"
+        >
+          {MODEL_OPTIONS.map((m) => (
+            <option key={m.id} value={m.id} className="bg-forge-bg text-forge-text">
+              {m.label}
+            </option>
+          ))}
+        </select>
+
+        <div className="ml-auto flex items-center gap-3 text-[10px] text-forge-text/30 font-mono">
+          {lastTurnTokens && (
+            <span title="Last turn: input → output tokens">
+              {formatTokens(lastTurnTokens.in)} → {formatTokens(lastTurnTokens.out)}
+            </span>
+          )}
+          <span title="Estimated total conversation tokens">
+            {formatTokens(totalTokens)} / 169K
+          </span>
+          {totalTokens > 120000 && (
+            <span className="text-forge-warning" title="Conversation is getting large — older messages may be trimmed">
+              ⚠
+            </span>
+          )}
+        </div>
+
+        {!compact && messages.length >= 2 && (
           <button
-            key={m}
-            onClick={() => switchMode(m)}
+            onClick={handleRegenerate}
             disabled={streaming}
-            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors border ${
-              mode === m
-                ? "bg-forge-accent/20 text-forge-accent border-forge-accent/40"
-                : "text-forge-text/50 border-white/10 hover:border-white/20 hover:text-forge-text/80"
-            }`}
+            className="text-[10px] text-forge-text/40 hover:text-forge-text/70 border border-white/10 rounded px-2 py-0.5 transition-colors disabled:opacity-30"
+            title="Regenerate last response"
           >
-            {MODE_CONFIG[m].label}
-          </button>
-        ))}
-        {onNewConversation && (
-          <button
-            onClick={onNewConversation}
-            disabled={streaming}
-            className="ml-auto px-3 py-1.5 rounded text-xs font-medium text-forge-text/50 border border-white/10 hover:border-forge-accent/40 hover:text-forge-accent/70 transition-colors disabled:opacity-40"
-            title="Start a new conversation"
-          >
-            + New Chat
+            ↻ Retry
           </button>
         )}
-        <span className={`${onNewConversation ? "ml-2" : "ml-auto"} text-xs text-forge-text/30 self-center hidden sm:block`}>
-          {MODE_CONFIG[mode].description}
-        </span>
       </div>
 
       {/* Messages */}
@@ -351,16 +337,21 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
         {!initialized && (
           <div className="text-forge-text/40 text-sm text-center mt-8">Loading context...</div>
         )}
+        {initialized && messages.length === 0 && (
+          <div className="text-forge-text/30 text-sm text-center mt-8">
+            Start a conversation — the agent has your full study context.
+          </div>
+        )}
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} group`}
+            onMouseEnter={() => setHoveredMsg(i)}
+            onMouseLeave={() => setHoveredMsg(null)}
           >
-            {msg.content.startsWith("— Switched to") ? (
-              <div className="text-xs text-forge-text/30 text-center w-full py-1">{msg.content}</div>
-            ) : (
+            <div className="relative max-w-[85%]">
               <div
-                className={`max-w-[85%] rounded-lg px-4 py-3 text-sm ${
+                className={`rounded-lg px-4 py-3 text-sm ${
                   msg.role === "user"
                     ? "bg-forge-accent/20 text-forge-text border border-forge-accent/30"
                     : "bg-white/5 text-forge-text border border-white/10"
@@ -376,7 +367,27 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
                   <span className="whitespace-pre-wrap">{msg.content}</span>
                 )}
               </div>
-            )}
+
+              {/* Message actions */}
+              {hoveredMsg === i && !streaming && (
+                <div className={`absolute top-0 flex gap-1 ${msg.role === "user" ? "right-full mr-1" : "left-full ml-1"}`}>
+                  <button
+                    onClick={() => handleCopy(i)}
+                    className="p-1 rounded text-[10px] text-forge-text/30 hover:text-forge-text/70 hover:bg-white/10 transition-colors"
+                    title="Copy"
+                  >
+                    {copiedIdx === i ? "✓" : "⧉"}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteFromHere(i)}
+                    className="p-1 rounded text-[10px] text-forge-text/30 hover:text-red-400 hover:bg-white/10 transition-colors"
+                    title="Delete from here"
+                  >
+                    ✂
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         ))}
         {streaming && messages[messages.length - 1]?.role === "assistant" && messages[messages.length - 1]?.content === "" && (
@@ -390,31 +401,18 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
       </div>
 
       {/* Drag divider */}
-      <div
-        onMouseDown={onDividerMouseDown}
-        className="h-2 shrink-0 cursor-ns-resize flex items-center justify-center group border-t border-white/10 hover:border-forge-accent/40 transition-colors"
-        title="Drag to resize"
-      >
-        <div className="w-8 h-0.5 rounded-full bg-white/10 group-hover:bg-forge-accent/40 transition-colors" />
-      </div>
+      {!compact && (
+        <div
+          onMouseDown={onDividerMouseDown}
+          className="h-2 shrink-0 cursor-ns-resize flex items-center justify-center group border-t border-white/10 hover:border-forge-accent/40 transition-colors"
+          title="Drag to resize"
+        >
+          <div className="w-8 h-0.5 rounded-full bg-white/10 group-hover:bg-forge-accent/40 transition-colors" />
+        </div>
+      )}
 
       {/* Input */}
-      <div className="p-3 shrink-0" style={{ height: `${inputPanelHeight}px`, display: "flex", flexDirection: "column" }}>
-        <div className="flex items-center gap-2 mb-2 shrink-0">
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value as ModelId)}
-            disabled={streaming}
-            className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-xs text-forge-text/70 focus:outline-none focus:border-forge-accent/50 disabled:opacity-50"
-          >
-            {MODEL_OPTIONS.map((m) => (
-              <option key={m.id} value={m.id} className="bg-forge-bg text-forge-text">
-                {m.label}
-              </option>
-            ))}
-          </select>
-          <span className="text-[10px] text-forge-text/25">{MODEL_OPTIONS.find((m) => m.id === model)?.label}</span>
-        </div>
+      <div className="p-3 shrink-0" style={{ height: compact ? undefined : `${inputPanelHeight}px`, display: "flex", flexDirection: "column" }}>
         <div className="flex gap-2 flex-1 min-h-0">
           <textarea
             ref={textareaRef}
@@ -422,7 +420,7 @@ export default function AgentChat({ threadId, compact = false, initialMode, init
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={streaming || !initialized}
-            placeholder={streaming ? "Agent is responding..." : "Message your coach... (Enter to send, Shift+Enter for newline)"}
+            placeholder={streaming ? "Agent is responding..." : "Message the agent... (Enter to send, Shift+Enter for newline)"}
             className="flex-1 resize-none bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-forge-text placeholder-forge-text/30 focus:outline-none focus:border-forge-accent/50 disabled:opacity-50 overflow-y-auto"
           />
           <button
