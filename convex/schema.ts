@@ -120,7 +120,8 @@ export default defineSchema({
 
   forgeConversations: defineTable({
     threadId: v.string(),          // UUID — client-generated
-    mode: v.string(),              // "coach" | "quiz" | "mock-interview"
+    title: v.optional(v.string()), // Auto-generated from first user message, editable
+    mode: v.string(),              // legacy — kept for compat, always "agent"
     messages: v.array(v.object({
       role: v.string(),            // "user" | "assistant"
       content: v.string(),

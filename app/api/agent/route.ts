@@ -5,7 +5,14 @@ const client = new Anthropic();
 
 export const runtime = "nodejs";
 
-function buildSystemPrompt(context: AgentContext, mode: string): string {
+const PERSONALITY_TONES: Record<string, string> = {
+  "drill-sergeant": `Your tone is that of a tough, no-nonsense drill sergeant. Be blunt, demanding, and direct. Push the user hard. Use military-style motivation. Don't coddle — if they're slacking, call it out. But when they earn it, give respect.`,
+  "cheerleader": `Your tone is that of an enthusiastic, high-energy cheerleader. Celebrate every win, big or small. Use exclamation marks, encouragement, and hype. Stay positive even when pointing out weaknesses — frame everything as an opportunity to grow.`,
+  "zen-master": `Your tone is that of a calm, wise zen master. Speak with measured wisdom and patience. Use metaphors and philosophical framing. Be accepting of mistakes as part of the journey. Guide rather than push. Keep responses thoughtful and unhurried.`,
+  "sarcastic-friend": `Your tone is that of a witty, sarcastic friend who genuinely cares. Use dry humor, light roasts, and playful jabs — but always with real support underneath. Be honest and casual. Don't take yourself too seriously.`,
+};
+
+function buildSystemPrompt(context: AgentContext, personality?: string): string {
   const { profile, progress, weakTopics, dueCount, totalCards, masteredCards, strugglingCards, recentSessions } = context;
 
   const progressSummary = progress
@@ -32,22 +39,14 @@ function buildSystemPrompt(context: AgentContext, mode: string): string {
     })
     .join("\n\n");
 
-  const modeInstructions: Record<string, string> = {
-    coach: `You are in COACH mode. Have a natural conversation. Analyze the user's weak areas, suggest what to study next, explain concepts they're struggling with, and give strategic interview prep advice. Be direct and specific — reference their actual data.`,
-    quiz: `You are in QUIZ mode. Pick one of the user's weak or due cards and quiz them on it. Present the question clearly, wait for their answer, then evaluate it thoroughly — not just keyword matching but real comprehension. Give detailed feedback, correct misconceptions, and then move to the next card. Track which cards you've covered in this session.`,
-    "mock-interview": `You are in MOCK INTERVIEW mode. You are a senior technical interviewer. Ask interview questions one at a time — start with a mix of their weak topics. After each answer, probe with follow-up questions if the answer is vague or incomplete. Score their answer on technical accuracy, structure, and use of concrete examples. Give feedback after each question before moving to the next. Be realistic but encouraging.`,
-  };
-
-  return `You are the L1NX Forge AI Coach — a sharp, knowledgeable interview prep assistant embedded in a spaced-repetition study app. You have full context of the user's study history, mastery levels, and past interview performance.
+  return `You are the L1NX Forge AI Agent — a sharp, knowledgeable interview prep assistant embedded in a spaced-repetition study app. You have full context of the user's study history, mastery levels, and past interview performance.
 
 ## Your Personality
-- Direct and honest — don't sugarcoat weak performance, but stay constructive
+${personality && PERSONALITY_TONES[personality] ? PERSONALITY_TONES[personality] : PERSONALITY_TONES["sarcastic-friend"]}
 - Technical depth — you understand the subject matter (Linux, data center ops, networking, hardware, xAI/Colossus)
 - Strategic — you think about interview prep holistically, not just flashcard recall
+- Versatile — you can coach, quiz, mock-interview, explain concepts, or just chat. Follow the user's lead.
 - Memory — you remember what the user has told you in this conversation and reference it naturally
-
-## Current Mode
-${modeInstructions[mode] ?? modeInstructions.coach}
 
 ## User's Study State (as of today)
 - Total cards: ${totalCards} | Mastered: ${masteredCards} | Due for review: ${dueCount}
@@ -68,7 +67,7 @@ ${interviewHistory || "  No mock interviews completed yet."}
 
 ## Instructions
 - Reference specific data from above when giving advice (e.g., "Your Linux mastery is only 62% — that's likely to come up in the interview")
-- In quiz/mock-interview mode, draw from the struggling cards and weak topics above
+- When the user asks to be quizzed, draw from the struggling cards and weak topics above
 - When the user answers a question, evaluate the substance of their answer, not just keywords
 - Keep responses focused and actionable — no unnecessary padding
 - If asked about a concept, teach it thoroughly with examples relevant to data center / SRE / xAI context`;
@@ -98,26 +97,25 @@ const ALLOWED_MODELS = new Set([
   "claude-opus-4-6",
 ]);
 
-// Rough token estimate: ~4 chars per token. Reserve budget for system prompt + response.
 const MAX_CONTEXT_TOKENS = 180_000;
 const SYSTEM_PROMPT_BUDGET = 10_000;
-const MAX_TOKENS_RESPONSE = 1024;
+const MAX_TOKENS_RESPONSE = 4096;
 const MESSAGE_TOKEN_BUDGET = MAX_CONTEXT_TOKENS - SYSTEM_PROMPT_BUDGET - MAX_TOKENS_RESPONSE;
 
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
 }
 
-/** Trim messages from the front to fit within token budget, preserving recent context. */
-function windowMessages(messages: AgentMessage[]): AgentMessage[] {
+function windowMessages(messages: AgentMessage[]): { messages: AgentMessage[]; inputTokens: number; trimmed: boolean } {
   let totalTokens = 0;
   for (const m of messages) {
     totalTokens += estimateTokens(m.content);
   }
 
-  if (totalTokens <= MESSAGE_TOKEN_BUDGET) return messages;
+  if (totalTokens <= MESSAGE_TOKEN_BUDGET) {
+    return { messages, inputTokens: totalTokens, trimmed: false };
+  }
 
-  // Walk backwards, keeping messages until we hit the budget
   const kept: AgentMessage[] = [];
   let budget = MESSAGE_TOKEN_BUDGET;
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -127,7 +125,6 @@ function windowMessages(messages: AgentMessage[]): AgentMessage[] {
     kept.unshift(messages[i]);
   }
 
-  // Prepend a note so Claude knows history was trimmed
   if (kept.length < messages.length) {
     kept.unshift({
       role: "user",
@@ -135,21 +132,21 @@ function windowMessages(messages: AgentMessage[]): AgentMessage[] {
     });
   }
 
-  return kept;
+  return { messages: kept, inputTokens: MESSAGE_TOKEN_BUDGET - budget, trimmed: true };
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, context, mode, model } = (await req.json()) as {
+    const { messages, context, model, personality } = (await req.json()) as {
       messages: AgentMessage[];
       context: AgentContext;
-      mode: string;
       model?: string;
+      personality?: string;
     };
 
-    const systemPrompt = buildSystemPrompt(context, mode);
+    const systemPrompt = buildSystemPrompt(context, personality);
     const resolvedModel = model && ALLOWED_MODELS.has(model) ? model : "claude-sonnet-4-6";
-    const windowedMessages = windowMessages(messages);
+    const { messages: windowedMessages, inputTokens, trimmed } = windowMessages(messages);
 
     const stream = await client.messages.stream({
       model: resolvedModel,
@@ -162,6 +159,7 @@ export async function POST(req: NextRequest) {
     });
 
     const encoder = new TextEncoder();
+    let outputTokens = 0;
 
     const readable = new ReadableStream({
       async start(controller) {
@@ -171,7 +169,9 @@ export async function POST(req: NextRequest) {
               chunk.type === "content_block_delta" &&
               chunk.delta.type === "text_delta"
             ) {
-              controller.enqueue(encoder.encode(chunk.delta.text));
+              const text = chunk.delta.text;
+              outputTokens += estimateTokens(text);
+              controller.enqueue(encoder.encode(text));
             }
           }
         } catch (streamErr) {
@@ -185,6 +185,9 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Transfer-Encoding": "chunked",
+        "X-Input-Tokens": String(inputTokens),
+        "X-Trimmed": String(trimmed),
+        "X-Model": resolvedModel,
       },
     });
   } catch (err) {

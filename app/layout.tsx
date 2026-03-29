@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ConvexClientProvider from "@/components/convex-provider";
-import FloatingCoach from "@/components/floating-coach";
 import Mascot from "@/components/mascot/mascot";
 import BadgeBanner from "@/components/badge-banner";
 
@@ -21,7 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-forge-bg text-forge-text min-h-screen">
         <ConvexClientProvider>
           {children}
-          <FloatingCoach />
           <Mascot />
           <BadgeBanner />
         </ConvexClientProvider>

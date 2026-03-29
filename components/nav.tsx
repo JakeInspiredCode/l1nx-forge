@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/stories", label: "Stories", icon: "◈" },
   { href: "/cards", label: "Cards", icon: "📇" },
   { href: "/history", label: "History", icon: "◷" },
+  { href: "/agent", label: "Agent", icon: "⬡" },
 ];
 
 export default function Nav() {
