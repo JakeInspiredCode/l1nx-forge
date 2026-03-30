@@ -158,4 +158,29 @@ const linuxT4: ForgeCard[] = [
   ),
 ];
 
-export { linuxT2, linuxT3, linuxT4 };
+// ── Gotcha Cards (from Linux Ops Forge — practical warnings) ──
+const linuxGotchas: ForgeCard[] = [
+  c("linux-091","linux","intermediate",2,2,
+    "Why is `grep -r` on `/` without `--exclude-dir` dangerous on a production server?",
+    "It will recursively search every file on every mounted filesystem — including `/proc`, `/sys`, and potentially huge data volumes. This can saturate I/O, spike CPU, and make the node unresponsive. Always scope your search: specify a directory, use `--exclude-dir` for virtual filesystems, or use `find` with `-path` exclusions."),
+  c("linux-092","linux","intermediate",2,2,
+    "What's the risk of running `sed -i` without a backup suffix on a production config file?",
+    "`sed -i` modifies the file in-place with no undo. If your regex is wrong, you've corrupted a production config. Always use `sed -i.bak` to create a backup first, or test with `sed` (without `-i`) to preview changes on stdout before committing."),
+  c("linux-093","linux","intermediate",2,2,
+    "Why does `locate` give stale results on a freshly racked node?",
+    "`locate` uses a pre-built database (`/var/lib/mlocate/mlocate.db`) updated by `updatedb`, typically via a daily cron job. On a fresh node, the database may be empty or outdated. Use `find` for real-time results, or run `updatedb` first. Never trust `locate` for time-sensitive troubleshooting."),
+  c("linux-094","linux","intermediate",2,2,
+    "What happens if you use `apt autoremove` blindly on a production node running a custom kernel?",
+    "`apt autoremove` removes packages it considers unused dependencies. On nodes with custom-compiled kernels or non-standard packages, it may remove kernel headers, modules, or drivers that are actually needed but weren't installed via the standard dependency chain. Always review the removal list before confirming."),
+  c("linux-095","linux","intermediate",2,2,
+    "A production DC node uses XFS on its data volumes. An engineer tries to run `fsck` on the XFS volume. What's wrong with this approach?",
+    "XFS does not use `fsck`. XFS has its own repair tool: `xfs_repair`. Running `fsck` on XFS will either do nothing or return an error. In `/etc/fstab`, XFS volumes should have the pass field set to `0` to skip automatic fsck at boot. Use `xfs_repair /dev/sdX` (requires the volume to be unmounted)."),
+  c("linux-096","linux","intermediate",2,2,
+    "Why should production DC nodes use `nodiscard` in their fstab mount options instead of `discard`?",
+    "The `discard` mount option sends TRIM commands to the SSD on every delete operation, adding latency to each I/O. Production fleets use `nodiscard` and instead schedule a weekly `fstrim.timer` to batch TRIM operations, avoiding per-IO overhead during training workloads."),
+  c("linux-097","linux","intermediate",2,2,
+    "You're piping `tail -f` into `grep -m 1`. The match is found but you notice the pipeline doesn't exit cleanly. Why?",
+    "When `grep -m 1` finds its match and exits, `tail -f` receives SIGPIPE on its next write attempt and terminates. The pipeline does end, but there can be a brief delay if `tail` hasn't attempted another write yet. If you need to capture output reliably during this pattern, use `tee` to write to a file simultaneously."),
+];
+
+export { linuxT2, linuxT3, linuxT4, linuxGotchas };

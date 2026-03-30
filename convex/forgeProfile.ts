@@ -165,6 +165,18 @@ export const checkAndAwardBadges = mutation({
     // ── Flawless session ──
     if (args.sessionAllGoodOrEasy) maybe("perfect-session");
 
+    // ── Incident Drill badges ──
+    const drills = await ctx.db.query("forgeDrills").collect();
+    const drillCount = drills.length;
+    if (drillCount > 0) maybe("first-drill");
+    if (drillCount >= 3) maybe("drill-3");
+    if (drillCount >= 10) maybe("drill-10");
+    if (drills.some((d) => d.overallTermHitRate === 100)) maybe("drill-perfect");
+    if (drills.some((d) => d.overallTermHitRate >= 80)) maybe("drill-80");
+    // Check if all unique scenario IDs have been attempted
+    const uniqueScenarios = new Set(drills.map((d) => d.scenarioId));
+    if (uniqueScenarios.size >= 5) maybe("drill-all-scenarios");
+
     // ── Persist ──
     if (earn.length > 0) {
       await ctx.db.patch(profile._id, {

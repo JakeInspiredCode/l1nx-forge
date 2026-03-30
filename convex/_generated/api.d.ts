@@ -11,6 +11,7 @@
 import type * as forgeAgentContext from "../forgeAgentContext.js";
 import type * as forgeCards from "../forgeCards.js";
 import type * as forgeConversations from "../forgeConversations.js";
+import type * as forgeDrills from "../forgeDrills.js";
 import type * as forgeProfile from "../forgeProfile.js";
 import type * as forgeProgress from "../forgeProgress.js";
 import type * as forgeProgressRecompute from "../forgeProgressRecompute.js";
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   forgeAgentContext: typeof forgeAgentContext;
   forgeCards: typeof forgeCards;
   forgeConversations: typeof forgeConversations;
+  forgeDrills: typeof forgeDrills;
   forgeProfile: typeof forgeProfile;
   forgeProgress: typeof forgeProgress;
   forgeProgressRecompute: typeof forgeProgressRecompute;

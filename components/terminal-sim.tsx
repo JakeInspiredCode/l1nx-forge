@@ -1,0 +1,148 @@
+"use client";
+
+import { useState, useRef, useEffect, useCallback } from "react";
+import { TERMINAL_COMMANDS, HOSTNAME, PROMPT_USER } from "@/lib/terminal-data";
+
+interface HistoryEntry {
+  type: "input" | "output" | "error" | "system";
+  text: string;
+}
+
+export default function TerminalSim() {
+  const [history, setHistory] = useState<HistoryEntry[]>([
+    { type: "system", text: `Welcome to ${HOSTNAME}. Type 'help' for available commands.` },
+  ]);
+  const [input, setInput] = useState("");
+  const [cmdHistory, setCmdHistory] = useState<string[]>([]);
+  const [histIdx, setHistIdx] = useState(-1);
+  const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [history]);
+
+  const exec = useCallback((cmd: string) => {
+    const trimmed = cmd.trim();
+    if (!trimmed) return;
+
+    setCmdHistory((h) => [trimmed, ...h]);
+    setHistIdx(-1);
+
+    if (trimmed === "clear") {
+      setHistory([{ type: "system", text: "Terminal cleared." }]);
+      setInput("");
+      return;
+    }
+
+    const newHistory: HistoryEntry[] = [
+      ...history,
+      { type: "input", text: trimmed },
+    ];
+
+    const match = TERMINAL_COMMANDS[trimmed];
+    if (match) {
+      newHistory.push({ type: "output", text: match.output });
+    } else {
+      const partial = Object.keys(TERMINAL_COMMANDS).find(
+        (k) => trimmed.startsWith(k.split(" ")[0])
+      );
+      if (partial) {
+        newHistory.push({
+          type: "error",
+          text: `Command not simulated with those exact flags. Try: ${partial}`,
+        });
+      } else {
+        newHistory.push({
+          type: "error",
+          text: `bash: ${trimmed.split(" ")[0]}: command not found (try 'help')`,
+        });
+      }
+    }
+
+    setHistory(newHistory);
+    setInput("");
+  }, [history]);
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      exec(input);
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (cmdHistory.length > 0) {
+        const newIdx = Math.min(histIdx + 1, cmdHistory.length - 1);
+        setHistIdx(newIdx);
+        setInput(cmdHistory[newIdx]);
+      }
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (histIdx > 0) {
+        setHistIdx(histIdx - 1);
+        setInput(cmdHistory[histIdx - 1]);
+      } else {
+        setHistIdx(-1);
+        setInput("");
+      }
+    }
+  };
+
+  return (
+    <div
+      className="rounded-lg border border-forge-border overflow-hidden"
+      onClick={() => inputRef.current?.focus()}
+    >
+      {/* Title bar */}
+      <div className="bg-forge-surface-2 px-4 py-2 flex items-center gap-2 border-b border-forge-border">
+        <span className="w-2.5 h-2.5 rounded-full bg-forge-danger" />
+        <span className="w-2.5 h-2.5 rounded-full bg-forge-warning" />
+        <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+        <span className="ml-2 mono text-xs text-forge-text-muted">
+          ops@{HOSTNAME}:~
+        </span>
+      </div>
+
+      {/* Output area */}
+      <div className="bg-forge-bg p-3 h-[380px] overflow-y-auto mono text-xs leading-relaxed">
+        {history.map((h, i) => (
+          <div key={i} className="mb-1 whitespace-pre-wrap break-all">
+            {h.type === "input" && (
+              <span>
+                <span className="text-green-400">{PROMPT_USER}</span>
+                <span className="text-forge-text-muted">:</span>
+                <span className="text-cyan-400">~</span>
+                <span className="text-forge-text-muted">$ </span>
+                <span className="text-forge-text">{h.text}</span>
+              </span>
+            )}
+            {h.type === "output" && (
+              <span className="text-forge-text-dim">{h.text}</span>
+            )}
+            {h.type === "error" && (
+              <span className="text-forge-danger">{h.text}</span>
+            )}
+            {h.type === "system" && (
+              <span className="text-forge-warning">{h.text}</span>
+            )}
+          </div>
+        ))}
+        <div ref={endRef} />
+      </div>
+
+      {/* Input area */}
+      <div className="px-4 py-2 border-t border-forge-border flex items-center gap-2 bg-forge-bg">
+        <span className="text-green-400 mono text-xs shrink-0">$</span>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder="type a command..."
+          autoFocus
+          className="flex-1 bg-transparent border-none outline-none text-forge-text mono text-xs placeholder:text-forge-text-muted"
+        />
+      </div>
+    </div>
+  );
+}

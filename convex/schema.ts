@@ -118,6 +118,23 @@ export default defineSchema({
     .index("by_topic", ["topicId"])
     .index("by_points", ["totalPoints"]),
 
+  forgeDrills: defineTable({
+    scenarioId: v.string(),          // e.g. "gpu-node-unresponsive"
+    timestamp: v.string(),
+    totalSteps: v.number(),
+    completedSteps: v.number(),
+    steps: v.array(v.object({
+      stepIndex: v.number(),
+      userResponse: v.string(),
+      matchedTerms: v.array(v.string()),
+      totalTerms: v.number(),
+      usedHints: v.boolean(),
+    })),
+    overallTermHitRate: v.number(),   // 0-100
+  })
+    .index("by_scenario", ["scenarioId"])
+    .index("by_timestamp", ["timestamp"]),
+
   forgeConversations: defineTable({
     threadId: v.string(),          // UUID — client-generated
     title: v.optional(v.string()), // Auto-generated from first user message, editable

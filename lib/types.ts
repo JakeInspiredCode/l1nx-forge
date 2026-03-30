@@ -180,4 +180,12 @@ export const BADGE_DEFS = [
   { id: "tier-2-any", name: "Level Up", condition: "Unlock Tier 2 in any topic", icon: "arrow-up" },
   { id: "tier-3-any", name: "Deep Dive", condition: "Unlock Tier 3 in any topic", icon: "arrow-up-2" },
   { id: "perfect-session", name: "Flawless", condition: "All cards rated Good or Easy in a session", icon: "diamond" },
+
+  // ── Incident Drill badges ──
+  { id: "first-drill", name: "First Responder", condition: "Complete your first incident drill", icon: "siren" },
+  { id: "drill-3", name: "Incident Veteran", condition: "Complete 3 drills", icon: "shield" },
+  { id: "drill-10", name: "Incident Commander", condition: "Complete 10 drills", icon: "shield-star" },
+  { id: "drill-perfect", name: "Perfect Triage", condition: "Score 100% key-term coverage on a drill", icon: "bullseye" },
+  { id: "drill-80", name: "Strong Responder", condition: "Score 80%+ on any drill", icon: "thumbs-up" },
+  { id: "drill-all-scenarios", name: "Full Rotation", condition: "Complete every available scenario", icon: "rotate" },
 ];

@@ -129,3 +129,21 @@ export function useSpeedRunBestScore(topicId?: string) {
 export function useSpeedRunsRecent(limit?: number) {
   return useQuery(api.forgeSpeedRuns.getRecent, { limit }) ?? [];
 }
+
+// ── Drills ──
+
+export function useDrills() {
+  return useQuery(api.forgeDrills.getAll) ?? [];
+}
+
+export function useDrillsByScenario(scenarioId: string) {
+  return useQuery(api.forgeDrills.getByScenario, { scenarioId }) ?? [];
+}
+
+export function useRecentDrills(limit?: number) {
+  return useQuery(api.forgeDrills.getRecent, { limit }) ?? [];
+}
+
+export function useDrillBestScore(scenarioId: string) {
+  return useQuery(api.forgeDrills.getBestByScenario, { scenarioId });
+}

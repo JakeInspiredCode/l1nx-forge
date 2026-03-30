@@ -1,6 +1,6 @@
 import { ForgeCard } from "../types";
 import linux from "./linux";
-import { linuxT2, linuxT3, linuxT4 } from "./linux-advanced";
+import { linuxT2, linuxT3, linuxT4, linuxGotchas } from "./linux-advanced";
 import { hardware, networking, fiber, powerCooling, opsProcesses, xaiContext, behavioral } from "./topics";
 
 export function getAllSeedCards(): ForgeCard[] {
@@ -9,6 +9,7 @@ export function getAllSeedCards(): ForgeCard[] {
     ...linuxT2,
     ...linuxT3,
     ...linuxT4,
+    ...linuxGotchas,
     ...hardware,
     ...networking,
     ...fiber,
