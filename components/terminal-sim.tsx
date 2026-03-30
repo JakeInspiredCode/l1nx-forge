@@ -8,7 +8,7 @@ interface HistoryEntry {
   text: string;
 }
 
-export default function TerminalSim() {
+export default function TerminalSim({ height = 240 }: { height?: number }) {
   const [history, setHistory] = useState<HistoryEntry[]>([
     { type: "system", text: `Welcome to ${HOSTNAME}. Type 'help' for available commands.` },
   ]);
@@ -104,7 +104,7 @@ export default function TerminalSim() {
       </div>
 
       {/* Output area */}
-      <div className="bg-forge-bg p-3 h-[380px] overflow-y-auto mono text-xs leading-relaxed">
+      <div className="bg-forge-bg p-3 overflow-y-auto mono text-xs leading-relaxed" style={{ height }}>
         {history.map((h, i) => (
           <div key={i} className="mb-1 whitespace-pre-wrap break-all">
             {h.type === "input" && (
