@@ -34,14 +34,22 @@ export const getHistory = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("forgeSpeedRuns");
-    const runs = await q.collect();
-    const filtered = args.topicId
-      ? runs.filter((r) => r.topicId === args.topicId)
-      : runs;
-    // Sort by points descending
-    filtered.sort((a, b) => b.totalPoints - a.totalPoints);
-    return filtered.slice(0, args.limit ?? 10);
+    const maxResults = args.limit ?? 10;
+    if (args.topicId) {
+      // Use topic index, then sort client-side (bounded by topic)
+      const runs = await ctx.db
+        .query("forgeSpeedRuns")
+        .withIndex("by_topic", (q) => q.eq("topicId", args.topicId!))
+        .collect();
+      runs.sort((a, b) => b.totalPoints - a.totalPoints);
+      return runs.slice(0, maxResults);
+    }
+    // No topic: get top scores using points index
+    return await ctx.db
+      .query("forgeSpeedRuns")
+      .withIndex("by_points")
+      .order("desc")
+      .take(maxResults);
   },
 });
 
@@ -50,12 +58,20 @@ export const getBestScore = query({
     topicId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const runs = await ctx.db.query("forgeSpeedRuns").collect();
-    const filtered = args.topicId
-      ? runs.filter((r) => r.topicId === args.topicId)
-      : runs;
-    if (filtered.length === 0) return null;
-    return filtered.reduce((best, r) => r.totalPoints > best.totalPoints ? r : best);
+    if (args.topicId) {
+      const runs = await ctx.db
+        .query("forgeSpeedRuns")
+        .withIndex("by_topic", (q) => q.eq("topicId", args.topicId!))
+        .collect();
+      if (runs.length === 0) return null;
+      return runs.reduce((best, r) => r.totalPoints > best.totalPoints ? r : best);
+    }
+    // Global best: use points index
+    return await ctx.db
+      .query("forgeSpeedRuns")
+      .withIndex("by_points")
+      .order("desc")
+      .first();
   },
 });
 

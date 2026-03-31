@@ -5,6 +5,23 @@ const client = new Anthropic();
 
 export const runtime = "nodejs";
 
+const SCORING_MODEL = process.env.SCORING_MODEL || "claude-sonnet-4-6";
+
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 10;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = rateLimitMap.get(ip) ?? [];
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) return false;
+  recent.push(now);
+  rateLimitMap.set(ip, recent);
+  return true;
+}
+
 interface ScoreRequest {
   answers: Array<{
     question: string;
@@ -24,6 +41,11 @@ interface AnswerScore {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
+
   const { answers } = (await req.json()) as ScoreRequest;
 
   if (!answers || answers.length === 0) {
@@ -45,7 +67,7 @@ ${a.userAnswer || "(no answer given)"}`
     .join("\n\n---\n\n");
 
   const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: SCORING_MODEL,
     max_tokens: 2048,
     system: `You are a technical interview scoring engine for data center operations, Linux systems, networking, and hardware topics.
 

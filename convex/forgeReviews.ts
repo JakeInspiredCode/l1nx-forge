@@ -2,9 +2,13 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getAll = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("forgeReviews").collect();
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("forgeReviews")
+      .withIndex("by_timestamp")
+      .order("desc")
+      .take(args.limit ?? 1000);
   },
 });
 

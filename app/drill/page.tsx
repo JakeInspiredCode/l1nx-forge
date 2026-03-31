@@ -93,7 +93,7 @@ function ScenarioCard({
 
 export default function DrillPage() {
   const [activeScenario, setActiveScenario] = useState<Scenario | null>(null);
-  const drillHistory = useQuery(api.forgeDrills.getAll) ?? [];
+  const drillHistory = useQuery(api.forgeDrills.getAll, {}) ?? [];
 
   if (activeScenario) {
     return (

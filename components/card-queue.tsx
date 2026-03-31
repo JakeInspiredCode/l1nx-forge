@@ -101,20 +101,12 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     };
     dispatchMascotEvent(triggerMap[quality], { quality, topicId: card.topicId });
 
-    // Checkpoint progress for crash recovery
-    saveCheckpoint({
-      sessionType,
-      cardIds: cards.map((c) => c.id),
-      completedCount: updatedResults.length,
-      sessionStart,
-    });
-
     const isLast = currentIndex + 1 >= cards.length;
     if (!isLast) {
       setCurrentIndex(currentIndex + 1);
     }
 
-    // Fire mutations async (optimistic UI — card already advanced)
+    // Fire mutations — only checkpoint after success
     try {
       await updateCard({
         cardId: card.id,
@@ -126,6 +118,14 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
         timestamp: new Date().toISOString(),
         quality,
         responseTime,
+      });
+
+      // Checkpoint only after critical mutations succeed
+      saveCheckpoint({
+        sessionType,
+        cardIds: cards.map((c) => c.id),
+        completedCount: updatedResults.length,
+        sessionStart,
       });
 
       const pts = card.type === "scenario" ? 25 : card.tier === 4 ? 40 : 10;

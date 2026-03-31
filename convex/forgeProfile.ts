@@ -37,11 +37,16 @@ export const upsert = mutation({
 
 export const checkAndAwardBadges = mutation({
   args: {
-    // Optional hints from the caller so we don't have to scan everything
+    // Caller hints to avoid redundant full-table scans
     speedRunBestStreak: v.optional(v.number()),
     speedRunCorrect: v.optional(v.number()),
     speedRunTotal: v.optional(v.number()),
     sessionAllGoodOrEasy: v.optional(v.boolean()),
+    reviewCount: v.optional(v.number()),
+    sessionCount: v.optional(v.number()),
+    speedRunCount: v.optional(v.number()),
+    drillCount: v.optional(v.number()),
+    hasCorrectReview: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const profile = await ctx.db
@@ -54,26 +59,37 @@ export const checkAndAwardBadges = mutation({
     const earn: string[] = [];
     const maybe = (id: string) => { if (!has.has(id)) earn.push(id); };
 
-    // ── Data queries (only fetch what we need) ──
-    const sessions = await ctx.db.query("forgeSessions").collect();
-    const reviews = await ctx.db.query("forgeReviews").collect();
-    const progress = await ctx.db.query("forgeProgress").collect();
-    const speedRuns = await ctx.db.query("forgeSpeedRuns").collect();
+    // ── Use caller hints when available, otherwise fetch bounded counts ──
+    // For reviews: only fetch enough to check the highest milestone (500)
+    const reviewCount = args.reviewCount ??
+      (await ctx.db.query("forgeReviews").withIndex("by_timestamp").take(501)).length;
+    const sessionCount = args.sessionCount ??
+      (await ctx.db.query("forgeSessions").withIndex("by_startTime").take(26)).length;
+    const speedRunCount = args.speedRunCount ??
+      (await ctx.db.query("forgeSpeedRuns").withIndex("by_timestamp").take(11)).length;
 
-    const reviewCount = reviews.length;
-    const sessionCount = sessions.length;
-    const speedRunCount = speedRuns.length;
+    // Progress is always small (8-10 topics), safe to collect
+    const progress = await ctx.db.query("forgeProgress").collect();
 
     // ── First-time / instant badges ──
     if (sessionCount > 0) maybe("first-forge");
     if (reviewCount > 0) maybe("first-flip");
     if (reviewCount > 0) maybe("first-topic");
     if (speedRunCount > 0) maybe("first-speed");
-    if (reviews.some((r) => r.quality >= 5)) maybe("first-correct");
+
+    // Only check for quality >= 5 review if not already earned and no hint
+    if (!has.has("first-correct")) {
+      const hasCorrect = args.hasCorrectReview ??
+        !!(await ctx.db.query("forgeReviews").withIndex("by_timestamp").order("desc").take(200))
+          .find((r) => r.quality >= 5);
+      if (hasCorrect) maybe("first-correct");
+    }
 
     // curious-mind — any conversation thread exists
-    const convos = await ctx.db.query("forgeConversations").take(1);
-    if (convos.length > 0) maybe("curious-mind");
+    if (!has.has("curious-mind")) {
+      const convos = await ctx.db.query("forgeConversations").take(1);
+      if (convos.length > 0) maybe("curious-mind");
+    }
 
     // ── Volume milestones ──
     if (reviewCount >= 10) maybe("cards-10");
@@ -106,18 +122,21 @@ export const checkAndAwardBadges = mutation({
     if (speedRunCount >= 3) maybe("speed-run-3");
     if (speedRunCount >= 10) maybe("speed-run-10");
 
-    // Best streak from speed runs (check DB + hint from caller)
-    const bestStreakDB = speedRuns.reduce((m, r) => Math.max(m, r.bestStreak ?? 0), 0);
-    const bestStreak = Math.max(bestStreakDB, args.speedRunBestStreak ?? 0);
-    if (bestStreak >= 3) maybe("speed-3-streak");
-    if (bestStreak >= 5) maybe("speed-5-streak");
-    if (bestStreak >= 10) maybe("speed-10-streak");
+    // Best streak — use caller hint or scan only speed runs (bounded above)
+    if (!has.has("speed-10-streak")) {
+      const speedRuns = await ctx.db.query("forgeSpeedRuns").withIndex("by_timestamp").order("desc").take(50);
+      const bestStreakDB = speedRuns.reduce((m, r) => Math.max(m, r.bestStreak ?? 0), 0);
+      const bestStreak = Math.max(bestStreakDB, args.speedRunBestStreak ?? 0);
+      if (bestStreak >= 3) maybe("speed-3-streak");
+      if (bestStreak >= 5) maybe("speed-5-streak");
+      if (bestStreak >= 10) maybe("speed-10-streak");
 
-    // Perfect speed run (5/5 or better)
-    const hasPerfect = speedRuns.some((r) => r.totalCards >= 5 && r.correctCards === r.totalCards)
-      || (args.speedRunCorrect != null && args.speedRunTotal != null
-          && args.speedRunTotal >= 5 && args.speedRunCorrect === args.speedRunTotal);
-    if (hasPerfect) maybe("speed-perfect-5");
+      // Perfect speed run
+      const hasPerfect = speedRuns.some((r) => r.totalCards >= 5 && r.correctCards === r.totalCards)
+        || (args.speedRunCorrect != null && args.speedRunTotal != null
+            && args.speedRunTotal >= 5 && args.speedRunCorrect === args.speedRunTotal);
+      if (hasPerfect) maybe("speed-perfect-5");
+    }
 
     // ── Topic mastery badges ──
     const masteryOf = (topicId: string) => progress.find((p) => p.topicId === topicId)?.masteryPercent ?? 0;
@@ -144,38 +163,54 @@ export const checkAndAwardBadges = mutation({
     if (progress.some((p) => p.currentTier >= 3)) maybe("tier-3-any");
     if (progress.some((p) => p.currentTier >= 4)) maybe("tier-breaker");
 
-    // ── Mock master ──
-    const mockCount = sessions.filter((s) => s.type === "mock-interview").length;
-    if (mockCount >= 5) maybe("mock-master");
+    // ── Mock master — only check if not already earned ──
+    if (!has.has("mock-master")) {
+      const mockSessions = await ctx.db.query("forgeSessions")
+        .withIndex("by_type", (q) => q.eq("type", "mock-interview"))
+        .take(6);
+      if (mockSessions.length >= 5) maybe("mock-master");
+    }
 
-    // ── Scenario slayer ──
-    const allCards = await ctx.db.query("forgeCards").collect();
-    const scenarioIds = new Set(allCards.filter((c) => c.type === "scenario").map((c) => c.cardId));
-    const scenarioReviewCount = reviews.filter((r) => scenarioIds.has(r.cardId)).length;
-    if (scenarioReviewCount >= 50) maybe("scenario-slayer");
+    // ── Scenario slayer — only check if not already earned ──
+    if (!has.has("scenario-slayer")) {
+      // Get scenario card IDs using the topic index (much smaller than all cards)
+      const scenarioCards = await ctx.db.query("forgeCards").collect();
+      const scenarioIds = new Set(scenarioCards.filter((c) => c.type === "scenario").map((c) => c.cardId));
+      // Count scenario reviews from recent reviews only (bounded)
+      const recentReviews = await ctx.db.query("forgeReviews").withIndex("by_timestamp").order("desc").take(500);
+      const scenarioReviewCount = recentReviews.filter((r) => scenarioIds.has(r.cardId)).length;
+      if (scenarioReviewCount >= 50) maybe("scenario-slayer");
+    }
 
-    // ── Speed demon ──
-    const speedSession = sessions.find((s) => {
-      if (s.cardIds.length < 20 || !s.endTime || !s.startTime) return false;
-      const dur = (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 60000;
-      return dur < 45;
-    });
-    if (speedSession) maybe("speed-demon");
+    // ── Speed demon — only check if not already earned ──
+    if (!has.has("speed-demon")) {
+      const recentSessions = await ctx.db.query("forgeSessions")
+        .withIndex("by_startTime").order("desc").take(50);
+      const speedSession = recentSessions.find((s) => {
+        if (s.cardIds.length < 20 || !s.endTime || !s.startTime) return false;
+        const dur = (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 60000;
+        return dur < 45;
+      });
+      if (speedSession) maybe("speed-demon");
+    }
 
     // ── Flawless session ──
     if (args.sessionAllGoodOrEasy) maybe("perfect-session");
 
     // ── Incident Drill badges ──
-    const drills = await ctx.db.query("forgeDrills").collect();
-    const drillCount = drills.length;
+    const drillCount = args.drillCount ??
+      (await ctx.db.query("forgeDrills").withIndex("by_timestamp").take(11)).length;
     if (drillCount > 0) maybe("first-drill");
     if (drillCount >= 3) maybe("drill-3");
     if (drillCount >= 10) maybe("drill-10");
-    if (drills.some((d) => d.overallTermHitRate === 100)) maybe("drill-perfect");
-    if (drills.some((d) => d.overallTermHitRate >= 80)) maybe("drill-80");
-    // Check if all unique scenario IDs have been attempted
-    const uniqueScenarios = new Set(drills.map((d) => d.scenarioId));
-    if (uniqueScenarios.size >= 5) maybe("drill-all-scenarios");
+
+    if (!has.has("drill-perfect") || !has.has("drill-80") || !has.has("drill-all-scenarios")) {
+      const drills = await ctx.db.query("forgeDrills").withIndex("by_timestamp").order("desc").take(100);
+      if (drills.some((d) => d.overallTermHitRate === 100)) maybe("drill-perfect");
+      if (drills.some((d) => d.overallTermHitRate >= 80)) maybe("drill-80");
+      const uniqueScenarios = new Set(drills.map((d) => d.scenarioId));
+      if (uniqueScenarios.size >= 5) maybe("drill-all-scenarios");
+    }
 
     // ── Persist ──
     if (earn.length > 0) {

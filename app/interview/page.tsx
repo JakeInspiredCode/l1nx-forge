@@ -30,6 +30,21 @@ export default function InterviewPage() {
   const [thinkTimer, setThinkTimer] = useState(30);
   const [showQuestion, setShowQuestion] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-save answers to sessionStorage on change (debounced)
+  useEffect(() => {
+    if (state !== "active") return;
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(() => {
+      try {
+        sessionStorage.setItem("l1nx-interview-autosave", JSON.stringify({
+          answers, currentAnswer, currentQ, timer, questions: questions.map((q) => q.id),
+        }));
+      } catch { /* storage full — ignore */ }
+    }, 1000);
+    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
+  }, [currentAnswer, answers, currentQ, timer, state, questions]);
 
   const addSession = useMutation(api.forgeSessions.add);
   const updateCard = useMutation(api.forgeCards.updateCard);
@@ -241,8 +256,14 @@ export default function InterviewPage() {
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs text-forge-text-dim mono">Q{currentQ + 1}/{questions.length}</span>
-            <span className={`text-lg mono font-bold ${timer < 120 ? "text-forge-danger" : "text-forge-accent"}`}>
+            <span className={`text-lg mono font-bold ${
+              timer <= 10 ? "text-forge-danger animate-pulse" :
+              timer <= 30 ? "text-forge-danger" :
+              timer <= 60 ? "text-forge-warning" :
+              "text-forge-accent"
+            }`}>
               {formatTime(timer)}
+              {timer <= 60 && timer > 0 && <span className="text-xs ml-1">{timer <= 10 ? "!!!" : timer <= 30 ? "!!" : "!"}</span>}
             </span>
             <button onClick={() => finishInterview()} className="text-xs text-forge-danger hover:text-forge-danger/80">End Early</button>
           </div>

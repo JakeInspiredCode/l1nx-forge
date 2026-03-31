@@ -14,7 +14,24 @@
   --color-forge-text: #e5e5e5;
   --color-forge-text-dim: #888888;
   --color-forge-text-muted: #555555;
+
+  /* ── Z-Index Scale ── */
+  --z-mascot: 30;
+  --z-nav: 40;
+  --z-toast: 50;
+  --z-badge-banner: 55;
+  --z-modal: 60;
 }
+
+/*
+ * Z-Index Scale Reference
+ * ───────────────────────
+ * 30  --z-mascot        Forge mascot overlay
+ * 40  --z-nav           Top/side navigation
+ * 50  --z-toast         Toast notifications
+ * 55  --z-badge-banner  Badge earned banner
+ * 60  --z-modal         Modal dialogs
+ */
 
 /* Fonts loaded via <link> in layout.tsx — no @font-face needed */
 

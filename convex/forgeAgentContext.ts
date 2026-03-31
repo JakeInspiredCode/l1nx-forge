@@ -10,21 +10,23 @@ export const get = query({
     // Topic progress
     const progress = await ctx.db.query("forgeProgress").collect();
 
-    // All cards — used to identify struggling cards (low ease) and due cards
-    const allCards = await ctx.db.query("forgeCards").collect();
-    const dueCards = allCards
-      .filter((c) => c.dueDate <= today)
-      .map((c) => ({
-        cardId: c.cardId,
-        topicId: c.topicId,
-        front: c.front,
-        easeFactor: c.easeFactor,
-        interval: c.interval,
-        repetitions: c.repetitions,
-        tier: c.tier,
-      }));
+    // Due cards — use index instead of fetching all cards
+    const dueCardsRaw = await ctx.db
+      .query("forgeCards")
+      .withIndex("by_due", (q) => q.lte("dueDate", today))
+      .take(100);
+    const dueCards = dueCardsRaw.map((c) => ({
+      cardId: c.cardId,
+      topicId: c.topicId,
+      front: c.front,
+      easeFactor: c.easeFactor,
+      interval: c.interval,
+      repetitions: c.repetitions,
+      tier: c.tier,
+    }));
 
-    // Cards the user is struggling with: low ease factor or repeatedly failed
+    // Struggling cards: still need full scan but only for context, bounded output
+    const allCards = await ctx.db.query("forgeCards").collect();
     const strugglingCards = allCards
       .filter((c) => c.easeFactor < 2.0 && c.repetitions > 0)
       .sort((a, b) => a.easeFactor - b.easeFactor)

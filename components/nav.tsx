@@ -21,7 +21,7 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-forge-border bg-forge-surface/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav aria-label="Main navigation" className="border-b border-forge-border bg-forge-surface/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           <Link href="/" className="flex items-center gap-2">
@@ -35,6 +35,8 @@ export default function Nav() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-label={item.label}
+                  aria-current={active ? "page" : undefined}
                   className={`px-3 py-1.5 rounded-md text-sm transition-colors duration-150 flex items-center gap-1.5 ${
                     active
                       ? "bg-forge-accent/15 text-forge-accent font-medium"

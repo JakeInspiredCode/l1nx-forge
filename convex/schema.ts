@@ -26,7 +26,8 @@ export default defineSchema({
     .index("by_topic", ["topicId"])
     .index("by_cardId", ["cardId"])
     .index("by_due", ["dueDate"])
-    .index("by_topic_tier", ["topicId", "tier"]),
+    .index("by_topic_tier", ["topicId", "tier"])
+    .index("by_topic_due", ["topicId", "dueDate"]),
 
   forgeReviews: defineTable({
     cardId: v.string(),            // References forgeCards.cardId
@@ -35,7 +36,8 @@ export default defineSchema({
     responseTime: v.number(),      // Milliseconds
   })
     .index("by_card", ["cardId"])
-    .index("by_timestamp", ["timestamp"]),
+    .index("by_timestamp", ["timestamp"])
+    .index("by_card_timestamp", ["cardId", "timestamp"]),
 
   forgeSessions: defineTable({
     type: v.string(),              // "mock-interview" | "daily-training" | "topic-drill"

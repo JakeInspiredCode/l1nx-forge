@@ -44,8 +44,8 @@ export function useUpdateCard() {
 
 // ── Reviews ──
 
-export function useReviews() {
-  return useQuery(api.forgeReviews.getAll) ?? [];
+export function useReviews(limit?: number) {
+  return useQuery(api.forgeReviews.getAll, { limit }) ?? [];
 }
 
 export function useRecentReviews(limit?: number) {
@@ -58,8 +58,8 @@ export function useAddReview() {
 
 // ── Sessions ──
 
-export function useSessions() {
-  return useQuery(api.forgeSessions.getAll) ?? [];
+export function useSessions(limit?: number) {
+  return useQuery(api.forgeSessions.getAll, { limit }) ?? [];
 }
 
 export function useRecentSessions(limit?: number) {
@@ -132,8 +132,8 @@ export function useSpeedRunsRecent(limit?: number) {
 
 // ── Drills ──
 
-export function useDrills() {
-  return useQuery(api.forgeDrills.getAll) ?? [];
+export function useDrills(limit?: number) {
+  return useQuery(api.forgeDrills.getAll, { limit }) ?? [];
 }
 
 export function useDrillsByScenario(scenarioId: string) {

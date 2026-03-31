@@ -11,7 +11,6 @@ export const recompute = mutation({
       .withIndex("by_topic", (q) => q.eq("topicId", args.topicId))
       .collect();
 
-    const reviews = await ctx.db.query("forgeReviews").collect();
     const today = new Date().toISOString().split("T")[0];
 
     const tiers: Record<string, { total: number; qualified: number }> = {
@@ -33,12 +32,13 @@ export const recompute = mutation({
         if (tiers[tierKey]) tiers[tierKey].qualified++;
       } else {
         learning++;
-        // Qualified if quality >= 3 on last review
-        const cardReviews = reviews
-          .filter((r) => r.cardId === card.cardId)
-          .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-        const last = cardReviews[cardReviews.length - 1];
-        if (last && last.quality >= 3) {
+        // Qualified if quality >= 3 on last review — query per-card using index
+        const lastReview = await ctx.db
+          .query("forgeReviews")
+          .withIndex("by_card_timestamp", (q) => q.eq("cardId", card.cardId))
+          .order("desc")
+          .first();
+        if (lastReview && lastReview.quality >= 3) {
           if (tiers[tierKey]) tiers[tierKey].qualified++;
         }
       }

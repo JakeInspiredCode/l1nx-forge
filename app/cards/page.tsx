@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import Nav from "@/components/nav";
 import { TOPICS, mapConvexCard, ForgeCard } from "@/lib/types";
-import { useCards } from "@/lib/convex-hooks";
+import { useCards, useSeedCards } from "@/lib/convex-hooks";
+import CardEditor from "@/components/card-editor";
+import { exportCardsToJSON, downloadJSON, parseImportedCards } from "@/lib/import-export";
 
 type SortKey = "topic" | "type" | "difficulty" | "due" | "mastery";
 type StatusFilter = "all" | "new" | "learning" | "mastered" | "overdue";
@@ -12,6 +14,10 @@ export default function CardsPage() {
   const rawCards = useCards();
   const cards = useMemo(() => rawCards.map((c, i) => ({ ...mapConvexCard(c), _key: (c as Record<string, unknown>)._id as string ?? `${c.cardId}-${i}` })), [rawCards]);
 
+  const [showEditor, setShowEditor] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const seedCards = useSeedCards();
   const [search, setSearch] = useState("");
   const [topicFilter, setTopicFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -97,7 +103,54 @@ export default function CardsPage() {
               {filtered.length} of {cards.length} cards
             </p>
           </div>
+          <div className="flex gap-2">
+            <button onClick={() => {
+              const exportData = rawCards.map((c) => ({
+                cardId: c.cardId, topicId: c.topicId, type: c.type,
+                front: c.front, back: c.back, difficulty: c.difficulty,
+                tier: c.tier, steps: c.steps as string[] | undefined,
+              }));
+              downloadJSON(exportCardsToJSON(exportData), `l1nx-cards-${new Date().toISOString().split("T")[0]}.json`);
+            }}
+              className="px-3 py-1.5 text-xs mono border border-forge-border rounded-lg hover:bg-forge-surface-2 transition-colors">
+              Export
+            </button>
+            <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const text = await file.text();
+              const { cards: imported, error } = parseImportedCards(text);
+              if (error) { setImportMsg(error); return; }
+              const batch = imported.map((c) => ({
+                cardId: c.cardId, topicId: c.topicId, type: c.type,
+                front: c.front, back: c.back, difficulty: c.difficulty,
+                tier: c.tier, steps: c.steps,
+                easeFactor: 2.5, interval: 0, repetitions: 0,
+                dueDate: new Date().toISOString().split("T")[0],
+              }));
+              await seedCards({ cards: batch });
+              setImportMsg(`Imported ${imported.length} cards (duplicates skipped).`);
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }} />
+            <button onClick={() => fileInputRef.current?.click()}
+              className="px-3 py-1.5 text-xs mono border border-forge-border rounded-lg hover:bg-forge-surface-2 transition-colors">
+              Import
+            </button>
+            <button onClick={() => setShowEditor(true)}
+              className="px-3 py-1.5 text-xs mono bg-forge-accent text-white rounded-lg hover:bg-forge-accent/90 transition-colors">
+              + New Card
+            </button>
+          </div>
         </div>
+
+        {importMsg && (
+          <div className="mb-4 p-3 bg-forge-surface border border-forge-border rounded-lg text-sm flex items-center justify-between">
+            <span>{importMsg}</span>
+            <button onClick={() => setImportMsg(null)} className="text-forge-text-muted hover:text-forge-text">&times;</button>
+          </div>
+        )}
+
+        {showEditor && <CardEditor onClose={() => setShowEditor(false)} onCreated={() => {}} />}
 
         {/* Search */}
         <input

@@ -5,6 +5,21 @@ const client = new Anthropic();
 
 export const runtime = "nodejs";
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 20;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = rateLimitMap.get(ip) ?? [];
+  const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) return false;
+  recent.push(now);
+  rateLimitMap.set(ip, recent);
+  return true;
+}
+
 const PERSONALITY_TONES: Record<string, string> = {
   "drill-sergeant": `Your tone is that of a tough, no-nonsense drill sergeant. Be blunt, demanding, and direct. Push the user hard. Use military-style motivation. Don't coddle — if they're slacking, call it out. But when they earn it, give respect.`,
   "cheerleader": `Your tone is that of an enthusiastic, high-energy cheerleader. Celebrate every win, big or small. Use exclamation marks, encouragement, and hype. Stay positive even when pointing out weaknesses — frame everything as an opportunity to grow.`,
@@ -136,6 +151,14 @@ function windowMessages(messages: AgentMessage[]): { messages: AgentMessage[]; i
 }
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown";
+  if (!checkRateLimit(ip)) {
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again in a minute." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { messages, context, model, personality } = (await req.json()) as {
       messages: AgentMessage[];

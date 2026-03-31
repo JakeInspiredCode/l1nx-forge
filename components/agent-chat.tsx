@@ -21,7 +21,14 @@ interface Message {
 }
 
 function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
+  // Word-based BPE approximation: ~1.3 tokens per word on average
+  // More accurate than char/4 for English text, code has higher ratio
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const codeBlocks = (text.match(/```[\s\S]*?```/g) || []).join("").length;
+  const codeRatio = text.length > 0 ? codeBlocks / text.length : 0;
+  // Code averages ~2 tokens/word, prose ~1.3
+  const avgTokensPerWord = 1.3 + codeRatio * 0.7;
+  return Math.ceil(words * avgTokensPerWord);
 }
 
 function formatTokens(n: number): string {
