@@ -167,12 +167,25 @@ export default function DiagnosisGame({ scenario, onComplete, onQuit }: Props) {
               <p className="text-sm">{step.interpretation}</p>
             </div>
 
-            <button
-              onClick={handleNextStep}
-              className="w-full py-3 bg-forge-accent text-white rounded-xl font-medium hover:bg-forge-accent/90 transition-colors"
-            >
-              {isLastStep ? "See Results" : "Next Step →"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setPhase("choose");
+                  setSelectedChoice(null);
+                  setWasCorrect(false);
+                  setAttempts(0);
+                }}
+                className="flex-1 py-3 bg-forge-surface-2 border border-forge-border rounded-xl text-sm font-medium hover:border-forge-accent/40 transition-colors"
+              >
+                Practice Again
+              </button>
+              <button
+                onClick={handleNextStep}
+                className="flex-1 py-3 bg-forge-accent text-white rounded-xl font-medium hover:bg-forge-accent/90 transition-colors"
+              >
+                {isLastStep ? "See Results" : "Next Step →"}
+              </button>
+            </div>
           </div>
         )}
       </div>
