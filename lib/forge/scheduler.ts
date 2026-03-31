@@ -116,13 +116,39 @@ function addBlock(
   });
 }
 
+export type PlanDifficulty = "light" | "standard" | "intense";
+
+const PLAN_MINUTES: Record<PlanDifficulty, number> = {
+  light: 30,
+  standard: 60,
+  intense: 90,
+};
+
+// Block time budgets scale proportionally with total plan minutes
+function blockBudgets(totalMin: number) {
+  const ratio = totalMin / 60;
+  return {
+    warmup: Math.round(5 * ratio),
+    easyReview: Math.round(10 * ratio),
+    weakEasy: Math.round(8 * ratio),
+    weakHarder: Math.round(8 * ratio),
+    dueRemaining: Math.round(8 * ratio),
+    newEasy: Math.round(5 * ratio),
+    newMixed: Math.round(5 * ratio),
+    coolDown: Math.round(5 * ratio),
+  };
+}
+
 export function generateDailyPlan(
   allCards: SchedulerCard[],
   progress: ProgressEntry[],
   topicFilter?: string,
+  difficulty: PlanDifficulty = "standard",
 ): DailyPlan {
   const today = new Date().toISOString().split("T")[0];
   const used = new Set<string>();
+  const targetMinutes = PLAN_MINUTES[difficulty];
+  const budgets = blockBudgets(targetMinutes);
 
   // Unlocked-tier cards only, optionally filtered to a single topic
   const unlocked = allCards.filter((c) => {
@@ -138,35 +164,30 @@ export function generateDailyPlan(
 
   const weakTopicIds = new Set(progress.filter((p) => p.weakFlag).map((p) => p.topicId));
 
-  // ── Block 1: Warm-Up (5 min) ──
-  // Easy cards only — get the brain going
+  // ── Block 1: Warm-Up ──
   const warmUpPool = dueAll.filter((c) => c.type === "easy");
-  const block1 = fillBlock(warmUpPool, 5 * 60, used);
+  const block1 = fillBlock(warmUpPool, budgets.warmup * 60, used);
 
-  // ── Block 2: Easy Review (10 min) ──
-  // Due easy + intermediate cards, mixed topics
+  // ── Block 2: Easy Review ──
   const easyReviewPool = dueAll
     .filter((c) => c.type === "easy" || c.type === "intermediate")
     .sort(easyFirst);
-  const block2 = fillBlock(easyReviewPool, 10 * 60, used);
+  const block2 = fillBlock(easyReviewPool, budgets.easyReview * 60, used);
 
-  // ── Block 3: Weak Topics — Easy (8 min) ──
-  // Easy cards from weak topics (due + new)
+  // ── Block 3: Weak Topics — Easy ──
   const weakEasyPool = unlocked
     .filter((c) => weakTopicIds.has(c.topicId) && (c.type === "easy" || c.type === "intermediate") && c.difficulty <= 2)
     .sort(easyFirst);
-  const block3 = fillBlock(weakEasyPool, 8 * 60, used);
+  const block3 = fillBlock(weakEasyPool, budgets.weakEasy * 60, used);
 
-  // ── Block 4: Weak Topics — Harder (8 min) ──
-  // Remaining weak topic cards (any type/difficulty)
+  // ── Block 4: Weak Topics — Harder ──
   const weakHarderPool = unlocked
     .filter((c) => weakTopicIds.has(c.topicId))
     .sort(easyFirst);
-  const block4 = fillBlock(weakHarderPool, 8 * 60, used);
+  const block4 = fillBlock(weakHarderPool, budgets.weakHarder * 60, used);
 
-  // ── Block 5: Due Review — Remaining (8 min) ──
-  // Any remaining due cards not yet scheduled
-  const block5 = fillBlock(dueAll, 8 * 60, used);
+  // ── Block 5: Due Review — Remaining ──
+  const block5 = fillBlock(dueAll, budgets.dueRemaining * 60, used);
 
   // ── Block 6: New Cards — Easy (5 min) ──
   // New easy cards, weak topics first
@@ -183,7 +204,7 @@ export function generateDailyPlan(
       .sort(easyFirst);
     newEasyPool.push(...topicNew);
   }
-  const block6 = fillBlock(newEasyPool, 5 * 60, used);
+  const block6 = fillBlock(newEasyPool, budgets.newEasy * 60, used);
 
   // ── Block 7: New Cards — Mixed (5 min) ──
   // New intermediate/scenario cards
@@ -196,19 +217,19 @@ export function generateDailyPlan(
       .sort(easyFirst);
     newMixedPool.push(...topicNew);
   }
-  const block7 = fillBlock(newMixedPool, 5 * 60, used);
+  const block7 = fillBlock(newMixedPool, budgets.newMixed * 60, used);
 
   // ── Block 8: Cool Down (5 min) ──
   // Quick easy cards to end on a high note
   const coolDownPool = unlocked
     .filter((c) => c.type === "easy")
     .sort(easyFirst);
-  const block8 = fillBlock(coolDownPool, 5 * 60, used);
+  const block8 = fillBlock(coolDownPool, budgets.coolDown * 60, used);
 
   // ── Backfill (remaining time up to 60 min) ──
   const allBlocks = [block1, block2, block3, block4, block5, block6, block7, block8];
   const totalSec = allBlocks.flat().reduce((s, c) => s + cardTime(c), 0);
-  const remainingSec = 60 * 60 - totalSec;
+  const remainingSec = targetMinutes * 60 - totalSec;
 
   let backfillCards: SchedulerCard[] = [];
   if (remainingSec > 60) {

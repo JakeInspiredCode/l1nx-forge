@@ -8,110 +8,179 @@ function c(id: string, topicId: TopicId, type: CardType, tier: Tier, difficulty:
 // HARDWARE — Server Hardware & GPUs
 // ═══════════════════════════════════════
 export const hardware: ForgeCard[] = [
-  c("hw-001","hardware","easy",1,1,"What are the main components of a GPU server?","CPU(s), RAM (often 512GB-2TB), GPUs (8x per node typical), NVMe storage, high-speed NIC (100/200/400GbE), power supplies (redundant), BMC/IPMI for remote management. In Colossus context: NVIDIA H100 GPUs with NVLink interconnect."),
-  c("hw-002","hardware","easy",1,1,"What is NVLink and why does it matter?","NVIDIA's high-bandwidth GPU-to-GPU interconnect. NVLink 4.0 (H100): 900 GB/s bidirectional. Much faster than PCIe for GPU-to-GPU communication. Enables model parallelism across GPUs within a node. Critical for large model training."),
-  c("hw-003","hardware","easy",1,1,"What is PCIe and what generations are current?","Peripheral Component Interconnect Express — serial expansion bus. Gen 4: 16 GT/s per lane (x16 = 32 GB/s). Gen 5: 32 GT/s (x16 = 64 GB/s). GPUs use x16 slots. NVMe drives use x4. Gen 5 is current for high-end servers."),
-  c("hw-004","hardware","easy",1,1,"What is ECC memory and why is it used in servers?","Error-Correcting Code memory detects and corrects single-bit errors, detects double-bit errors. Essential for servers running 24/7 where a bit flip could crash a process or corrupt data. Non-ECC is unacceptable in production."),
-  c("hw-005","hardware","easy",1,1,"What does a BMC/IPMI provide?","Baseboard Management Controller with IPMI interface: remote power on/off/cycle, serial-over-LAN console, hardware sensor monitoring (temps, voltages, fans), event logs, firmware updates — all out-of-band (works even if OS is dead)."),
-  c("hw-006","hardware","easy",1,1,"What is hot-swap and which components typically support it?","Replacing a component without powering down. Typically hot-swappable: hard drives/SSDs (in drive bays), power supplies (redundant), fans, sometimes PCIe cards. NOT hot-swappable: CPU, RAM, motherboard."),
-  c("hw-007","hardware","easy",1,1,"What are DIMMs and how is server RAM organized?","Dual Inline Memory Module — physical RAM sticks. Servers have multiple memory channels per CPU (8 channels on modern Xeons). Populate channels evenly for max bandwidth. DDR5 is current generation. Capacity per DIMM: 16GB to 256GB."),
-  c("hw-008","hardware","easy",1,1,"What is the difference between SAS and NVMe drives?","**SAS**: Serial Attached SCSI. Enterprise HDDs/SSDs. Reliable, hot-swappable, ~12 Gbps. Mature ecosystem.\n**NVMe**: Non-Volatile Memory Express. Direct PCIe connection. Much faster: 7+ GB/s. Lower latency. Standard for modern server SSDs. U.2 and M.2 form factors."),
-  c("hw-009","hardware","easy",1,1,"What is a GPU TDP and why does it matter for DC operations?","Thermal Design Power — the maximum heat a GPU generates under load (H100: 700W). Determines cooling requirements, power provisioning, and rack density limits. 8x H100s = 5.6kW just for GPUs. Total server draw can exceed 10kW."),
-  c("hw-010","hardware","easy",1,1,"What is InfiniBand and when is it used?","High-bandwidth, low-latency network fabric. HDR: 200 Gbps, NDR: 400 Gbps. Used for GPU cluster interconnect (RDMA). Lower latency than Ethernet for HPC/AI workloads. Colossus uses InfiniBand for inter-node GPU communication."),
-  c("hw-011","hardware","easy",1,1,"What are the typical failure modes for server hardware?","By frequency: 1) Disk/SSD failures (most common), 2) Memory errors (ECC corrections -> eventual DIMM failure), 3) Fan failures, 4) Power supply failures, 5) NIC failures, 6) GPU failures (less common but high impact), 7) CPU failures (rare). Monitor with BMC sensors and SMART data."),
-  c("hw-012","hardware","easy",1,1,"What is RAID and which controller manages it?","Redundant Array of Independent Disks. Hardware RAID uses a dedicated controller card (LSI/Broadcom MegaRAID common). Software RAID uses the OS (`mdadm` on Linux). Hardware RAID offloads parity calculations but adds a point of failure. Battery backup unit (BBU) protects write cache."),
-  c("hw-013","hardware","easy",1,1,"What is a server chassis form factor? What does 1U, 2U, 4U mean?","U = rack unit = 1.75 inches. 1U = thin server (limited expansion). 2U = standard (more PCIe slots, drives). 4U = GPU server typical (needs space for 8 GPUs + cooling). A standard rack is 42U tall."),
-  c("hw-014","hardware","easy",1,1,"What is UEFI and how does it differ from legacy BIOS?","Unified Extensible Firmware Interface — modern firmware replacing BIOS. Supports GPT partitions (>2TB disks), Secure Boot, faster boot, network stack, graphical UI. BIOS was 16-bit, limited to MBR, 2TB max. All modern servers use UEFI."),
-  c("hw-015","hardware","easy",1,1,"What is a ToR switch in DC architecture?","Top-of-Rack switch — aggregates network connections from all servers in a rack (typically 48 ports). Uplinks to spine/aggregation switches. Each rack has 1-2 ToR switches for redundancy. Management interface for configuration."),
-  c("hw-101","hardware","intermediate",2,2,"Walk through the process of troubleshooting a GPU that shows as 'fallen off the bus' in dmesg.","1. `dmesg | grep -i nvidia` — confirm the error\n2. Check `nvidia-smi` — affected GPU likely missing\n3. Check PCIe: `lspci | grep -i nvidia` — is the device still enumerated?\n4. Check thermals: was the GPU overheating? BMC sensor logs\n5. Try PCIe bus reset: `echo 1 > /sys/bus/pci/devices/ADDR/reset`\n6. If persists: power cycle server via IPMI\n7. If persists after reboot: likely hardware failure. Reseat GPU or RMA.\n8. Document: which GPU slot, serial number, error history."),
-  c("hw-102","hardware","intermediate",2,2,"A server shows correctable memory errors increasing. What's the procedure?","1. Check BMC/IPMI SEL logs: `ipmitool sel list | grep Memory`\n2. Identify which DIMM: `edac-util -s` or `mcelog --client`\n3. Correctable errors = ECC doing its job, but indicates degradation\n4. Schedule replacement if error rate exceeds threshold (vendor-specific)\n5. Run `memtest86+` during maintenance window to confirm\n6. Replace DIMM in matching pairs if using mirrored config\n7. Monitor after replacement to confirm resolution"),
-  c("hw-103","hardware","intermediate",2,2,"Explain NVSwitch and its role in GPU server topology.","NVSwitch is an NVIDIA chip that provides all-to-all GPU connectivity within a server. In DGX H100: 4 NVSwitches connect 8 GPUs, enabling any GPU to communicate with any other at full NVLink bandwidth (900 GB/s). Without NVSwitch, GPUs would need mesh connections (impractical). Enables efficient all-reduce operations in distributed training."),
-  c("hw-104","hardware","intermediate",2,2,"What is GPU memory bandwidth and why is it the key bottleneck for LLM inference?","H100 HBM3: 3.35 TB/s memory bandwidth. LLM inference is memory-bandwidth bound because it must read all model weights for each token generated. Arithmetic intensity is low (few FLOPs per byte loaded). This is why inference throughput scales with memory bandwidth, not compute FLOPS."),
-  c("hw-105","hardware","intermediate",2,2,"How do you perform firmware updates on server components?","1. BMC/IPMI firmware: via web UI or `ipmitool` — often requires reboot\n2. BIOS/UEFI: flash via BMC or bootable USB\n3. Drive firmware: vendor utility (Samsung Magician, Intel MAS)\n4. NIC firmware: `ethtool -i eth0` for current, vendor tool to flash\n5. GPU firmware: `nvidia-smi` shows version, `nvidia-fabricmanager` for NVSwitch\n6. Always: test on one server first, have rollback plan, schedule maintenance window"),
+  c("hw-001","hardware","easy",1,1,"Main components of a GPU server","CPUs, RAM (512GB-2TB), GPUs (8x typical), NVMe storage, high-speed NIC, redundant PSUs, BMC/IPMI"),
+  c("hw-002","hardware","easy",1,1,"NVLink","NVIDIA GPU-to-GPU interconnect. H100: 900 GB/s bidirectional. Much faster than PCIe."),
+  c("hw-003","hardware","easy",1,1,"PCIe Gen 4 vs Gen 5","Gen 4: 32 GB/s (x16). Gen 5: 64 GB/s (x16). GPUs use x16, NVMe uses x4."),
+  c("hw-004","hardware","easy",1,1,"ECC memory","Detects/corrects single-bit errors. Required for servers — non-ECC is unacceptable in production."),
+  c("hw-005","hardware","easy",1,1,"BMC/IPMI","Remote power control, console, sensor monitoring, event logs — works even if OS is dead."),
+  c("hw-006","hardware","easy",1,1,"Hot-swappable components","Drives, PSUs, fans. NOT hot-swappable: CPU, RAM, motherboard."),
+  c("hw-007","hardware","easy",1,1,"DIMMs","Physical RAM sticks. Populate channels evenly for max bandwidth. DDR5 current gen, 16-256GB per stick."),
+  c("hw-008","hardware","easy",1,1,"SAS vs NVMe","SAS: 12 Gbps, enterprise reliable. NVMe: 7+ GB/s, direct PCIe, much lower latency. NVMe is standard now."),
+  c("hw-009","hardware","easy",1,1,"H100 GPU TDP","700W per GPU. 8x H100s = 5.6kW just GPUs. Total server can exceed 10kW."),
+  c("hw-010","hardware","easy",1,1,"InfiniBand","High-bandwidth, low-latency RDMA fabric. NDR: 400 Gbps. Used for GPU cluster interconnect."),
+  c("hw-011","hardware","easy",1,1,"Server failure frequency (most→least)","Disks → Memory → Fans → PSUs → NICs → GPUs → CPUs"),
+  c("hw-012","hardware","easy",1,1,"RAID","Redundant disk array. Hardware RAID: dedicated controller (MegaRAID). Software: `mdadm`. BBU protects write cache."),
+  c("hw-013","hardware","easy",1,1,"1U, 2U, 4U","Rack units (1.75\" each). 4U = typical GPU server. Standard rack = 42U."),
+  c("hw-014","hardware","easy",1,1,"UEFI vs BIOS","UEFI: modern, GPT support (>2TB), Secure Boot, faster. BIOS: legacy, MBR, 2TB limit."),
+  c("hw-015","hardware","easy",1,1,"ToR switch","Top-of-Rack — aggregates all server connections (typically 48 ports). Uplinks to spine switches."),
+  // Intermediate — keep as moderate scenario walkthroughs
+  c("hw-101","hardware","intermediate",2,2,"GPU 'fell off the bus' in dmesg","Check `nvidia-smi`, `lspci | grep nvidia`. Try PCIe bus reset. Power cycle via IPMI. If persists: reseat GPU or RMA."),
+  c("hw-102","hardware","intermediate",2,2,"Increasing correctable memory errors","Check IPMI SEL → `edac-util -s` to identify DIMM → schedule replacement if rate exceeds threshold → `dmidecode -t memory` for serial."),
+  c("hw-103","hardware","intermediate",2,2,"NVSwitch","All-to-all GPU connectivity within a server. DGX H100: 4 NVSwitches connect 8 GPUs at full NVLink bandwidth."),
+  c("hw-104","hardware","intermediate",2,2,"Why is LLM inference memory-bound?","Must read all model weights per token. Few FLOPs per byte loaded. Throughput scales with memory bandwidth (H100: 3.35 TB/s), not compute."),
+  c("hw-105","hardware","intermediate",2,2,"Firmware update order of caution","Test on one server first. BMC → BIOS → drive → NIC → GPU firmware. Always have rollback plan + maintenance window."),
+
+  // Dropped-fact recovery
+  c("hwf-001","hardware","easy",1,1,"PCIe stands for?","Peripheral Component Interconnect Express"),
+  c("hwf-002","hardware","easy",1,1,"What does NVLink enable?","Model parallelism across GPUs within a node"),
+  c("hwf-003","hardware","easy",1,1,"ECC: how many bit errors?","Corrects single-bit, detects double-bit"),
+  c("hwf-004","hardware","easy",1,1,"What is BMC serial-over-LAN (SOL)?","Remote console access — see server output without physical connection"),
+  c("hwf-005","hardware","easy",1,1,"Memory channels on modern Xeon?","8 channels per CPU — populate evenly for max bandwidth"),
+  c("hwf-006","hardware","easy",1,1,"NVMe form factors?","U.2 (2.5\" hot-swap bay) and M.2 (small board-mount)"),
+  c("hwf-007","hardware","easy",1,1,"What does GPU TDP determine?","Cooling requirements, power provisioning, and rack density limits"),
+  c("hwf-008","hardware","easy",1,1,"InfiniBand HDR speed?","200 Gbps"),
+  c("hwf-009","hardware","easy",1,1,"How to monitor server hardware health?","BMC sensors + SMART data"),
+  c("hwf-010","hardware","easy",1,1,"Downside of hardware RAID controller?","The controller itself is a single point of failure"),
+  c("hwf-011a","hardware","easy",1,1,"1U server?","Thin, limited expansion slots"),
+  c("hwf-011b","hardware","easy",1,1,"2U server?","Standard — more PCIe slots and drive bays"),
+  c("hwf-012","hardware","easy",1,1,"UEFI features over legacy BIOS?","Secure Boot, GPT (>2TB disks), network stack, faster boot"),
+  c("hwf-013","hardware","intermediate",2,2,"PCIe bus reset command?","`echo 1 > /sys/bus/pci/devices/<ADDR>/reset`"),
+  c("hwf-014","hardware","intermediate",2,2,"GPU fell off bus: what to check via BMC?","Thermal sensors — was the GPU overheating before the fault?"),
+  c("hwf-015","hardware","intermediate",2,2,"What is `memtest86+`?","Memory testing tool — run during maintenance window to confirm DIMM failure"),
+  c("hwf-016","hardware","intermediate",2,2,"Replace DIMMs in mirrored config?","Replace in matching pairs"),
+  c("hwf-017","hardware","intermediate",2,2,"What does NVSwitch replace?","Full mesh GPU connections (impractical at 8 GPUs). Enables efficient all-reduce."),
+  c("hwf-018","hardware","intermediate",2,2,"Check current NIC firmware version?","`ethtool -i eth0`"),
+  c("hwf-019","hardware","intermediate",2,2,"NVSwitch firmware manager?","`nvidia-fabricmanager`"),
 ];
 
 // ═══════════════════════════════════════
 // NETWORKING
 // ═══════════════════════════════════════
 export const networking: ForgeCard[] = [
-  c("net-001","networking","easy",1,1,"What is a VLAN and why are they used in data centers?","Virtual LAN — logically segments a physical network. Servers in the same VLAN can communicate at Layer 2. Different VLANs require a router (Layer 3). Used for: security isolation, traffic management, separating management/data/storage networks."),
-  c("net-002","networking","easy",1,1,"What is BGP and where is it used?","Border Gateway Protocol — the routing protocol of the internet. Path-vector protocol that exchanges routing info between autonomous systems. In DC context: used for routing between data center networks and for ECMP load balancing in leaf-spine fabrics."),
-  c("net-003","networking","easy",1,1,"Explain the difference between Layer 2 and Layer 3 networking.","**Layer 2 (Data Link)**: MAC addresses, switches, VLANs, ARP. Local network segment.\n**Layer 3 (Network)**: IP addresses, routers, subnets, routing tables. Connects different networks.\nDC networking increasingly uses Layer 3 everywhere (each rack is its own subnet) for scalability."),
-  c("net-004","networking","easy",1,1,"What is MTU and what is a jumbo frame?","Maximum Transmission Unit — largest packet size without fragmentation. Standard Ethernet: 1500 bytes. Jumbo frames: 9000 bytes. Larger MTU = fewer packets = lower CPU overhead. Must be consistent across entire path. Common in DC storage and GPU cluster networks."),
-  c("net-005","networking","easy",1,1,"What is LACP (Link Aggregation Control Protocol)?","IEEE 802.3ad — bonds multiple physical links into one logical link for bandwidth and redundancy. Both switch and server must support it. If one link fails, traffic shifts to remaining links. Standard practice for server uplinks in DCs."),
-  c("net-006","networking","easy",1,1,"What is a leaf-spine network topology?","Modern DC fabric: **Leaf switches** (ToR) connect to servers. **Spine switches** connect all leaf switches. Every leaf connects to every spine. Benefits: predictable latency, easy to scale (add more spines), no spanning tree. ECMP distributes traffic across spine paths."),
-  c("net-007","networking","easy",1,1,"What is DHCP and how does it work?","Dynamic Host Configuration Protocol. Server assigns IP addresses to clients. Process: Discover -> Offer -> Request -> Acknowledge (DORA). Lease-based — clients must renew. In DCs, servers often use static IPs or DHCP with reservations (MAC->IP mapping)."),
-  c("net-008","networking","easy",1,1,"What is DNS and what are A, AAAA, CNAME, and PTR records?","Domain Name System — translates hostnames to IPs.\n**A**: hostname -> IPv4\n**AAAA**: hostname -> IPv6\n**CNAME**: alias -> canonical name\n**PTR**: IP -> hostname (reverse DNS)\nIn DCs: internal DNS for server naming. Essential for service discovery."),
-  c("net-009","networking","easy",1,1,"What is RDMA and why is it important for GPU clusters?","Remote Direct Memory Access — allows a server to read/write another server's memory without involving either CPU. Bypasses OS kernel network stack. Ultra-low latency. Used over InfiniBand (native) or RoCE (RDMA over Converged Ethernet). Critical for distributed training — GPU-to-GPU data transfer across nodes."),
-  c("net-010","networking","easy",1,1,"What is ARP and how do you troubleshoot ARP issues?","Address Resolution Protocol — maps IP to MAC addresses on local network. `arp -a` or `ip neigh show` displays ARP table. Issues: ARP storms (broadcast floods), stale entries, IP conflicts. Flush: `ip neigh flush all`. ARP is Layer 2 — only works within a subnet."),
-  c("net-101","networking","intermediate",2,2,"A server has network connectivity but is experiencing 5% packet loss. How do you diagnose?","1. `mtr server_ip` — persistent traceroute showing loss per hop\n2. `ethtool -S eth0` — check NIC error counters (CRC errors, drops)\n3. `ip -s link show eth0` — interface-level error stats\n4. `dmesg | grep eth0` — driver-level errors\n5. Check switch port counters (via switch CLI)\n6. Cable issue? Swap cable, check SFP/transceiver\n7. If loss at a specific hop: switch issue or congestion on that link"),
-  c("net-102","networking","intermediate",2,2,"Explain how ECMP works in a leaf-spine fabric.","Equal-Cost Multi-Path routing: when multiple paths have the same metric, traffic is distributed across all paths. Hash-based: flow (src IP + dst IP + ports) is hashed to select a path. Ensures each connection uses one consistent path (prevents reordering) while spreading total load. With N spines, each leaf-to-leaf path has N equal options."),
-  c("net-103","networking","intermediate",2,2,"What is RoCE and how does it differ from InfiniBand?","RDMA over Converged Ethernet — brings RDMA to Ethernet networks.\n**RoCEv1**: RDMA over Ethernet L2 only (same VLAN)\n**RoCEv2**: RDMA over UDP/IP (routable, preferred)\n**InfiniBand**: Purpose-built RDMA fabric, dedicated switches, lower latency, higher reliability.\nRoCE is cheaper (uses existing Ethernet), IB is faster and more reliable. GPU clusters often use IB for training traffic."),
+  c("net-001","networking","easy",1,1,"VLAN","Virtual LAN — logically segments a physical network. Different VLANs need a router (L3)."),
+  c("net-002","networking","easy",1,1,"BGP","Border Gateway Protocol — routing between autonomous systems. Used for ECMP in leaf-spine fabrics."),
+  c("net-003","networking","easy",1,1,"Layer 2 vs Layer 3","L2: MAC addresses, switches, VLANs (local). L3: IP addresses, routers, subnets (connects networks)."),
+  c("net-004","networking","easy",1,1,"MTU / jumbo frames","Standard: 1500 bytes. Jumbo: 9000 bytes. Fewer packets = lower CPU overhead. Must match entire path."),
+  c("net-005","networking","easy",1,1,"LACP","Link Aggregation — bonds multiple physical links for bandwidth + redundancy. Both switch and server must support."),
+  c("net-006","networking","easy",1,1,"Leaf-spine topology","Every leaf (ToR) connects to every spine. Predictable latency, easy to scale, no spanning tree. ECMP distributes traffic."),
+  c("net-007","networking","easy",1,1,"DHCP process","DORA: Discover → Offer → Request → Acknowledge. Lease-based. DCs often use static IPs or DHCP reservations."),
+  c("net-008","networking","easy",1,1,"DNS record types","A: hostname→IPv4. AAAA: →IPv6. CNAME: alias→canonical. PTR: IP→hostname (reverse)."),
+  c("net-009","networking","easy",1,1,"RDMA","Remote Direct Memory Access — read/write remote memory without CPU. Bypasses kernel. Used for GPU-to-GPU across nodes."),
+  c("net-010","networking","easy",1,1,"ARP","Maps IP→MAC on local network. `ip neigh show` to view. Flush: `ip neigh flush all`. L2 only — within a subnet."),
+  c("net-101","networking","intermediate",2,2,"5% packet loss — diagnose?","`mtr` for per-hop loss → `ethtool -S eth0` for NIC errors → `ip -s link` for interface stats → check switch counters → swap cable/SFP."),
+  c("net-102","networking","intermediate",2,2,"ECMP in leaf-spine","Equal-Cost Multi-Path: hash-based (src+dst IP+ports) distributes flows across all spine paths. N spines = N paths."),
+  c("net-103","networking","intermediate",2,2,"RoCE vs InfiniBand","RoCE: RDMA over Ethernet (cheaper, uses existing switches). IB: purpose-built, lower latency, more reliable. GPU clusters often use IB."),
+
+  // Dropped-fact recovery
+  c("netf-001","networking","easy",1,1,"VLAN use cases in DCs?","Security isolation, separating management/data/storage networks"),
+  c("netf-002","networking","easy",1,1,"BGP is what type of protocol?","Path-vector"),
+  c("netf-003","networking","easy",1,1,"DC networking trend: L3 everywhere?","Each rack is its own subnet — better scalability than L2 spanning tree"),
+  c("netf-004","networking","easy",1,1,"LACP IEEE standard?","802.3ad"),
+  c("netf-005","networking","easy",1,1,"Why no spanning tree in leaf-spine?","Every leaf connects to every spine — no loops to prevent"),
+  c("netf-006","networking","easy",1,1,"DHCP: what are leases?","Time-limited IP assignments — clients must renew or lose their address"),
+  c("netf-007","networking","easy",1,1,"Two ways to run RDMA?","InfiniBand (native) or RoCE (RDMA over Converged Ethernet)"),
+  c("netf-008","networking","easy",1,1,"Common ARP issues?","Storms (broadcast floods), stale entries, IP conflicts"),
+  c("netf-009","networking","intermediate",2,2,"RoCEv1 vs RoCEv2?","v1: L2 only (same VLAN). v2: UDP/IP (routable). v2 preferred."),
+  c("netf-010","networking","intermediate",2,2,"How does ECMP prevent packet reordering?","Each flow hashes to one consistent path"),
+  c("netf-011","networking","intermediate",2,2,"Check driver-level NIC errors?","`dmesg | grep eth0`"),
+  c("netf-012","networking","intermediate",2,2,"Check switch port counters?","Via switch CLI (`show interface counters`)"),
 ];
 
 // ═══════════════════════════════════════
 // FIBER & CABLING
 // ═══════════════════════════════════════
 export const fiber: ForgeCard[] = [
-  c("fib-001","fiber","easy",1,1,"What is the difference between single-mode and multi-mode fiber?","**Single-mode (SMF)**: Small core (9μm), one light path, longer distance (km+), yellow jacket. Used for inter-building/campus runs.\n**Multi-mode (MMF)**: Larger core (50μm), multiple light paths, shorter distance (up to ~550m at 10G), aqua/orange jacket. Used inside DCs."),
-  c("fib-002","fiber","easy",1,1,"What is an SFP/QSFP transceiver?","Small Form-factor Pluggable modules convert electrical signals to optical (and back). SFP: 1 lane (1/10/25G). SFP28: 25G. QSFP28: 4 lanes x 25G = 100G. QSFP56: 4 x 50G = 200G. QSFP-DD: 8 lanes = 400G. Must match fiber type (SM/MM) and distance."),
-  c("fib-003","fiber","easy",1,1,"What is an MTP/MPO connector and when is it used?","Multi-fiber Push On — a connector carrying 12 or 24 fibers in one ferrule. Used for high-density connections: 40G, 100G, 400G links that use multiple fiber pairs. Enables structured cabling with breakout cables (MTP to individual LC connectors). Common in spine-to-leaf links."),
-  c("fib-004","fiber","easy",1,1,"What is an OTDR and when would you use one?","Optical Time Domain Reflectometer — sends light pulses down fiber and measures reflections. Creates a distance map showing: connectors, splices, bends, breaks. Used to locate faults, measure loss, and certify new cable runs. Essential tool for fiber troubleshooting."),
-  c("fib-005","fiber","easy",1,1,"What causes fiber optic signal loss?","1. **Connector dirt** — #1 cause, always clean before connecting\n2. **Bend radius** — too tight a bend = light leaks out\n3. **Bad splice/connection** — misaligned cores\n4. **Distance** — attenuation over length\n5. **Damaged fiber** — crushed, kinked, or broken\n6. **Wrong transceiver** — wavelength/type mismatch"),
-  c("fib-006","fiber","easy",1,1,"What do LC, SC, and MTP connectors look like?","**LC**: Small, square, latching. Most common in DCs. Used on SFP/SFP28/SFP56 modules.\n**SC**: Larger, square, push-pull. Older standard, still seen.\n**MTP/MPO**: Wide rectangular, multi-fiber (12/24). Used for high-density trunk cables.\nAll connectors must be cleaned before every insertion — contamination is the #1 cause of fiber issues."),
-  c("fib-007","fiber","easy",1,1,"What is structured cabling in a DC?","Organized cabling infrastructure: fiber trunks from main distribution area (MDA) to each row/rack, breakout panels/cassettes at the rack, patch cables to equipment. Benefits: manageable, traceable, scalable. Avoids spaghetti. Color coding: different colors for different networks (management, data, storage)."),
-  c("fib-008","fiber","easy",1,1,"What is the typical fiber cleaning procedure?","1. Inspect with fiber scope FIRST (identify contamination type)\n2. Dry clean with one-click cleaner or lint-free wipe\n3. Re-inspect — should see clean, smooth end-face\n4. If contaminated: wet clean with IPA, then dry clean\n5. Re-inspect again\n6. Never touch the ferrule end-face\n7. Cap unused connectors\nRule: ALWAYS inspect, ALWAYS clean, ALWAYS re-inspect."),
-  c("fib-101","fiber","intermediate",2,2,"You're seeing intermittent CRC errors on a 100G link. Walk through fiber troubleshooting.","1. Check light levels: `ethtool -m eth0` or switch `show interface transceiver` — compare Rx power to transceiver spec. Low = dirty/damaged fiber.\n2. Clean both ends (ALWAYS clean first, then diagnose)\n3. Re-check light levels after cleaning\n4. Swap transceiver to rule out bad optic\n5. Swap patch cable to rule out cable damage\n6. If trunk fiber: use OTDR to locate fault\n7. Check for tight bends near patch panels\n8. Verify fiber type matches transceiver (SM vs MM)"),
+  c("fib-001","fiber","easy",1,1,"Single-mode vs multi-mode fiber","SMF: 9μm core, long distance (km+), yellow. MMF: 50μm, short (~550m), aqua/orange. MMF used inside DCs."),
+  c("fib-002","fiber","easy",1,1,"SFP / QSFP transceivers","SFP28: 25G. QSFP28: 100G (4x25). QSFP56: 200G. QSFP-DD: 400G. Must match fiber type + distance."),
+  c("fib-003","fiber","easy",1,1,"MTP/MPO connector","Multi-fiber (12/24 fibers in one connector). Used for 40G/100G/400G links. Breakout cables split to LC."),
+  c("fib-004","fiber","easy",1,1,"OTDR","Optical Time Domain Reflectometer — sends light pulses to locate faults, measure loss, certify cable runs."),
+  c("fib-005","fiber","easy",1,1,"#1 cause of fiber signal loss","Dirty connectors. Always inspect and clean before connecting."),
+  c("fib-006","fiber","easy",1,1,"LC vs SC vs MTP connectors","LC: small, latching, most common (SFP). SC: larger, push-pull, older. MTP: wide, multi-fiber (trunks)."),
+  c("fib-007","fiber","easy",1,1,"Structured cabling","Organized trunks from MDA to racks, breakout panels, color-coded by network type. Avoids spaghetti."),
+  c("fib-008","fiber","easy",1,1,"Fiber cleaning procedure","Inspect → dry clean (one-click cleaner) → re-inspect → wet clean if needed → re-inspect. Never touch ferrule."),
+  c("fib-101","fiber","intermediate",2,2,"Intermittent CRC errors on 100G link","Check light levels (`ethtool -m`) → clean both ends FIRST → swap transceiver → swap patch cable → OTDR for trunk faults → check bend radius."),
+
+  // Dropped-fact recovery
+  c("fibf-001","fiber","easy",1,1,"Where is single-mode fiber used?","Inter-building / campus runs (long distance, km+)"),
+  c("fibf-002","fiber","easy",1,1,"Fiber loss: bend radius?","Too tight a bend = light leaks out of the core"),
+  c("fibf-003","fiber","easy",1,1,"Fiber loss: bad splice?","Misaligned cores = signal loss at junction"),
+  c("fibf-004","fiber","easy",1,1,"Fiber loss: wrong transceiver?","Wavelength or SM/MM type mismatch with the fiber"),
+  c("fibf-005","fiber","easy",1,1,"First step before cleaning fiber?","Inspect with fiber scope FIRST — identify contamination type"),
+  c("fibf-006","fiber","easy",1,1,"Wet-clean fiber with what?","IPA (isopropyl alcohol), then dry clean after"),
+  c("fibf-007","fiber","easy",1,1,"Unused fiber connectors?","Always cap them — prevents contamination"),
+  c("fibf-008","fiber","easy",1,1,"Structured cabling: color coding?","Different colors for management, data, and storage networks"),
+  c("fibf-009","fiber","intermediate",2,2,"Check fiber light levels?","`ethtool -m eth0` (or switch: `show interface transceiver`). Compare Rx power to spec."),
+  c("fibf-010","fiber","intermediate",2,2,"CRC errors: verify fiber type match?","Confirm SM vs MM matches transceiver spec"),
 ];
 
 // ═══════════════════════════════════════
 // POWER & COOLING
 // ═══════════════════════════════════════
 export const powerCooling: ForgeCard[] = [
-  c("pc-001","power-cooling","easy",1,1,"What is a PDU in a data center?","Power Distribution Unit — distributes electrical power to servers in a rack. Types: Basic (dumb distribution), Metered (shows usage), Switched (remote on/off per outlet), Monitored (per-outlet metering). Typical rack has 2 PDUs on separate circuits for redundancy."),
-  c("pc-002","power-cooling","easy",1,1,"What is N+1, 2N, and 2N+1 redundancy?","**N+1**: One extra unit beyond minimum needed (e.g., 3 UPS where 2 suffice). Single point of upgrade.\n**2N**: Fully duplicated system — two complete, independent paths. Can lose an entire path.\n**2N+1**: Two complete paths plus one extra unit. Highest redundancy. Colossus-scale requires at least 2N for power."),
-  c("pc-003","power-cooling","easy",1,1,"What is PUE and what's a good target?","Power Usage Effectiveness = Total Facility Power / IT Equipment Power. Perfect = 1.0 (impossible). Good = 1.2-1.4. Average = 1.5-1.8. Google/Meta achieve 1.1-1.2. Lower PUE = less wasted power on cooling/lighting/loss. GPU DCs are challenging due to high heat density."),
-  c("pc-004","power-cooling","easy",1,1,"How does hot aisle / cold aisle containment work?","Racks face alternating directions. Cold aisle: intakes face each other, contained, fed chilled air. Hot aisle: exhausts face each other, contained, ducted to cooling. Prevents hot/cold air mixing. Containment uses curtains or rigid panels. Dramatically improves cooling efficiency."),
-  c("pc-005","power-cooling","easy",1,1,"What is a UPS and what types are common in DCs?","Uninterruptible Power Supply — provides battery power during outage until generators start (typically 10-30 seconds).\n**Online/Double-conversion**: Always running through inverter. Best protection. Standard for DCs.\n**Line-interactive**: Switches to battery on outage. Brief transfer time.\n**Standby**: Cheapest, longest transfer time. Not for DCs."),
-  c("pc-006","power-cooling","easy",1,1,"How much power does a typical GPU server rack consume?","A rack of 4x GPU servers (8 GPUs each, H100-class) can draw 40-60kW. A traditional server rack draws 5-15kW. This 4-5x increase drives major changes in power delivery, cooling, and rack density. Some Colossus-scale racks exceed 100kW."),
-  c("pc-007","power-cooling","easy",1,1,"What is liquid cooling and why is it relevant to GPU DCs?","Air cooling has limits (~30-40kW per rack). GPU racks exceed this. Liquid cooling options:\n**Direct-to-chip**: Cold plates on CPUs/GPUs, liquid circulates heat away. Most common for GPU servers.\n**Rear-door heat exchangers**: Liquid-cooled door behind rack captures hot exhaust.\n**Immersion**: Entire server submerged in dielectric fluid. Most efficient but most complex."),
-  c("pc-101","power-cooling","intermediate",2,2,"A monitoring alert shows rack inlet temperature rising above threshold. Walk through your response.","1. Check: is it one rack or multiple? One rack = local issue. Multiple = facility-wide.\n2. Check CRAC/CRAH units — any failures? Fan status?\n3. Check containment — are curtains/panels intact? Door left open?\n4. Check for obstructions in cold aisle (boxes, cables blocking airflow)\n5. Check blanking panels — any missing in the rack (hot air recirculation)?\n6. If critical: reduce load on affected servers or power down non-critical systems\n7. Escalate to facilities team if HVAC equipment failure"),
+  c("pc-001","power-cooling","easy",1,1,"PDU","Power Distribution Unit — distributes power in a rack. Types: basic, metered, switched, monitored. 2 per rack for redundancy."),
+  c("pc-002","power-cooling","easy",1,1,"N+1 vs 2N redundancy","N+1: one extra unit. 2N: fully duplicated paths. 2N+1: two paths + one extra. GPU DCs need at least 2N."),
+  c("pc-003","power-cooling","easy",1,1,"PUE","Power Usage Effectiveness = Total Power / IT Power. 1.0 = perfect. Good: 1.2. Average: 1.5. Lower = less cooling waste."),
+  c("pc-004","power-cooling","easy",1,1,"Hot aisle / cold aisle","Racks alternate direction. Cold aisle: intakes face each other (chilled air). Hot aisle: exhausts (ducted to cooling). Containment prevents mixing."),
+  c("pc-005","power-cooling","easy",1,1,"UPS types for DCs","Online/double-conversion: always through inverter, best protection, DC standard. Line-interactive and standby are not for DCs."),
+  c("pc-006","power-cooling","easy",1,1,"GPU rack power draw","4 GPU servers (8x H100 each) = 40-60kW per rack. Traditional rack: 5-15kW. Large GPU clusters exceed 100kW/rack."),
+  c("pc-007","power-cooling","easy",1,1,"Liquid cooling types","Direct-to-chip: cold plates on GPUs (most common). Rear-door heat exchangers. Immersion: server submerged in fluid (most efficient)."),
+  c("pc-101","power-cooling","intermediate",2,2,"Rack inlet temp rising — response?","One rack or many? Check CRAC/CRAH units → containment intact? → airflow obstructions? → blanking panels missing? → reduce load if critical → escalate to facilities."),
+
+  // Dropped-fact recovery
+  c("pcf-001","power-cooling","easy",1,1,"PDU types?","Basic (dumb), Metered (shows usage), Switched (remote on/off), Monitored (per-outlet metering)"),
+  c("pcf-002","power-cooling","easy",1,1,"N+1 redundancy example?","3 UPS units where 2 would suffice"),
+  c("pcf-003","power-cooling","easy",1,1,"2N redundancy advantage?","Can lose an entire power path and still operate"),
+  c("pcf-004","power-cooling","easy",1,1,"Best-in-class PUE?","Google/Meta achieve 1.1-1.2"),
+  c("pcf-005","power-cooling","easy",1,1,"UPS bridges power until what?","Generators start (typically 10-30 seconds)"),
+  c("pcf-006","power-cooling","easy",1,1,"Air cooling rack power limit?","~30-40kW — GPU racks exceed this, requiring liquid cooling"),
+  c("pcf-007","power-cooling","easy",1,1,"Missing blanking panels in a rack?","Hot air recirculates to cold aisle — raises inlet temps"),
 ];
 
 // ═══════════════════════════════════════
 // OPS & PROCESSES
 // ═══════════════════════════════════════
 export const opsProcesses: ForgeCard[] = [
-  c("ops-001","ops-processes","easy",1,1,"What are the 5 phases of incident management?","1. **Detection** — monitoring alerts or user reports\n2. **Triage** — assess severity, assign priority\n3. **Investigation** — root cause analysis\n4. **Resolution** — fix the issue, restore service\n5. **Post-mortem** — document, identify preventive actions. Blameless culture."),
-  c("ops-002","ops-processes","easy",1,1,"What is MTTR and why is it critical?","Mean Time To Recovery — average time from incident detection to resolution. Lower = better. In DC ops, MTTR directly correlates to GPU cluster uptime, which directly correlates to training job completion. Every minute of downtime on Colossus wastes massive compute resources."),
-  c("ops-003","ops-processes","easy",1,1,"What is a change management process?","Structured approach to making changes in production: 1) Request (what, why, when), 2) Review (risk assessment, rollback plan), 3) Approve (CAB or peer review), 4) Implement (during maintenance window), 5) Verify (smoke test), 6) Document. Prevents unplanned outages from untested changes."),
-  c("ops-004","ops-processes","easy",1,1,"What is a runbook and what should it contain?","Step-by-step procedure for a known operational task or incident response. Contains: title, scope, prerequisites, step-by-step instructions, expected outputs, rollback procedures, escalation contacts. Enables any on-call engineer to handle known issues without tribal knowledge."),
-  c("ops-005","ops-processes","easy",1,1,"What is monitoring and what are the key metrics to track?","Continuous observation of system health. Key DC metrics:\n- Server: CPU, memory, disk, GPU utilization, temperatures\n- Network: bandwidth, errors, latency, packet loss\n- Storage: IOPS, latency, capacity\n- Facility: power draw, temperature, humidity\n- Application: job status, training throughput\nTools: Prometheus/Grafana, Nagios, Datadog, Zabbix"),
-  c("ops-006","ops-processes","easy",1,1,"What is the difference between P1, P2, P3, and P4 incidents?","**P1 (Critical)**: Service down, all users affected. Immediate response, war room.\n**P2 (High)**: Major degradation, significant impact. Response within 30 min.\n**P3 (Medium)**: Partial impact, workaround available. Response within 4 hours.\n**P4 (Low)**: Minor issue, no immediate impact. Next business day.\nIn GPU DC: training job failure on majority of cluster = P1."),
-  c("ops-007","ops-processes","easy",1,1,"What is SLA vs SLO vs SLI?","**SLI** (Service Level Indicator): A measurable metric (e.g., uptime %, latency p99).\n**SLO** (Service Level Objective): Target value for an SLI (e.g., 99.9% uptime).\n**SLA** (Service Level Agreement): Contract with consequences if SLO is missed. SLIs measure, SLOs target, SLAs enforce."),
-  c("ops-101","ops-processes","intermediate",2,2,"You're handed the on-call pager for a GPU cluster you've never operated. What do you do in your first 30 minutes?","1. Get access: monitoring dashboards, alert channels, escalation list, VPN/SSH\n2. Read the runbook index — what documented procedures exist?\n3. Identify current state: any active incidents? Recent changes?\n4. Review alert thresholds — what fires and at what level?\n5. Shadow the outgoing on-call: ask about known issues, gotchas, in-progress maintenance\n6. Verify you can reach: IPMI, switches, storage, facility contacts\n7. Test one action: SSH to a server, check `nvidia-smi`, confirm monitoring shows you online"),
+  c("ops-001","ops-processes","easy",1,1,"5 phases of incident management","Detect → Triage → Investigate → Resolve → Post-mortem (blameless)"),
+  c("ops-002","ops-processes","easy",1,1,"MTTR","Mean Time To Recovery. Lower = better. Directly correlates to cluster uptime and training job completion."),
+  c("ops-003","ops-processes","easy",1,1,"Change management process","Request → Review (risk + rollback plan) → Approve → Implement (maintenance window) → Verify → Document"),
+  c("ops-004","ops-processes","easy",1,1,"Runbook","Step-by-step procedure for known tasks/incidents. Enables any on-call engineer to handle issues without tribal knowledge."),
+  c("ops-005","ops-processes","easy",1,1,"Key DC monitoring metrics","Server: CPU, memory, disk, GPU, temps. Network: bandwidth, errors, latency. Storage: IOPS, capacity. Facility: power, temp, humidity."),
+  c("ops-006","ops-processes","easy",1,1,"P1 vs P2 vs P3 vs P4","P1: service down, immediate. P2: major degradation, 30min. P3: partial impact, 4h. P4: minor, next business day."),
+  c("ops-007","ops-processes","easy",1,1,"SLI vs SLO vs SLA","SLI: measurable metric. SLO: target value. SLA: contract with consequences. SLIs measure, SLOs target, SLAs enforce."),
+  c("ops-101","ops-processes","intermediate",2,2,"First 30 min on unfamiliar on-call?","Get access (dashboards, VPN, SSH) → read runbook index → check active incidents → review alert thresholds → shadow outgoing on-call → verify you can reach IPMI/switches → test one action."),
+
+  // Dropped-fact recovery
+  c("opsf-001","ops-processes","easy",1,1,"What should a runbook contain?","Title, scope, prerequisites, steps, expected outputs, rollback, escalation contacts"),
+  c("opsf-002","ops-processes","easy",1,1,"Common DC monitoring tools?","Prometheus/Grafana, Nagios, Datadog, Zabbix"),
+  c("opsf-003","ops-processes","easy",1,1,"Why is MTTR critical at large GPU scale?","Every minute of downtime wastes massive compute resources"),
+  c("opsf-004","ops-processes","easy",1,1,"MTBF vs MTTR at scale?","MTTR matters more — failures are constant, speed of recovery is what counts"),
 ];
 
 // ═══════════════════════════════════════
-// xAI & COLOSSUS CONTEXT
+// TARGET COMPANY & SCALE CONTEXT
 // ═══════════════════════════════════════
-export const xaiContext: ForgeCard[] = [
-  c("xai-001","xai-context","easy",1,1,"What is Colossus?","xAI's supercomputer cluster — one of the largest AI training systems in the world. Built to train Grok models. Scale: 100,000+ NVIDIA H100 GPUs. Located in Memphis, Tennessee. Built at unprecedented speed (months, not years). The DC Ops Tech role directly supports this infrastructure."),
-  c("xai-002","xai-context","easy",1,1,"What is xAI's mission?","To understand the true nature of the universe. Founded by Elon Musk in 2023. Building Grok — an AI assistant. Emphasis on speed, scale, and first-principles thinking. Culture values: move fast, build big, question assumptions."),
-  c("xai-003","xai-context","easy",1,1,"What makes Colossus-scale DC operations unique?","1. Density: GPU servers draw 5-10x more power than standard servers\n2. Interconnect: InfiniBand fabric connecting 100K+ GPUs\n3. Failure rate: At scale, hardware failures are constant (daily GPU/node failures)\n4. Impact: Any downtime wastes millions in compute time\n5. Speed: Infrastructure changes happen in days, not quarters\n6. Cooling: Liquid cooling is mandatory at this density"),
-  c("xai-004","xai-context","easy",1,1,"What does a DC Operations Technician do at xAI?","Hardware installation, cabling, troubleshooting, and repair. Server deployment and decommissioning. Network and fiber optic cable management. Power and cooling monitoring. IPMI/BMC management. Incident response. Physical security. Inventory management. Documentation. Working with engineering teams on new deployments."),
-  c("xai-005","xai-context","easy",1,1,"Why is Memphis significant for Colossus?","Cheap power (TVA), available real estate (converted industrial space), fiber connectivity, and speed — xAI needed to build fast and Memphis offered the combination of resources to make that possible. The facility went from empty building to operational supercomputer in record time."),
-  c("xai-101","xai-context","intermediate",2,2,"At Colossus scale (100K GPUs), approximately how many hardware failures should you expect per day?","With 100K GPUs + associated infrastructure: expect multiple failures daily. GPUs: ~0.1-0.5% monthly failure rate = 100-500 GPU failures/month = 3-17/day. Plus memory errors, disk failures, NIC issues, cable faults, fan failures. The job isn't preventing failures — it's detecting and replacing fast enough that training jobs can checkpoint and resume. This is why MTTR matters more than MTBF at scale."),
+export const scaleContext: ForgeCard[] = [
+  c("sc-001","target-context","easy",1,1,"Large-scale GPU cluster","100K+ H100 GPUs. Purpose-built facility. Trains large AI models. Built in months, not years."),
+  c("sc-002","target-context","easy",1,1,"Target company mission","Pushing the frontier of AI. Values: speed, scale, first-principles thinking."),
+  c("sc-003","target-context","easy",1,1,"100K GPU scale challenges","5-10x power density, InfiniBand for 100K+ GPUs, daily hardware failures at scale, liquid cooling mandatory, infrastructure changes in days."),
+  c("sc-004","target-context","easy",1,1,"DC Ops Tech role","Hardware install/repair, cabling, troubleshooting, IPMI/BMC mgmt, incident response, inventory, documentation."),
+  c("sc-005","target-context","easy",1,1,"Why build a purpose-built facility?","Cheap power, available real estate, fiber connectivity, speed of buildout."),
+  c("sc-101","target-context","intermediate",2,2,"Expected daily failures at 100K GPU scale?","3-17 GPU failures/day (0.1-0.5% monthly rate). Plus memory, disk, NIC, cable, fan failures. Job is fast detection + replacement, not prevention. MTTR > MTBF at scale."),
 ];
 
 // ═══════════════════════════════════════
 // BEHAVIORAL
 // ═══════════════════════════════════════
 export const behavioral: ForgeCard[] = [
-  c("beh-001","behavioral","easy",1,1,"What is the STAR method?","**Situation**: Set the context\n**Task**: What was your responsibility\n**Action**: What you specifically did (use 'I', not 'we')\n**Result**: Quantified outcome\nKey: be specific, use first person, include metrics. Avoid vague 'we' language."),
-  c("beh-002","behavioral","easy",1,1,"'Why xAI?' — What's a strong framework for this answer?","1. Mission alignment: 'Understanding the universe' resonates with your values\n2. Scale: Colossus is the most ambitious infrastructure build in AI\n3. Culture: Speed and first-principles thinking match your background\n4. Personal fit: Your military + Meta/data center experience + builder mindset\nBe specific about what draws you — generic 'I love AI' is weak."),
-  c("beh-003","behavioral","easy",1,1,"'Tell me about a time you worked under pressure.' — What makes a strong answer?","Must include: specific scenario, stakes, your specific actions, outcome. Military background is strong here. Quantify the pressure (deadline, consequences). Show calm decision-making. Show ownership of the outcome. End with what you learned. Red flags: vague stories, blaming others, no specific actions."),
-  c("beh-004","behavioral","easy",1,1,"'What would your first 30 days look like?' — Framework?","Week 1: Learn — systems, processes, team, tools, documentation\nWeek 2: Shadow — ride-alongs with experienced techs, observe procedures\nWeek 3: Document — start contributing to runbooks, fill gaps you noticed\nWeek 4: Ship — take on tasks independently, demonstrate value\nShow you're humble enough to learn but motivated enough to contribute quickly."),
-  c("beh-005","behavioral","easy",1,1,"How do you demonstrate 'ownership' in an interview answer?","1. Use 'I' not 'we' — specify YOUR role\n2. Show proactive behavior — you identified the problem, not just responded\n3. Show follow-through — you didn't just fix it, you prevented recurrence\n4. Own mistakes — 'I should have...' shows maturity\n5. Quantify YOUR impact — 'I reduced MTTR by 40%'"),
-  c("beh-101","behavioral","intermediate",2,2,"'Tell me about a process you improved.' — Build a strong STAR answer.","Template:\nS: 'At [company], the process for [X] was [problem — manual, slow, error-prone]'\nT: 'I was responsible for [scope]. It was taking [metric — hours/errors/cost]'\nA: 'I [specific actions — analyzed, proposed, built, tested, trained]. Specifically, I [one key detail].'\nR: 'Reduced [time/errors/cost] by [%]. Team adopted it as the standard.'\nYour Meta/Synthesis experience is ideal here — quantify the automation impact."),
+  c("beh-001","behavioral","easy",1,1,"STAR method","Situation → Task → Action → Result. Use 'I' not 'we'. Include metrics."),
+  c("beh-002","behavioral","easy",1,1,"'Why this company?' framework","Mission alignment + scale + culture (speed, first principles) + personal fit. Be specific, not generic."),
+  c("beh-003","behavioral","easy",1,1,"'Worked under pressure' — key elements","Specific scenario, stakes, YOUR actions, quantified outcome, what you learned. No vague 'we' stories."),
+  c("beh-004","behavioral","easy",1,1,"'First 30 days?' framework","Week 1: learn systems. Week 2: shadow experienced techs. Week 3: document/contribute to runbooks. Week 4: ship independently."),
+  c("beh-005","behavioral","easy",1,1,"Show 'ownership' in interviews","Use 'I'. Be proactive (you found the problem). Show follow-through (prevented recurrence). Own mistakes. Quantify YOUR impact."),
+  c("beh-101","behavioral","intermediate",2,2,"'Process you improved' — STAR template","S: 'At [X], process for [Y] was [problem].' T: 'I was responsible for [scope], taking [metric].' A: 'I [specific actions].' R: 'Reduced [X] by [%]. Team adopted as standard.'"),
+
+  // Dropped-fact recovery
+  c("behf-001","behavioral","easy",1,1,"Weak 'Why this company?' answer?","Generic 'I love AI' — be specific about mission, scale, culture fit"),
+  c("behf-002","behavioral","easy",1,1,"Red flags in 'under pressure' answers?","Vague stories, blaming others, no specific actions"),
+  c("behf-003","behavioral","easy",1,1,"'First 30 days' tone?","Humble enough to learn, motivated enough to contribute quickly"),
 ];

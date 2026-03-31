@@ -38,6 +38,10 @@ export function useSeedCards() {
   return useMutation(api.forgeCards.seedCards);
 }
 
+export function useReseedCards() {
+  return useMutation(api.forgeCards.reseedCards);
+}
+
 export function useUpdateCard() {
   return useMutation(api.forgeCards.updateCard);
 }

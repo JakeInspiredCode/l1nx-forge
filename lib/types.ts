@@ -7,7 +7,7 @@ export type TopicId =
   | "power-cooling"
   | "networking"
   | "ops-processes"
-  | "xai-context"
+  | "target-context"
   | "behavioral";
 
 export type CardType = "easy" | "intermediate" | "scenario";
@@ -92,7 +92,7 @@ export const TOPICS: TopicMeta[] = [
   { id: "fiber", name: "Fiber & Cabling", description: "Fiber optics, transceivers, cable management", priority: 4, icon: "|" },
   { id: "power-cooling", name: "Power & Cooling", description: "PDUs, UPS, HVAC, thermal management", priority: 5, icon: "^" },
   { id: "ops-processes", name: "Ops & Processes", description: "Incident response, change management, monitoring", priority: 6, icon: "!" },
-  { id: "xai-context", name: "xAI & Colossus", description: "Colossus architecture, xAI mission, scale context", priority: 7, icon: "*" },
+  { id: "target-context", name: "Target Company & Scale", description: "Large-scale GPU cluster architecture, mission, scale context", priority: 7, icon: "*" },
   { id: "behavioral", name: "Behavioral", description: "STAR stories, leadership, teamwork, conflict", priority: 8, icon: "@" },
 ];
 
@@ -174,7 +174,7 @@ export const BADGE_DEFS = [
   // ── Advanced / endgame ──
   { id: "scenario-slayer", name: "Scenario Slayer", condition: "50 scenario cards reviewed", icon: "crosshair" },
   { id: "mock-master", name: "Mock Master", condition: "5 mock interviews completed", icon: "signal" },
-  { id: "colossus-ready", name: "Colossus Ready", condition: "Overall mastery >= 90%", icon: "star" },
+  { id: "cluster-ready", name: "Cluster Ready", condition: "Overall mastery >= 90%", icon: "star" },
   { id: "speed-demon", name: "Speed Demon", condition: "20+ cards in under 45 min", icon: "bolt" },
   { id: "tier-breaker", name: "Tier Breaker", condition: "First Tier 4 unlock", icon: "chain" },
   { id: "tier-2-any", name: "Level Up", condition: "Unlock Tier 2 in any topic", icon: "arrow-up" },

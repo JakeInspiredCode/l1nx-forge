@@ -1,0 +1,133 @@
+"use client";
+
+import { useState } from "react";
+import Nav from "@/components/nav";
+import DiagnosisGame, { DiagnosisResult } from "@/components/forge/diagnosis/diagnosis-game";
+import DiagnosisResults from "@/components/forge/diagnosis/diagnosis-results";
+import scenarios, { DiagnosisScenario, DiagnosisDifficulty } from "@/lib/seeds/diagnosis-scenarios";
+
+type Screen = "browse" | "playing" | "results";
+
+const DIFFICULTY_INFO: Record<DiagnosisDifficulty, { label: string; color: string; description: string }> = {
+  learning: { label: "Learning", color: "text-emerald-400", description: "System shows commands — you read output and pick answers" },
+  guided: { label: "Guided", color: "text-sky-400", description: "You choose what to check — system shows the command" },
+  independent: { label: "Independent", color: "text-orange-400", description: "You choose what AND which command to run" },
+  full: { label: "Full", color: "text-red-400", description: "Multi-step compound problems" },
+};
+
+export default function DiagnosisLabPage() {
+  const [screen, setScreen] = useState<Screen>("browse");
+  const [activeScenario, setActiveScenario] = useState<DiagnosisScenario | null>(null);
+  const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<DiagnosisDifficulty | "all">("all");
+
+  const filtered = difficultyFilter === "all"
+    ? scenarios
+    : scenarios.filter((s) => s.difficulty === difficultyFilter);
+
+  const startScenario = (s: DiagnosisScenario) => {
+    setActiveScenario(s);
+    setResult(null);
+    setScreen("playing");
+  };
+
+  if (screen === "playing" && activeScenario) {
+    return (
+      <div className="min-h-screen bg-forge-bg">
+        <Nav />
+        <main className="px-4 sm:px-6 py-8">
+          <DiagnosisGame
+            scenario={activeScenario}
+            onComplete={(r) => { setResult(r); setScreen("results"); }}
+            onQuit={() => setScreen("browse")}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (screen === "results" && result && activeScenario) {
+    return (
+      <div className="min-h-screen bg-forge-bg">
+        <Nav />
+        <main className="px-4 sm:px-6 py-8">
+          <DiagnosisResults
+            result={result}
+            onPlayAgain={() => startScenario(activeScenario)}
+            onBack={() => setScreen("browse")}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Browse scenarios
+  return (
+    <div className="min-h-screen bg-forge-bg">
+      <Nav />
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <h1 className="text-2xl font-bold mono mb-1">Diagnosis Lab</h1>
+        <p className="text-sm text-forge-text-dim mb-6">
+          Step-by-step troubleshooting — {scenarios.length} scenarios across 4 difficulty levels
+        </p>
+
+        {/* Difficulty filter */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          <button
+            onClick={() => setDifficultyFilter("all")}
+            className={`px-3 py-1.5 rounded-lg text-xs mono border transition-colors ${
+              difficultyFilter === "all"
+                ? "bg-forge-accent/20 text-forge-accent border-forge-accent/40"
+                : "border-forge-border text-forge-text-dim hover:text-forge-text"
+            }`}
+          >
+            All ({scenarios.length})
+          </button>
+          {(["learning", "guided", "independent", "full"] as DiagnosisDifficulty[]).map((d) => {
+            const info = DIFFICULTY_INFO[d];
+            const count = scenarios.filter((s) => s.difficulty === d).length;
+            return (
+              <button
+                key={d}
+                onClick={() => setDifficultyFilter(d)}
+                className={`px-3 py-1.5 rounded-lg text-xs mono border transition-colors ${
+                  difficultyFilter === d
+                    ? "bg-forge-accent/20 text-forge-accent border-forge-accent/40"
+                    : "border-forge-border text-forge-text-dim hover:text-forge-text"
+                }`}
+              >
+                {info.label} ({count})
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Scenario cards */}
+        <div className="space-y-3">
+          {filtered.map((s) => {
+            const info = DIFFICULTY_INFO[s.difficulty];
+            return (
+              <button
+                key={s.id}
+                onClick={() => startScenario(s)}
+                className="w-full bg-forge-surface border border-forge-border rounded-xl p-5 text-left hover:border-forge-accent/30 transition-colors"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`text-xs mono font-semibold ${info.color}`}>
+                    {info.label.toUpperCase()}
+                  </span>
+                  <span className="font-semibold text-sm">{s.title}</span>
+                  <span className="text-[10px] mono text-forge-text-muted bg-forge-surface-2 px-1.5 py-0.5 rounded">
+                    {s.steps.length} steps
+                  </span>
+                  <span className="text-[10px] mono text-forge-text-muted">{s.category}</span>
+                </div>
+                <p className="text-xs text-forge-text-dim">{s.description}</p>
+              </button>
+            );
+          })}
+        </div>
+      </main>
+    </div>
+  );
+}

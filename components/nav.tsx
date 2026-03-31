@@ -5,17 +5,25 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "◆" },
-  { href: "/study", label: "Study", icon: "▶" },
+  { href: "/train", label: "Train", icon: "▶" },
+  { href: "/explore", label: "Explore", icon: "◒" },
   { href: "/interview", label: "Interview", icon: "◎" },
-  { href: "/forge/speed-run", label: "Speed Run", icon: "⚡" },
   { href: "/progress", label: "Progress", icon: "▲" },
-  { href: "/stories", label: "Stories", icon: "◈" },
-  { href: "/cards", label: "Cards", icon: "📇" },
-  { href: "/history", label: "History", icon: "◷" },
-  { href: "/terminal", label: "Terminal", icon: "▹" },
-  { href: "/drill", label: "Drills", icon: "⚡" },
-  { href: "/agent", label: "Agent", icon: "⬡" },
 ];
+
+// Sub-routes that should highlight each hub
+const HUB_ROUTES: Record<string, string[]> = {
+  "/train": ["/train", "/study", "/forge/speed-run", "/drill"],
+  "/explore": ["/explore", "/foundations", "/terminal", "/cards"],
+  "/interview": ["/interview", "/stories", "/agent"],
+};
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  const children = HUB_ROUTES[href];
+  if (children) return children.some((r) => pathname === r || pathname.startsWith(r + "/"));
+  return pathname.startsWith(href);
+}
 
 export default function Nav() {
   const pathname = usePathname();
@@ -26,11 +34,10 @@ export default function Nav() {
         <div className="flex items-center justify-between h-14">
           <Link href="/" className="flex items-center gap-2">
             <span className="mono text-forge-accent font-bold text-lg">L1NX</span>
-            <span className="text-forge-text-dim text-sm hidden sm:inline">Interview Forge</span>
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 ml-6">
             {NAV_ITEMS.map((item) => {
-              const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+              const active = isActive(pathname, item.href);
               return (
                 <Link
                   key={item.href}
