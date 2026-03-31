@@ -152,7 +152,7 @@ export const checkAndAwardBadges = mutation({
     if (progress.length >= 8 && progress.every((p) => p.masteryPercent >= 25)) maybe("all-topics-25");
     if (progress.length >= 8 && progress.every((p) => p.masteryPercent >= 50)) maybe("all-topics-50");
 
-    // Colossus-ready — avg mastery >= 90%
+    // Scale-ready — avg mastery >= 90%
     if (progress.length > 0) {
       const avg = progress.reduce((s, p) => s + p.masteryPercent, 0) / progress.length;
       if (avg >= 90) maybe("colossus-ready");

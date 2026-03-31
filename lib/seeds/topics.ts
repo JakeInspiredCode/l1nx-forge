@@ -159,13 +159,13 @@ export const opsProcesses: ForgeCard[] = [
 // ═══════════════════════════════════════
 // TARGET COMPANY & SCALE CONTEXT
 // ═══════════════════════════════════════
-export const targetContext: ForgeCard[] = [
-  c("xai-001","target-context","easy",1,1,"Large-scale GPU cluster","100K+ H100 GPUs. Purpose-built facility. Trains large AI models. Built in months, not years."),
-  c("xai-002","target-context","easy",1,1,"Target company mission","Pushing the frontier of AI. Values: speed, scale, first-principles thinking."),
-  c("xai-003","target-context","easy",1,1,"100K GPU scale challenges","5-10x power density, InfiniBand for 100K+ GPUs, daily hardware failures at scale, liquid cooling mandatory, infrastructure changes in days."),
-  c("xai-004","target-context","easy",1,1,"DC Ops Tech role","Hardware install/repair, cabling, troubleshooting, IPMI/BMC mgmt, incident response, inventory, documentation."),
-  c("xai-005","target-context","easy",1,1,"Why build a purpose-built facility?","Cheap power, available real estate, fiber connectivity, speed of buildout."),
-  c("xai-101","target-context","intermediate",2,2,"Expected daily failures at 100K GPU scale?","3-17 GPU failures/day (0.1-0.5% monthly rate). Plus memory, disk, NIC, cable, fan failures. Job is fast detection + replacement, not prevention. MTTR > MTBF at scale."),
+export const scaleContext: ForgeCard[] = [
+  c("sc-001","target-context","easy",1,1,"Large-scale GPU cluster","100K+ H100 GPUs. Purpose-built facility. Trains large AI models. Built in months, not years."),
+  c("sc-002","target-context","easy",1,1,"Target company mission","Pushing the frontier of AI. Values: speed, scale, first-principles thinking."),
+  c("sc-003","target-context","easy",1,1,"100K GPU scale challenges","5-10x power density, InfiniBand for 100K+ GPUs, daily hardware failures at scale, liquid cooling mandatory, infrastructure changes in days."),
+  c("sc-004","target-context","easy",1,1,"DC Ops Tech role","Hardware install/repair, cabling, troubleshooting, IPMI/BMC mgmt, incident response, inventory, documentation."),
+  c("sc-005","target-context","easy",1,1,"Why build a purpose-built facility?","Cheap power, available real estate, fiber connectivity, speed of buildout."),
+  c("sc-101","target-context","intermediate",2,2,"Expected daily failures at 100K GPU scale?","3-17 GPU failures/day (0.1-0.5% monthly rate). Plus memory, disk, NIC, cable, fan failures. Job is fast detection + replacement, not prevention. MTTR > MTBF at scale."),
 ];
 
 // ═══════════════════════════════════════
@@ -180,7 +180,7 @@ export const behavioral: ForgeCard[] = [
   c("beh-101","behavioral","intermediate",2,2,"'Process you improved' — STAR template","S: 'At [X], process for [Y] was [problem].' T: 'I was responsible for [scope], taking [metric].' A: 'I [specific actions].' R: 'Reduced [X] by [%]. Team adopted as standard.'"),
 
   // Dropped-fact recovery
-  c("behf-001","behavioral","easy",1,1,"Weak 'Why xAI?' answer?","Generic 'I love AI' — be specific about mission, scale, culture fit"),
+  c("behf-001","behavioral","easy",1,1,"Weak 'Why this company?' answer?","Generic 'I love AI' — be specific about mission, scale, culture fit"),
   c("behf-002","behavioral","easy",1,1,"Red flags in 'under pressure' answers?","Vague stories, blaming others, no specific actions"),
   c("behf-003","behavioral","easy",1,1,"'First 30 days' tone?","Humble enough to learn, motivated enough to contribute quickly"),
 ];

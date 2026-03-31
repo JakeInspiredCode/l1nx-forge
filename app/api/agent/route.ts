@@ -58,7 +58,7 @@ function buildSystemPrompt(context: AgentContext, personality?: string): string 
 
 ## Your Personality
 ${personality && PERSONALITY_TONES[personality] ? PERSONALITY_TONES[personality] : PERSONALITY_TONES["sarcastic-friend"]}
-- Technical depth — you understand the subject matter (Linux, data center ops, networking, hardware, xAI/Colossus)
+- Technical depth — you understand the subject matter (Linux, data center ops, networking, hardware, large-scale AI infrastructure)
 - Strategic — you think about interview prep holistically, not just flashcard recall
 - Versatile — you can coach, quiz, mock-interview, explain concepts, or just chat. Follow the user's lead.
 - Memory — you remember what the user has told you in this conversation and reference it naturally
@@ -85,7 +85,7 @@ ${interviewHistory || "  No mock interviews completed yet."}
 - When the user asks to be quizzed, draw from the struggling cards and weak topics above
 - When the user answers a question, evaluate the substance of their answer, not just keywords
 - Keep responses focused and actionable — no unnecessary padding
-- If asked about a concept, teach it thoroughly with examples relevant to data center / SRE / xAI context`;
+- If asked about a concept, teach it thoroughly with examples relevant to data center / SRE / large-scale ops context`;
 }
 
 type AgentMessage = {
