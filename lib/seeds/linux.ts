@@ -13,59 +13,166 @@ function card(
 }
 
 const linux: ForgeCard[] = [
-  // ── Tier 1: Foundations (Easy) ──
-  card("linux-001", "linux", "easy", 1, 1, "What command prints the absolute path of your current working directory?", "\`pwd\` (print working directory). Outputs the full path from root, e.g., \`/home/ops/scripts\`."),
-  card("linux-002", "linux", "easy", 1, 1, "What command changes your current directory to \`/var/log\`?", "\`cd /var/log\`. This is an absolute path change. Use \`cd -\` to return to the previous directory."),
-  card("linux-003", "linux", "easy", 1, 1, "What does \`ls -la\` display that \`ls\` alone does not?", "\`ls -la\` shows hidden files (those starting with \`.\`) via the \`-a\` flag and long-format details via \`-l\`: permissions, owner, group, size, and modification timestamp."),
-  card("linux-004", "linux", "easy", 1, 1, "What is the root of the Linux filesystem hierarchy?", "\`/\` (forward slash). All files and directories branch from this single root. There are no drive letters like in Windows."),
-  card("linux-005", "linux", "easy", 1, 1, "What is stored in \`/var/log\`?", "System and application log files. Examples: \`syslog\` or \`messages\` (general system log), \`auth.log\` (authentication events). Note: \`/var/log/dmesg\` is a boot-time snapshot only \u2014 not updated after initial boot on modern systemd distros. Use the \`dmesg\` command or \`journalctl -k\` for current kernel messages."),
-  card("linux-006", "linux", "easy", 1, 1, "What is stored in \`/etc\`?", "System-wide configuration files. Examples: \`/etc/hostname\`, \`/etc/fstab\` (filesystem mounts), \`/etc/hosts\`, \`/etc/ssh/sshd_config\`."),
-  card("linux-007", "linux", "easy", 1, 1, "What is \`/proc\` and what kind of information does it expose?", "\`/proc\` is a virtual filesystem (not on disk) that exposes kernel and process information at runtime. Examples: \`/proc/cpuinfo\` (CPU details), \`/proc/meminfo\` (memory stats), \`/proc/<PID>/status\` (per-process info)."),
-  card("linux-008", "linux", "easy", 1, 1, "What is the difference between an absolute path and a relative path?", "An absolute path starts from \`/\` (e.g., \`/var/log/syslog\`) and works from any location. A relative path starts from the current directory (e.g., \`../log/syslog\`) and depends on where you are. Use absolute paths in scripts and documentation."),
-  card("linux-009", "linux", "easy", 1, 1, "What command creates an empty file or updates the timestamp of an existing file?", "\`touch <filename>\`. If the file exists, it updates the access and modification timestamps without changing content. If it doesn't exist, it creates an empty file."),
-  card("linux-010", "linux", "easy", 1, 1, "What command copies a directory and all its contents recursively?", "\`cp -r <source_dir> <dest_dir>\`. The \`-r\` (recursive) flag is required for directories \u2014 without it, \`cp\` will fail on a directory."),
-  card("linux-011", "linux", "easy", 1, 1, "What is the difference between \`rm\` and \`rm -rf\`?", "\`rm\` deletes a single file. \`rm -rf\` deletes recursively (\`-r\`) and force-skips confirmation prompts (\`-f\`). Extremely dangerous with wrong paths \u2014 there is no undo."),
-  card("linux-012", "linux", "easy", 1, 1, "What command creates a directory including any missing parent directories?", "\`mkdir -p /path/to/new/dir\`. The \`-p\` flag creates parent directories as needed instead of failing when an intermediate directory doesn't exist."),
-  card("linux-013", "linux", "easy", 1, 1, "What does \`tail -f /var/log/syslog\` do?", "Follows the file in real time, displaying new lines as they are appended. Essential for watching log output during live troubleshooting. Press \`Ctrl+C\` to stop."),
-  card("linux-014", "linux", "easy", 1, 1, "What command searches for a text pattern inside a file?", "\`grep \"<pattern>\" <file>\`. Example: \`grep \"error\" /var/log/syslog\`. Add \`-i\` for case-insensitive, \`-r\` for recursive directory search, \`-n\` for line numbers."),
-  card("linux-015", "linux", "easy", 1, 1, "What does the pipe operator \`|\` do in Linux?", "It sends the standard output (stdout) of the command on the left as standard input (stdin) to the command on the right. Example: \`dmesg | grep -i \"error\"\` filters kernel messages for errors."),
-  card("linux-016", "linux", "easy", 1, 1, "What is the difference between \`>\` and \`>>\` in shell redirection?", "\`>\` redirects output to a file, overwriting existing content. \`>>\` appends to the file without overwriting. Example: \`echo \"note\" >> log.txt\` adds a line to \`log.txt\`."),
-  card("linux-017", "linux", "easy", 1, 1, "What do the three permission fields represent in \`-rwxr-xr--\`?", "Owner (rwx = read+write+execute), Group (r-x = read+execute), Others (r-- = read only). Each field has three bits for read, write, and execute."),
-  card("linux-018", "linux", "easy", 1, 1, "What numeric value represents \`rwxr-xr-x\` in octal permission notation?", "\`755\`. Owner: r(4)+w(2)+x(1)=7. Group: r(4)+x(1)=5. Others: r(4)+x(1)=5."),
-  card("linux-019", "linux", "easy", 1, 1, "What command changes the owner and group of a file?", "\`chown <owner>:<group> <file>\`. Example: \`chown ops:dcteam script.sh\`. Add \`-R\` for recursive on directories."),
-  card("linux-020", "linux", "easy", 1, 1, "What does the SUID permission bit do on an executable file?", "When set, the file executes with the permissions of the file's owner rather than the user running it. Example: \`/usr/bin/passwd\` has SUID set so normal users can update the password file owned by root."),
-  card("linux-021", "linux", "easy", 1, 1, "What command adds a user to a supplementary group without removing them from existing groups?", "\`sudo usermod -aG <group> <username>\`. The \`-a\` (append) flag is critical \u2014 without it, the user is removed from all groups except the one specified."),
-  card("linux-022", "linux", "easy", 1, 1, "What package manager is used on RHEL, Rocky Linux, and AlmaLinux?", "\`dnf\` (Dandified YUM). It replaced \`yum\` as the default package manager. Both commands still work on most RHEL-family systems, with \`yum\` aliased to \`dnf\`."),
-  card("linux-023", "linux", "easy", 1, 1, "What package manager is used on Ubuntu and Debian?", "\`apt\` (Advanced Package Tool). Use \`apt update\` to refresh the package index before installing. The older \`apt-get\` command still works but \`apt\` is preferred for interactive use."),
-  card("linux-024", "linux", "easy", 1, 1, "What command lists all installed RPM packages on a RHEL-family system?", "\`rpm -qa\`. Pipe to \`grep\` to filter: \`rpm -qa | grep nvidia\`. Use \`rpm -qi <package>\` for detailed info on a specific package."),
-  card("linux-025", "linux", "easy", 1, 1, "Why should you not run \`apt upgrade\` or \`dnf update\` on a production server without a change ticket?", "Uncontrolled updates can introduce breaking changes, kernel updates that require reboots, or driver incompatibilities. Production environments use controlled maintenance windows, internal repository mirrors, and change management processes."),
-  card("linux-026", "linux", "easy", 1, 1, "What filesystem is the default on RHEL/Rocky Linux?", "XFS. It supports very large volumes (up to 8 EiB), has excellent parallel I/O performance, and is well-suited for large file workloads."),
-  card("linux-027", "linux", "easy", 1, 1, "What does the \`ext4\` filesystem provide that makes it resilient to crashes?", "Journaling. ext4 writes metadata changes to a journal before committing them to disk, so if a crash occurs mid-write, the filesystem can replay the journal to recover to a consistent state."),
-  card("linux-028", "linux", "easy", 1, 1, "What command shows mounted filesystems with their types and disk usage?", "\`df -hT\`. \`-h\` gives human-readable sizes (GB, MB). \`-T\` includes the filesystem type column (ext4, xfs, tmpfs, etc.)."),
-  card("linux-029", "linux", "easy", 1, 1, "What command lists block devices and their partition layouts?", "\`lsblk\`. Shows device names, sizes, types, and mount points in a tree structure. Useful for identifying disks and partitions on a server."),
-  card("linux-030", "linux", "easy", 1, 1, "What file defines persistent filesystem mounts in Linux?", "\`/etc/fstab\`. Each line specifies a device (or UUID), mount point, filesystem type, mount options, and dump/fsck settings. Errors in fstab can prevent a system from booting."),
-  card("linux-031", "linux", "easy", 1, 1, "What is \`tmpfs\` and where is it typically used?", "\`tmpfs\` is a filesystem that lives in RAM (and swap if needed). It's very fast but data is lost on reboot. Commonly mounted at \`/tmp\` and \`/dev/shm\`."),
-  card("linux-032", "linux", "easy", 1, 1, "What command lists all running processes with full details?", "\`ps aux\`. \`a\` = all users, \`u\` = user-oriented format (shows owner, CPU%, MEM%), \`x\` = include processes not attached to a terminal."),
-  card("linux-033", "linux", "easy", 1, 1, "What is the difference between \`kill <PID>\` and \`kill -9 <PID>\`?", "\`kill <PID>\` sends SIGTERM (signal 15), asking the process to shut down gracefully. \`kill -9 <PID>\` sends SIGKILL (signal 9), forcing immediate termination with no cleanup. Always try SIGTERM first."),
-  card("linux-034", "linux", "easy", 1, 1, "What command shows the status of a systemd service?", "\`systemctl status <service_name>\`. Shows whether the service is active/inactive, its PID, recent log output, and whether it's enabled to start on boot."),
-  card("linux-035", "linux", "easy", 1, 1, "What command views logs for a specific systemd service?", "\`journalctl -u <service_name>\`. Add \`-f\` to follow in real time, or \`--since \"1 hour ago\"\` to filter by time."),
-  card("linux-036", "linux", "easy", 1, 1, "What does \`systemctl enable <service>\` do versus \`systemctl start <service>\`?", "\`start\` runs the service immediately. \`enable\` configures it to start automatically on boot. They are independent \u2014 you usually need both: \`systemctl enable --now <service>\` does both at once."),
-  card("linux-037", "linux", "easy", 1, 1, "What is a zombie process?", "A process that has finished executing but still has an entry in the process table because its parent hasn't called \`wait()\` to collect its exit status. Shows as \`Z\` in \`ps\` output. Usually harmless in small numbers but indicates a buggy parent."),
-  card("linux-038", "linux", "easy", 1, 1, "What command shows recent kernel messages, including hardware errors and driver events?", "\`dmesg\`. Add \`| tail -50\` for recent entries, or \`-T\` for human-readable timestamps. Critical for diagnosing hardware failures \u2014 disk errors, memory (ECC) errors, GPU issues, and NIC problems all appear here."),
-  card("linux-039", "linux", "easy", 1, 1, "What command lists PCI devices on a server, such as GPUs, NICs, and storage controllers?", "\`lspci\`. Add \`-v\` for verbose details or pipe through \`grep\` to filter: \`lspci | grep -i nvidia\`."),
-  card("linux-040", "linux", "easy", 1, 1, "What command shows network interfaces and their IP addresses?", "\`ip addr show\` (or \`ip a\` for short). Shows all interfaces, their state (UP/DOWN), IPv4/IPv6 addresses, and MAC addresses. Replaces the deprecated \`ifconfig\`."),
-  card("linux-041", "linux", "easy", 1, 1, "What command shows listening TCP ports and the processes using them?", "\`ss -tlnp\`. \`-t\` = TCP, \`-l\` = listening, \`-n\` = numeric (no DNS resolution), \`-p\` = show process name. Replaces the older \`netstat -tlnp\`."),
-  card("linux-042", "linux", "easy", 1, 1, "What command shows disk I/O statistics per device?", "\`iostat -xz 1\`. \`-x\` = extended stats (including await, %util), \`-z\` = skip idle devices, \`1\` = refresh every second. Part of the \`sysstat\` package."),
-  card("linux-043", "linux", "easy", 1, 1, "What command displays memory and swap usage in human-readable format?", "\`free -h\`. Shows total, used, free, shared, buff/cache, and available memory. The \"available\" column is the best indicator of how much memory is actually free for new processes."),
-  card("linux-044", "linux", "easy", 1, 1, "What does \`nvidia-smi\` display?", "GPU status including: GPU name/model, temperature, power draw, memory usage (used/total), GPU utilization percentage, and running processes. Essential for monitoring GPU compute nodes."),
-  card("linux-045", "linux", "easy", 1, 1, "What is the shebang line and why is it the first line of a bash script?", "\`#!/bin/bash\`. It tells the system which interpreter to use when the script is executed directly. Without it, the system may use a different default shell, causing unexpected behavior."),
-  card("linux-046", "linux", "easy", 1, 1, "What is the meaning of exit code \`0\` versus a non-zero exit code?", "Exit code \`0\` means success. Any non-zero value means failure. The specific non-zero value can indicate the type of error. Check the last command's exit code with \`echo $?\`."),
-  card("linux-047", "linux", "easy", 1, 1, "What is the difference between single quotes and double quotes in bash?", "Single quotes (\`'...'\`) treat everything literally \u2014 no variable expansion. Double quotes (\`\"...\"\`) expand variables and command substitutions. Example: \`echo \"$HOME\"\` prints your home path; \`echo '$HOME'\` prints the literal string \`$HOME\`."),
-  card("linux-048", "linux", "easy", 1, 1, "What does \`$(command)\` do in a bash script?", "Command substitution \u2014 it executes \`command\` and replaces \`$(command)\` with its output. Example: \`DATE=$(date +%Y-%m-%d)\` stores today's date in the \`DATE\` variable. Preferred over the older backtick syntax."),
-  card("linux-049", "linux", "easy", 1, 1, "What does \`/dev\` contain and why is it important for hardware troubleshooting?", "\`/dev\` contains device files that represent hardware and virtual devices. Examples: \`/dev/sda\` (first disk), \`/dev/nvidia0\` (first GPU), \`/dev/ttyS0\` (serial port). Missing device files can indicate driver failures or hardware not being detected."),
-  card("linux-050", "linux", "easy", 1, 1, "What command shows the SMART health status of a disk drive?", "\`smartctl -a /dev/sda\` (from the \`smartmontools\` package). Displays disk health attributes, error logs, and self-test results. Look for reallocated sectors, pending sectors, and uncorrectable errors as indicators of imminent disk failure."),
-  card("linux-051", "linux", "easy", 1, 1, "What does \`ethtool eth0\` show?", "NIC details including link speed (e.g., 25Gbps, 100Gbps), duplex setting, auto-negotiation status, and whether the link is detected. Useful for verifying physical network connectivity and speed mismatches."),
-  card("linux-052", "linux", "easy", 1, 1, "What command shows which disk or partition is using the most space?", "\`du -sh /*\` shows the size of each top-level directory. Drill down into the largest with \`du -sh /var/*\`, etc. Combine with \`sort -h\` to rank by size: \`du -sh /* 2>/dev/null | sort -h\`."),
+  // ── Tier 1: Foundations (Rapid-Fire) ──
+
+  // Commands — core
+  card("linux-001", "linux", "easy", 1, 1, "Print current directory", "`pwd`"),
+  card("linux-002", "linux", "easy", 1, 1, "`cd -`", "Return to previous directory"),
+  card("linux-003", "linux", "easy", 1, 1, "List all files, long format", "`ls -la`"),
+  card("linux-003a", "linux", "easy", 1, 1, "`ls -a`", "Show hidden files (starting with `.`)"),
+  card("linux-003b", "linux", "easy", 1, 1, "`ls -l`", "Long format: permissions, owner, size, date"),
+  card("linux-009", "linux", "easy", 1, 1, "Create empty file / update timestamp", "`touch <file>`"),
+  card("linux-010", "linux", "easy", 1, 1, "Copy directory recursively", "`cp -r <src> <dest>`"),
+  card("linux-011", "linux", "easy", 1, 1, "`rm -rf`", "Recursive force delete — no undo"),
+  card("linux-012", "linux", "easy", 1, 1, "Create dir with missing parents", "`mkdir -p <path>`"),
+  card("linux-013", "linux", "easy", 1, 1, "Follow log file in real time", "`tail -f <file>`"),
+
+  // grep
+  card("linux-014", "linux", "easy", 1, 1, "Search text pattern in file", '`grep "pattern" <file>`'),
+  card("linux-014a", "linux", "easy", 1, 1, "`grep -i`", "Case-insensitive search"),
+  card("linux-014b", "linux", "easy", 1, 1, "`grep -r`", "Recursive directory search"),
+  card("linux-014c", "linux", "easy", 1, 1, "`grep -n`", "Show line numbers in output"),
+
+  // Shell operators
+  card("linux-015", "linux", "easy", 1, 1, "Pipe `|`", "Send stdout of left command as stdin to right"),
+  card("linux-016", "linux", "easy", 1, 1, "`>` vs `>>`", "`>` overwrites file, `>>` appends"),
+
+  // Filesystem hierarchy
+  card("linux-004", "linux", "easy", 1, 1, "Root of Linux filesystem", "`/` — all files branch from here"),
+  card("linux-005", "linux", "easy", 1, 1, "`/var/log`", "System and application logs"),
+  card("linux-006", "linux", "easy", 1, 1, "`/etc`", "System-wide configuration files"),
+  card("linux-007", "linux", "easy", 1, 1, "`/proc`", "Virtual filesystem — kernel and process info at runtime"),
+  card("linux-049", "linux", "easy", 1, 1, "`/dev`", "Device files — hardware and virtual devices"),
+  card("linux-008", "linux", "easy", 1, 1, "Absolute vs relative path", "Absolute starts from `/`, relative from current dir"),
+
+  // Permissions
+  card("linux-017", "linux", "easy", 1, 1, "`rwxr-xr--`", "Owner: rwx, Group: r-x, Others: r--"),
+  card("linux-018", "linux", "easy", 1, 1, "`rwxr-xr-x` in octal", "`755`"),
+  card("linux-018a", "linux", "easy", 1, 1, "`rw-r--r--` in octal", "`644`"),
+  card("linux-018b", "linux", "easy", 1, 1, "`rwx------` in octal", "`700`"),
+  card("linux-018c", "linux", "easy", 1, 1, "Octal: r, w, x", "r=4, w=2, x=1"),
+  card("linux-019", "linux", "easy", 1, 1, "Change file owner and group", "`chown owner:group <file>`"),
+  card("linux-019a", "linux", "easy", 1, 1, "`chown -R`", "Change ownership recursively"),
+  card("linux-020", "linux", "easy", 1, 1, "SUID bit on executable", "Runs as file owner, not executing user"),
+  card("linux-021", "linux", "easy", 1, 1, "Add user to group (keep existing)", "`usermod -aG <group> <user>`"),
+  card("linux-021a", "linux", "easy", 1, 1, "`usermod -aG` — why `-a`?", "Without it, user is removed from all other groups"),
+
+  // Package managers
+  card("linux-022", "linux", "easy", 1, 1, "RHEL/Rocky package manager", "`dnf`"),
+  card("linux-023", "linux", "easy", 1, 1, "Ubuntu/Debian package manager", "`apt`"),
+  card("linux-024", "linux", "easy", 1, 1, "List installed RPM packages", "`rpm -qa`"),
+  card("linux-025", "linux", "easy", 1, 1, "Why not `apt upgrade` in prod?", "Uncontrolled updates break things — use change tickets"),
+
+  // Filesystems
+  card("linux-026", "linux", "easy", 1, 1, "Default filesystem on RHEL", "XFS"),
+  card("linux-027", "linux", "easy", 1, 1, "ext4 crash resilience", "Journaling — replays metadata changes after crash"),
+  card("linux-028", "linux", "easy", 1, 1, "Mounted filesystems + disk usage", "`df -hT`"),
+  card("linux-029", "linux", "easy", 1, 1, "List block devices + partitions", "`lsblk`"),
+  card("linux-030", "linux", "easy", 1, 1, "Persistent mount config file", "`/etc/fstab`"),
+  card("linux-031", "linux", "easy", 1, 1, "`tmpfs`", "RAM-based filesystem, lost on reboot"),
+
+  // Processes & services
+  card("linux-032", "linux", "easy", 1, 1, "List all running processes", "`ps aux`"),
+  card("linux-033", "linux", "easy", 1, 1, "`kill` vs `kill -9`", "SIGTERM (graceful) vs SIGKILL (forced, no cleanup)"),
+  card("linux-034", "linux", "easy", 1, 1, "Check systemd service status", "`systemctl status <service>`"),
+  card("linux-035", "linux", "easy", 1, 1, "View logs for a systemd service", "`journalctl -u <service>`"),
+  card("linux-036", "linux", "easy", 1, 1, "`enable` vs `start` (systemd)", "`start` = run now, `enable` = run on boot"),
+  card("linux-036a", "linux", "easy", 1, 1, "Start + enable in one command", "`systemctl enable --now <service>`"),
+  card("linux-037", "linux", "easy", 1, 1, "Zombie process", "Finished but parent hasn't collected exit status (`Z`)"),
+
+  // System & hardware inspection
+  card("linux-038", "linux", "easy", 1, 1, "View kernel messages", "`dmesg` — hardware errors, drivers, boot"),
+  card("linux-039", "linux", "easy", 1, 1, "List PCI devices (GPUs, NICs)", "`lspci`"),
+  card("linux-040", "linux", "easy", 1, 1, "Show network interfaces + IPs", "`ip addr show` (or `ip a`)"),
+  card("linux-041", "linux", "easy", 1, 1, "Show listening TCP ports + processes", "`ss -tlnp`"),
+  card("linux-042", "linux", "easy", 1, 1, "Disk I/O stats per device", "`iostat -xz 1`"),
+  card("linux-043", "linux", "easy", 1, 1, "Memory and swap usage", "`free -h`"),
+  card("linux-044", "linux", "easy", 1, 1, "GPU status command", "`nvidia-smi`"),
+  card("linux-050", "linux", "easy", 1, 1, "Check disk SMART health", "`smartctl -a /dev/sda`"),
+  card("linux-051", "linux", "easy", 1, 1, "`ethtool eth0`", "NIC link speed, duplex, auto-negotiation"),
+  card("linux-052", "linux", "easy", 1, 1, "Find largest directories", "`du -sh /* | sort -h`"),
+
+  // Bash scripting basics
+  card("linux-045", "linux", "easy", 1, 1, "Shebang line", "`#!/bin/bash` — sets the interpreter"),
+  card("linux-046", "linux", "easy", 1, 1, "Exit code `0`", "Success. Non-zero = failure. Check with `$?`"),
+  card("linux-047", "linux", "easy", 1, 1, "Single vs double quotes (bash)", "Single: literal. Double: expands variables"),
+  card("linux-048", "linux", "easy", 1, 1, "`$(command)`", "Command substitution — replaced by output"),
+
+  // ── Dropped-fact recovery cards ──
+
+  // Filesystem paths — specific files
+  card("lx-001", "linux", "easy", 1, 1, "What is the general system log file?", "`/var/log/syslog` (Ubuntu) or `/var/log/messages` (RHEL)"),
+  card("lx-002", "linux", "easy", 1, 1, "What log file records authentication events?", "`/var/log/auth.log`"),
+  card("lx-003", "linux", "easy", 1, 1, "Is `/var/log/dmesg` updated after boot?", "No — boot-time snapshot only. Use `dmesg` or `journalctl -k` for live kernel messages."),
+  card("lx-004a", "linux", "easy", 1, 1, "`/etc/hostname`", "Stores the system's hostname"),
+  card("lx-004b", "linux", "easy", 1, 1, "`/etc/hosts`", "Local hostname-to-IP mappings (bypasses DNS)"),
+  card("lx-004c", "linux", "easy", 1, 1, "`/etc/ssh/sshd_config`", "SSH server configuration file"),
+  card("lx-005", "linux", "easy", 1, 1, "`/proc/cpuinfo`", "CPU details (model, cores, speed)"),
+  card("lx-006", "linux", "easy", 1, 1, "`/proc/meminfo`", "Detailed memory statistics"),
+  card("lx-008", "linux", "easy", 1, 1, "`/dev/nvidia0`", "First GPU device file"),
+  card("lx-009", "linux", "easy", 1, 1, "Missing device file in `/dev` means?", "Driver failure or hardware not detected"),
+  card("lx-010a", "linux", "easy", 1, 1, "Where is `tmpfs` commonly mounted?", "`/tmp` and `/dev/shm`"),
+  card("lx-010b", "linux", "easy", 1, 1, "What does it mean to 'mount' a filesystem?", "Attach a filesystem to a directory so its contents become accessible"),
+
+  // Command flags — dmesg
+  card("lx-011", "linux", "easy", 1, 1, "What does the `-T` flag do in `dmesg`?", "Shows human-readable timestamps"),
+  card("lx-012", "linux", "easy", 1, 1, "`dmesg | tail -50`", "Show most recent 50 kernel messages"),
+
+  // Command flags — lspci
+  card("lx-013", "linux", "easy", 1, 1, "What does the `-v` flag do in `lspci`?", "Verbose device details"),
+  card("lx-014", "linux", "easy", 1, 1, "Filter `lspci` for NVIDIA GPUs?", "`lspci | grep -i nvidia`"),
+
+  // Command flags — journalctl
+  card("lx-015", "linux", "easy", 1, 1, "What does the `-f` flag do in `journalctl`?", "Follow log output in real time"),
+  card("lx-016", "linux", "easy", 1, 1, "Filter `journalctl` to last hour?", '`journalctl --since "1 hour ago"`'),
+
+  // Command flags — ss
+  card("lx-017", "linux", "easy", 1, 1, "`ss` flags: -t, -l, -n, -p", "-t=TCP, -l=listening, -n=numeric (no DNS), -p=show process"),
+  card("lx-018", "linux", "easy", 1, 1, "`ss` replaces what deprecated tool?", "`netstat`"),
+
+  // Command flags — iostat
+  card("lx-019a", "linux", "easy", 1, 1, "What does `-x` do in `iostat`?", "Extended stats: includes await (latency) and %util"),
+  card("lx-019b", "linux", "easy", 1, 1, "What package provides `iostat`?", "`sysstat`"),
+
+  // Command flags — ps
+  card("lx-020", "linux", "easy", 1, 1, "`ps aux` flag breakdown?", "a=all users, u=user format (CPU%, MEM%), x=include no-terminal processes"),
+
+  // Command flags — df
+  card("lx-021a", "linux", "easy", 1, 1, "What does `-h` do in `df`?", "Human-readable sizes (GB, MB)"),
+  card("lx-021b", "linux", "easy", 1, 1, "What does `-T` do in `df`?", "Shows filesystem type column (ext4, xfs, etc.)"),
+
+  // Quick facts
+  card("lx-022", "linux", "easy", 1, 1, "How do you stop `tail -f`?", "`Ctrl+C`"),
+  card("lx-023", "linux", "easy", 1, 1, "`ip addr` replaces what deprecated tool?", "`ifconfig`"),
+  card("lx-024", "linux", "easy", 1, 1, "Filter installed RPM packages?", "`rpm -qa | grep <name>`"),
+  card("lx-025", "linux", "easy", 1, 1, "Detailed info on one RPM package?", "`rpm -qi <package>`"),
+
+  // Signal numbers
+  card("lx-026a", "linux", "easy", 1, 1, "SIGTERM signal number?", "15"),
+  card("lx-026b", "linux", "easy", 1, 1, "SIGKILL signal number?", "9"),
+  card("lx-027", "linux", "easy", 1, 1, "Which kill signal should you try first?", "SIGTERM (15) — always try graceful before forced"),
+
+  // Key concepts
+  card("lx-028", "linux", "easy", 1, 1, "Are `systemctl start` and `enable` dependent?", "No — independent. You usually need both."),
+  card("lx-029", "linux", "easy", 1, 1, "Best column in `free -h` for actual free memory?", "'available' — accounts for reclaimable cache"),
+  card("lx-030", "linux", "easy", 1, 1, "What fields does `nvidia-smi` show?", "GPU name, temp, power, VRAM used/total, utilization %, running processes"),
+  card("lx-031", "linux", "easy", 1, 1, "SMART indicators of imminent disk failure?", "Reallocated sectors, pending sectors, uncorrectable errors"),
+  card("lx-032", "linux", "easy", 1, 1, "What package provides `smartctl`?", "`smartmontools`"),
+  card("lx-033", "linux", "easy", 1, 1, "Risk of errors in `/etc/fstab`?", "Can prevent system from booting"),
+  card("lx-034", "linux", "easy", 1, 1, "Are zombie processes dangerous?", "Usually harmless in small numbers — indicates buggy parent process"),
+  card("lx-035", "linux", "easy", 1, 1, "Classic SUID example?", "`/usr/bin/passwd` — lets normal users update root-owned password file"),
+  card("lx-036", "linux", "easy", 1, 1, "Does Linux use drive letters?", "No — single root `/`, no C: or D:"),
+  card("lx-037", "linux", "easy", 1, 1, "`dnf` vs `yum`?", "dnf replaced yum. yum still works (aliased to dnf) on RHEL-family."),
+  card("lx-038", "linux", "easy", 1, 1, "What to run before `apt install`?", "`apt update` — refreshes the package index"),
+  card("lx-039", "linux", "easy", 1, 1, "Absolute or relative paths in scripts?", "Absolute — works from any location"),
+  card("lx-040", "linux", "easy", 1, 1, "What happens if you `cp` a directory without `-r`?", "It fails — `-r` is required for directories"),
+  card("lx-041", "linux", "easy", 1, 1, "Backtick `` `cmd` `` vs `$(cmd)`?", "Both do command substitution. `$()` preferred — nestable and clearer."),
+
+  // Examples as recall cards
+  card("lx-042", "linux", "easy", 1, 1, '`echo "$HOME"` vs `echo \'$HOME\'`?', "Double quotes: prints path. Single quotes: prints literal $HOME"),
+  card("lx-043", "linux", "easy", 1, 1, "`DATE=$(date +%Y-%m-%d)` does what?", "Stores today's date in variable DATE (command substitution)"),
+  card("lx-044", "linux", "easy", 1, 1, '`echo "note" >> log.txt` does what?', "Appends 'note' to log.txt"),
+  card("lx-045", "linux", "easy", 1, 1, '`dmesg | grep -i "error"` does what?', "Filters kernel messages for errors"),
 ];
 
 export default linux;

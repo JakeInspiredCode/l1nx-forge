@@ -1,0 +1,119 @@
+"use client";
+
+import { useState } from "react";
+import Nav from "@/components/nav";
+import QuickDrawGame, { QuickDrawSummary } from "@/components/forge/quick-draw/quick-draw-game";
+import QuickDrawResults from "@/components/forge/quick-draw/quick-draw-results";
+import { getAllModules, QuickDrawModule } from "@/lib/seeds/quick-draw-modules";
+
+type Screen = "setup" | "playing" | "results";
+type Mode = "type" | "choice";
+
+export default function QuickDrawPage() {
+  const [screen, setScreen] = useState<Screen>("setup");
+  const [selectedModule, setSelectedModule] = useState<QuickDrawModule | null>(null);
+  const [mode, setMode] = useState<Mode>("type");
+  const [summary, setSummary] = useState<QuickDrawSummary | null>(null);
+
+  const modules = getAllModules();
+
+  const startGame = (mod: QuickDrawModule) => {
+    setSelectedModule(mod);
+    setSummary(null);
+    setScreen("playing");
+  };
+
+  const handleComplete = (s: QuickDrawSummary) => {
+    setSummary(s);
+    setScreen("results");
+  };
+
+  if (screen === "playing" && selectedModule) {
+    return (
+      <div className="min-h-screen bg-forge-bg">
+        <Nav />
+        <main className="px-4 sm:px-6 py-8">
+          <QuickDrawGame
+            items={selectedModule.items}
+            mode={mode}
+            onComplete={handleComplete}
+            onQuit={() => setScreen("setup")}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (screen === "results" && summary && selectedModule) {
+    return (
+      <div className="min-h-screen bg-forge-bg">
+        <Nav />
+        <main className="px-4 sm:px-6 py-8">
+          <QuickDrawResults
+            summary={summary}
+            moduleName={selectedModule.title}
+            onPlayAgain={() => startGame(selectedModule)}
+            onBack={() => setScreen("setup")}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Setup
+  return (
+    <div className="min-h-screen bg-forge-bg">
+      <Nav />
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <h1 className="text-2xl font-bold mono mb-1">Quick Draw</h1>
+        <p className="text-sm text-forge-text-dim mb-6">
+          Fast recall drills — pick a module and go
+        </p>
+
+        {/* Mode toggle */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setMode("type")}
+            className={`px-4 py-2 rounded-lg text-sm mono border transition-colors ${
+              mode === "type"
+                ? "bg-forge-accent/20 text-forge-accent border-forge-accent/40"
+                : "border-forge-border text-forge-text-dim hover:text-forge-text"
+            }`}
+          >
+            Type Answer
+          </button>
+          <button
+            onClick={() => setMode("choice")}
+            className={`px-4 py-2 rounded-lg text-sm mono border transition-colors ${
+              mode === "choice"
+                ? "bg-forge-accent/20 text-forge-accent border-forge-accent/40"
+                : "border-forge-border text-forge-text-dim hover:text-forge-text"
+            }`}
+          >
+            Multiple Choice
+          </button>
+        </div>
+
+        {/* Module grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {modules.map((mod) => (
+            <button
+              key={mod.id}
+              onClick={() => startGame(mod)}
+              className="rounded-xl p-5 border border-forge-border bg-forge-surface hover:border-forge-accent/30 hover:bg-forge-accent/5 transition-all text-left"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-lg">{mod.icon}</span>
+                <span className="font-semibold text-sm text-forge-text">{mod.title}</span>
+                <span className="text-[10px] mono text-forge-text-muted bg-forge-surface-2 px-1.5 py-0.5 rounded">
+                  {mod.items.length} items
+                </span>
+              </div>
+              <p className="text-xs text-forge-text-dim">{mod.description}</p>
+            </button>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}

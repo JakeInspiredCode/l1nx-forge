@@ -189,6 +189,54 @@ export const seedCards = mutation({
   },
 });
 
+// Upsert cards: update existing card text, insert new cards, preserve review progress
+export const reseedCards = mutation({
+  args: {
+    cards: v.array(v.object({
+      cardId: v.string(),
+      topicId: v.string(),
+      type: v.string(),
+      front: v.string(),
+      back: v.string(),
+      difficulty: v.number(),
+      tier: v.number(),
+      steps: v.optional(v.array(v.string())),
+      easeFactor: v.number(),
+      interval: v.number(),
+      repetitions: v.number(),
+      dueDate: v.string(),
+      lastReview: v.optional(v.string()),
+    })),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let updated = 0;
+    for (const card of args.cards) {
+      const existing = await ctx.db
+        .query("forgeCards")
+        .withIndex("by_cardId", (q) => q.eq("cardId", card.cardId))
+        .first();
+      if (existing) {
+        // Update text but preserve review progress
+        await ctx.db.patch(existing._id, {
+          front: card.front,
+          back: card.back,
+          topicId: card.topicId,
+          type: card.type,
+          difficulty: card.difficulty,
+          tier: card.tier,
+          steps: card.steps,
+        });
+        updated++;
+      } else {
+        await ctx.db.insert("forgeCards", card);
+        inserted++;
+      }
+    }
+    return { inserted, updated };
+  },
+});
+
 // Remove duplicate cards, keeping only the one with the most review progress
 export const dedup = mutation({
   args: {},

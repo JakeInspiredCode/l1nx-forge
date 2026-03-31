@@ -9,12 +9,12 @@ import DailyPlanDisplay from "@/components/daily-plan";
 import CardQueue from "@/components/card-queue";
 import { TOPICS, ForgeCard, mapConvexCard } from "@/lib/types";
 import {
-  useCards, useIsSeeded, useSeedCards,
+  useCards, useIsSeeded, useSeedCards, useReseedCards,
   useAllProgress, useProfile, useDueCards,
   useRecomputeProgress, useRecentReviews, useRecentSessions, useSpeedRunsRecent,
 } from "@/lib/convex-hooks";
 import { getAllSeedCards } from "@/lib/seeds";
-import { generateDailyPlan } from "@/lib/forge/scheduler";
+import { generateDailyPlan, PlanDifficulty } from "@/lib/forge/scheduler";
 import ActivityToday from "@/components/activity-today";
 import Link from "next/link";
 
@@ -22,6 +22,7 @@ export default function Dashboard() {
   const rawCards = useCards();
   const isSeeded = useIsSeeded();
   const seedCards = useSeedCards();
+  const reseedCards = useReseedCards();
   const progress = useAllProgress();
   const profile = useProfile();
   const dueCards = useDueCards();
@@ -32,6 +33,8 @@ export default function Dashboard() {
   const [seeding, setSeeding] = useState(false);
   const [trainingCards, setTrainingCards] = useState<ForgeCard[] | null>(null);
   const [planTopicFilter, setPlanTopicFilter] = useState<string>("all");
+  const [planDifficulty, setPlanDifficulty] = useState<PlanDifficulty>("standard");
+  const [planResetKey, setPlanResetKey] = useState(0);
 
   // Seed on first load if DB is empty
   useEffect(() => {
@@ -57,13 +60,44 @@ export default function Dashboard() {
     doSeed();
   }, [isSeeded, seeding, seedCards, recomputeProgress]);
 
+  // Reseed: update existing card text + insert new cards (v2 audit)
+  // Bump RESEED_VERSION when seed data changes to trigger a refresh
+  const RESEED_VERSION = 2;
+  useEffect(() => {
+    if (!isSeeded || seeding) return;
+    const key = `l1nx-reseed-v${RESEED_VERSION}`;
+    if (typeof window !== "undefined" && localStorage.getItem(key)) return;
+    const doReseed = async () => {
+      setSeeding(true);
+      const allCards = getAllSeedCards();
+      for (let i = 0; i < allCards.length; i += 50) {
+        const batch = allCards.slice(i, i + 50).map((c) => ({
+          cardId: c.id, topicId: c.topicId, type: c.type,
+          front: c.front, back: c.back, difficulty: c.difficulty,
+          tier: c.tier, steps: c.steps, easeFactor: c.easeFactor,
+          interval: c.interval, repetitions: c.repetitions,
+          dueDate: c.dueDate, lastReview: c.lastReview ?? undefined,
+        }));
+        await reseedCards({ cards: batch });
+      }
+      for (const t of TOPICS) {
+        await recomputeProgress({ topicId: t.id });
+      }
+      if (typeof window !== "undefined") localStorage.setItem(key, "done");
+      setSeeding(false);
+    };
+    doReseed();
+  }, [isSeeded, seeding, reseedCards, recomputeProgress]);
+
   const mapCard = mapConvexCard;
 
   // Generate daily plan from current card data, filtered by topic
   const dailyPlan = useMemo(() => {
+    // planResetKey forces regeneration when user clicks Reset Plan
+    void planResetKey;
     if (rawCards.length === 0) return null;
-    return generateDailyPlan(rawCards, progress, planTopicFilter);
-  }, [rawCards, progress, planTopicFilter]);
+    return generateDailyPlan(rawCards, progress, planTopicFilter, planDifficulty);
+  }, [rawCards, progress, planTopicFilter, planDifficulty, planResetKey]);
 
   const dueCount = dueCards.length;
   const totalCards = rawCards.length;
@@ -163,6 +197,12 @@ export default function Dashboard() {
               onStartTraining={handleStartTraining}
               topicFilter={planTopicFilter}
               onTopicFilterChange={setPlanTopicFilter}
+              difficulty={planDifficulty}
+              onDifficultyChange={setPlanDifficulty}
+              onResetPlan={() => {
+                localStorage.removeItem("l1nx-plan-done");
+                setPlanResetKey((k) => k + 1);
+              }}
             />
 
             {/* Mock interview CTA */}

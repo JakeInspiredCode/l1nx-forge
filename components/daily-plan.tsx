@@ -2,13 +2,16 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { TOPICS } from "@/lib/types";
-import { DailyPlan, ScheduleBlock } from "@/lib/forge/scheduler";
+import { DailyPlan, ScheduleBlock, PlanDifficulty } from "@/lib/forge/scheduler";
 
 interface DailyPlanDisplayProps {
   plan: DailyPlan | null;
   onStartTraining: (cardIds: string[]) => void;
   topicFilter: string;
   onTopicFilterChange: (topic: string) => void;
+  difficulty: PlanDifficulty;
+  onDifficultyChange: (d: PlanDifficulty) => void;
+  onResetPlan: () => void;
 }
 
 const BLOCK_COLORS: Record<string, { bg: string; border: string; text: string; bar: string }> = {
@@ -140,7 +143,13 @@ function BlockCard({
   );
 }
 
-export default function DailyPlanDisplay({ plan, onStartTraining, topicFilter, onTopicFilterChange }: DailyPlanDisplayProps) {
+const DIFFICULTY_LABELS: Record<PlanDifficulty, { label: string; desc: string }> = {
+  light: { label: "Light", desc: "~30 min" },
+  standard: { label: "Standard", desc: "~60 min" },
+  intense: { label: "Intense", desc: "~90 min" },
+};
+
+export default function DailyPlanDisplay({ plan, onStartTraining, topicFilter, onTopicFilterChange, difficulty, onDifficultyChange, onResetPlan }: DailyPlanDisplayProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [doneState, setDoneState] = useState<DoneState>({ ids: new Set(), cardsByBlock: {} });
 
@@ -250,6 +259,23 @@ export default function DailyPlanDisplay({ plan, onStartTraining, topicFilter, o
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Difficulty toggle */}
+          <div className="flex rounded-lg overflow-hidden border border-forge-border">
+            {(["light", "standard", "intense"] as PlanDifficulty[]).map((d) => (
+              <button
+                key={d}
+                onClick={() => onDifficultyChange(d)}
+                className={`text-[11px] mono px-2.5 py-1 transition-colors ${
+                  difficulty === d
+                    ? "bg-forge-accent/20 text-forge-accent"
+                    : "bg-forge-surface-2 text-forge-text-dim hover:text-forge-text"
+                }`}
+                title={DIFFICULTY_LABELS[d].desc}
+              >
+                {DIFFICULTY_LABELS[d].label}
+              </button>
+            ))}
+          </div>
           <select
             value={topicFilter}
             onChange={(e) => onTopicFilterChange(e.target.value)}
@@ -265,6 +291,12 @@ export default function DailyPlanDisplay({ plan, onStartTraining, topicFilter, o
           <button onClick={selectNone}
             className="text-[11px] mono px-2 py-1 rounded bg-forge-surface-2 text-forge-text-dim hover:text-forge-text transition-colors">
             Clear
+          </button>
+          <button onClick={onResetPlan}
+            className="text-[11px] mono px-2 py-1 rounded bg-forge-surface-2 text-forge-danger/80 hover:text-forge-danger transition-colors border border-forge-border"
+            title="Reset today's plan — clears all block progress and regenerates"
+          >
+            Reset Plan
           </button>
         </div>
       </div>
