@@ -4,8 +4,9 @@ import { useState } from "react";
 import Nav from "@/components/nav";
 import FilesystemGame from "@/components/forge/explorer/filesystem-game";
 import CommandDissector from "@/components/forge/explorer/command-dissector";
+import FilesystemTypes from "@/components/forge/explorer/filesystem-types";
 
-type Tab = "filesystem" | "commands";
+type Tab = "filesystem" | "commands" | "types";
 type FSMode = "learn" | "label" | null;
 
 export default function VisualExplorerPage() {
@@ -18,7 +19,7 @@ export default function VisualExplorerPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mono mb-1">Visual Explorer</h1>
         <p className="text-sm text-forge-text-dim mb-6">
-          Interactive filesystem tree + 75-command dissector
+          Interactive filesystem tree, command dissector, and filesystem types
         </p>
 
         {/* Tab toggle */}
@@ -26,6 +27,7 @@ export default function VisualExplorerPage() {
           {([
             { id: "filesystem" as Tab, label: "Filesystem" },
             { id: "commands" as Tab, label: "Commands" },
+            { id: "types" as Tab, label: "Types" },
           ]).map((t) => (
             <button
               key={t.id}
@@ -74,6 +76,11 @@ export default function VisualExplorerPage() {
         {/* Commands tab */}
         {tab === "commands" && (
           <CommandDissector onBack={() => setTab("filesystem")} />
+        )}
+
+        {/* Types tab */}
+        {tab === "types" && (
+          <FilesystemTypes />
         )}
       </main>
     </div>
