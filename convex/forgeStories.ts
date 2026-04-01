@@ -14,6 +14,11 @@ export const upsert = mutation({
     question: v.string(),
     framework: v.string(),
     answer: v.string(),
+    chunks: v.optional(v.array(v.object({
+      label: v.string(),
+      summary: v.string(),
+      content: v.string(),
+    }))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db

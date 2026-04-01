@@ -93,6 +93,11 @@ export default defineSchema({
     question: v.string(),
     framework: v.string(),
     answer: v.string(),
+    chunks: v.optional(v.array(v.object({
+      label: v.string(),
+      summary: v.string(),
+      content: v.string(),
+    }))),
   })
     .index("by_storyId", ["storyId"]),
 
