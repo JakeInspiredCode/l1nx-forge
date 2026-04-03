@@ -8,7 +8,7 @@ interface HistoryEntry {
   text: string;
 }
 
-export default function TerminalSim({ height = 240 }: { height?: number }) {
+export default function TerminalSim({ height = 240, onCommand }: { height?: number; onCommand?: (cmd: string) => void }) {
   const [history, setHistory] = useState<HistoryEntry[]>([
     { type: "system", text: `Welcome to ${HOSTNAME}. Type 'help' for available commands.` },
   ]);
@@ -28,6 +28,7 @@ export default function TerminalSim({ height = 240 }: { height?: number }) {
 
     setCmdHistory((h) => [trimmed, ...h]);
     setHistIdx(-1);
+    onCommand?.(trimmed);
 
     if (trimmed === "clear") {
       setHistory([{ type: "system", text: "Terminal cleared." }]);

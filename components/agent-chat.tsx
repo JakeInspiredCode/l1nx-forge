@@ -57,7 +57,7 @@ export default function AgentChat({ threadId, compact = false, initialMessage, p
   }, [personalityProp]);
   const personality = personalityProp || localPersonality;
 
-  const [model, setModel] = useState<ModelId>("claude-sonnet-4-6");
+  const [model, setModel] = useState<ModelId>("claude-haiku-4-5-20251001");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);

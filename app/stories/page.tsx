@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Nav from "@/components/nav";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useStories } from "@/lib/convex-hooks";
 
 type Chunk = { label: string; summary: string; content: string };
 type Story = {
@@ -539,17 +538,20 @@ function ChunkBlock({
 }
 
 export default function StoriesPage() {
-  const convexStories = useStories();
+  const convexStoriesRaw = useQuery(api.forgeStories.getAll);
   const upsertStory = useMutation(api.forgeStories.upsert);
   const [seeded, setSeeded] = useState(false);
   const [hiddenStories, setHiddenStories] = useState<Set<string>>(new Set());
 
+  const isLoading = convexStoriesRaw === undefined;
+  const convexStories = convexStoriesRaw ?? [];
+
   useEffect(() => {
-    if (convexStories.length === 0 && !seeded) {
+    if (!isLoading && convexStories.length === 0 && !seeded) {
       setSeeded(true);
       DEFAULT_STORIES.forEach((s) => upsertStory(s));
     }
-  }, [convexStories.length, seeded, upsertStory]);
+  }, [isLoading, convexStories.length, seeded, upsertStory]);
 
   const stories: Story[] =
     convexStories.length > 0

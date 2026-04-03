@@ -8,14 +8,16 @@ const NAV_ITEMS = [
   { href: "/train", label: "Train", icon: "▶" },
   { href: "/explore", label: "Explore", icon: "◒" },
   { href: "/interview", label: "Interview", icon: "◎" },
+  { href: "/agent", label: "Agent", icon: "⬡" },
   { href: "/progress", label: "Progress", icon: "▲" },
 ];
 
 // Sub-routes that should highlight each hub
 const HUB_ROUTES: Record<string, string[]> = {
   "/train": ["/train", "/study", "/forge/speed-run", "/drill"],
-  "/explore": ["/explore", "/foundations", "/terminal", "/cards"],
-  "/interview": ["/interview", "/stories", "/agent"],
+  "/explore": ["/explore", "/foundations", "/terminal", "/cards", "/explore/boot-process"],
+  "/interview": ["/interview", "/stories"],
+  "/agent": ["/agent"],
 };
 
 function isActive(pathname: string, href: string): boolean {

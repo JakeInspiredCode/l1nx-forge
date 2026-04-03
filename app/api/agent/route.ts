@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
     };
 
     const systemPrompt = buildSystemPrompt(context, personality);
-    const resolvedModel = model && ALLOWED_MODELS.has(model) ? model : "claude-sonnet-4-6";
+    const resolvedModel = model && ALLOWED_MODELS.has(model) ? model : "claude-haiku-4-5-20251001";
     const { messages: windowedMessages, inputTokens, trimmed } = windowMessages(messages);
 
     const stream = await client.messages.stream({

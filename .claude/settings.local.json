@@ -9,7 +9,31 @@
       "Bash(git push:*)",
       "Bash(npx tsc:*)",
       "Bash(npx next:*)",
-      "Bash(npx convex:*)"
+      "Bash(npx convex:*)",
+      "Bash(npx eslint:*)",
+      "Bash(node -e \":*)",
+      "Bash(npx tsx -e \":*)",
+      "Bash(ls /Users/jacobsumsion/Projects/l1nx/.env*)",
+      "Bash(printenv)",
+      "mcp__Desktop_Commander__read_multiple_files",
+      "Bash(rm -rf ~/Projects/cog0/carina-nova ~/Projects/cog0/life-command-center)",
+      "Read(//Users/jacobsumsion/Projects/**)",
+      "Bash(npx create-next-app@latest cog0 --typescript --app --no-tailwind --no-eslint --no-src-dir)",
+      "Bash(npx create-next-app@latest cog0 --typescript --app --no-tailwind --no-eslint --no-src-dir --no-turbopack --no-import-alias)",
+      "Bash(printf 'n\\\\nn\\\\n')",
+      "Bash(yes n:*)",
+      "Bash(npm install:*)",
+      "Bash(while read:*)",
+      "Bash(do sed:*)",
+      "Bash(done)",
+      "Bash(npm run:*)",
+      "Bash(source ~/.zshrc)",
+      "Bash(find ~ -maxdepth 4 -name *.zsh -o -name aliases* -o -name *alias*)",
+      "Bash(git -C /Users/jacobsumsion/Projects/l1nx log --oneline -5)",
+      "Bash(git rm:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git fetch:*)"
     ]
   }
 }

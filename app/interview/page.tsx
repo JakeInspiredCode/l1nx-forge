@@ -22,15 +22,6 @@ const TOOLS = [
     bg: "bg-purple-500/8",
     border: "border-purple-500/25",
   },
-  {
-    href: "/agent",
-    icon: "⬡",
-    title: "AI Agent",
-    description: "Chat with an AI interview coach — get feedback, practice answers",
-    color: "text-sky-400",
-    bg: "bg-sky-500/8",
-    border: "border-sky-500/25",
-  },
 ];
 
 export default function InterviewHub() {
@@ -40,7 +31,7 @@ export default function InterviewHub() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mono mb-1">Interview Prep</h1>
         <p className="text-sm text-forge-text-dim mb-6">
-          Practice mock interviews, build your story bank, and get AI coaching
+          Practice mock interviews and build your story bank
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -40,6 +40,15 @@ const RESOURCES = [
     bg: "bg-orange-500/8",
     border: "border-orange-500/25",
   },
+  {
+    href: "/explore/boot-process",
+    icon: "⏻",
+    title: "Boot Process",
+    description: "Learn the 6-stage Linux boot sequence, then triage real boot failure scenarios",
+    color: "text-amber-400",
+    bg: "bg-amber-500/8",
+    border: "border-amber-500/25",
+  },
 ];
 
 export default function ExploreHub() {
