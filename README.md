@@ -1,6 +1,6 @@
-# L1NX Forge
+# L1NX
 
-A spaced-repetition interview preparation app built with **Next.js**, **Convex**, and **Tailwind CSS**. L1NX Forge helps candidates master technical knowledge through tiered flashcards, mock interviews, and progress tracking.
+A spaced-repetition training app built with **Next.js**, **Convex**, and **Tailwind CSS**. L1NX prepares users for data center technician roles through tiered flashcards, interactive exercises, mock interviews, and progress tracking.
 
 ## Features
 

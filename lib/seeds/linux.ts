@@ -4,10 +4,10 @@ const today = new Date().toISOString().split("T")[0];
 
 function card(
   id: string, topicId: TopicId, type: CardType, tier: Tier, difficulty: Difficulty,
-  front: string, back: string, steps?: string[]
+  front: string, back: string, steps?: string[], sortOrder?: number
 ): ForgeCard {
   return {
-    id, topicId, type, front, back, difficulty, tier, steps,
+    id, topicId, type, front, back, difficulty, tier, steps, sortOrder,
     easeFactor: 2.5, interval: 0, repetitions: 0, dueDate: today, lastReview: null,
   };
 }

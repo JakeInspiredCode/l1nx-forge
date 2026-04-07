@@ -54,7 +54,7 @@ function buildSystemPrompt(context: AgentContext, personality?: string): string 
     })
     .join("\n\n");
 
-  return `You are the L1NX Forge AI Agent — a sharp, knowledgeable interview prep assistant embedded in a spaced-repetition study app. You have full context of the user's study history, mastery levels, and past interview performance.
+  return `You are the L1NX AI Agent — a sharp, knowledgeable DC tech training assistant embedded in a spaced-repetition study app. You have full context of the user's study history, mastery levels, and past interview performance.
 
 ## Your Personality
 ${personality && PERSONALITY_TONES[personality] ? PERSONALITY_TONES[personality] : PERSONALITY_TONES["sarcastic-friend"]}

@@ -16,6 +16,7 @@ export default defineSchema({
     difficulty: v.number(),        // 1 | 2 | 3
     tier: v.number(),              // 1-4
     steps: v.optional(v.array(v.string())), // Tier 4 branching steps
+    sortOrder: v.optional(v.number()),     // Curriculum order within topic+tier
     // SM-2 state
     easeFactor: v.number(),        // Default 2.5, min 1.3
     interval: v.number(),          // Days until next review

@@ -1,8 +1,8 @@
-# L1NX Forge — Vision
+# L1NX — Vision
 
 ## The Goal
 
-Transform L1NX Forge from a single-role study tool into a **universal interview preparation engine** that can target any job role from a single input: the job posting.
+Transform L1NX from a single-role study tool into a **universal interview preparation engine** that can target any job role from a single input: the job posting.
 
 ## How It Would Work
 
@@ -28,7 +28,7 @@ Job Requisition URL or Text
            │
            ▼
 ┌──────────────────────┐
-│  Ready to Study      │  Full L1NX Forge experience: SM-2 scheduling,
+│  Ready to Study      │  Full L1NX experience: SM-2 scheduling,
 │                      │  daily plans, mock interviews, progress tracking
 └──────────────────────┘
 ```

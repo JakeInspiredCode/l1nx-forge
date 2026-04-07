@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearOnboardingFlag } from "@/components/onboarding";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "◆" },
@@ -29,6 +30,7 @@ function isActive(pathname: string, href: string): boolean {
 
 export default function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <nav aria-label="Main navigation" className="border-b border-forge-border bg-forge-surface/80 backdrop-blur-sm sticky top-0 z-50">
@@ -37,7 +39,7 @@ export default function Nav() {
           <Link href="/" className="flex items-center gap-2">
             <span className="mono text-forge-accent font-bold text-lg">L1NX</span>
           </Link>
-          <div className="flex items-center gap-1 ml-6">
+          <div className="flex items-center gap-1 ml-6 flex-1">
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
               return (
@@ -58,6 +60,21 @@ export default function Nav() {
               );
             })}
           </div>
+          <button
+            onClick={() => {
+              clearOnboardingFlag();
+              if (pathname === "/") {
+                window.location.reload();
+              } else {
+                router.push("/");
+              }
+            }}
+            title="Relaunch the onboarding guide"
+            className="ml-2 px-2 h-8 flex items-center gap-1 rounded-md text-forge-text-dim hover:text-forge-text hover:bg-forge-surface-2 transition-colors text-xs"
+          >
+            <span>?</span>
+            <span className="hidden sm:inline">Guide</span>
+          </button>
         </div>
       </div>
     </nav>

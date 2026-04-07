@@ -7,7 +7,7 @@ export type TopicId =
   | "power-cooling"
   | "networking"
   | "ops-processes"
-  | "target-context"
+  | "scale"
   | "behavioral";
 
 export type CardType = "easy" | "intermediate" | "scenario";
@@ -24,6 +24,7 @@ export interface ForgeCard {
   difficulty: Difficulty;
   tier: Tier;
   steps?: string[];
+  sortOrder?: number;
   // SM-2
   easeFactor: number;
   interval: number;
@@ -92,7 +93,7 @@ export const TOPICS: TopicMeta[] = [
   { id: "fiber", name: "Fiber & Cabling", description: "Fiber optics, transceivers, cable management", priority: 4, icon: "|" },
   { id: "power-cooling", name: "Power & Cooling", description: "PDUs, UPS, HVAC, thermal management", priority: 5, icon: "^" },
   { id: "ops-processes", name: "Ops & Processes", description: "Incident response, change management, monitoring", priority: 6, icon: "!" },
-  { id: "target-context", name: "Target Company & Scale", description: "Large-scale GPU cluster architecture, mission, scale context", priority: 7, icon: "*" },
+  { id: "scale", name: "Scale & Architecture", description: "Hyperscale vs colo, rack density, cluster hierarchy, monitoring", priority: 7, icon: "*" },
   { id: "behavioral", name: "Behavioral", description: "STAR stories, leadership, teamwork, conflict", priority: 8, icon: "@" },
 ];
 
@@ -108,6 +109,7 @@ export function mapConvexCard(c: any): ForgeCard {
     difficulty: c.difficulty as Difficulty,
     tier: c.tier as Tier,
     steps: c.steps,
+    sortOrder: c.sortOrder ?? undefined,
     easeFactor: c.easeFactor,
     interval: c.interval,
     repetitions: c.repetitions,
