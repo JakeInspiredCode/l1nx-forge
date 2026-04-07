@@ -29,9 +29,14 @@ export interface ScheduleBlock {
   label: string;
   description: string;
   minutes: number;
+  blockType: "cards" | "activity";
+  // Card block fields
   cardIds: string[];
   tierLabel: string;
   topicBreakdown: { topicId: string; count: number }[];
+  // Activity block fields
+  activityType?: string;
+  link?: string;
 }
 
 export interface DailyPlan {
@@ -110,9 +115,33 @@ function addBlock(
     label,
     description,
     minutes: mins,
+    blockType: "cards",
     cardIds: cards.map((c) => c.cardId),
     tierLabel: tierRange(cards),
     topicBreakdown: topicBreakdown(cards),
+  });
+}
+
+function addActivityBlock(
+  blocks: ScheduleBlock[],
+  id: string,
+  label: string,
+  description: string,
+  minutes: number,
+  activityType: string,
+  link: string,
+) {
+  blocks.push({
+    id,
+    label,
+    description,
+    minutes,
+    blockType: "activity",
+    cardIds: [],
+    tierLabel: "",
+    topicBreakdown: [],
+    activityType,
+    link,
   });
 }
 
@@ -256,6 +285,85 @@ export function generateDailyPlan(
   addBlock(blocks, "block-7-new-mixed", "New Cards — Mixed", "Fresh intermediate & scenario cards", block7);
   addBlock(blocks, "block-8-cooldown", "Cool Down", "Quick easy cards to end strong", block8);
   addBlock(blocks, "block-9-backfill", "Backfill", "Re-drill struggled cards + new weak-topic cards", backfillCards);
+
+  // ── Activity Recommendations (1-2 per plan) ──
+  const activities: { id: string; label: string; desc: string; mins: number; type: string; link: string }[] = [];
+  const linuxProgress = progress.find((p) => p.topicId === "linux");
+  const linuxTier = linuxProgress?.currentTier ?? 1;
+
+  // Recommend foundations if user is in Linux T1
+  if (linuxTier <= 1) {
+    activities.push({
+      id: "activity-foundations", label: "Read: Linux Foundations",
+      desc: "Build core concepts in the interactive guide", mins: 10,
+      type: "foundations", link: "/foundations",
+    });
+  }
+
+  // Recommend terminal sim for Linux T1 users
+  if (linuxTier <= 2) {
+    activities.push({
+      id: "activity-terminal", label: "Explore the Terminal Simulator",
+      desc: "Practice commands in a simulated DC environment", mins: 5,
+      type: "terminal", link: "/terminal",
+    });
+  }
+
+  // Recommend quick draw if there are weak topics
+  if (weakTopicIds.size > 0) {
+    const weakNames = [...weakTopicIds].slice(0, 2);
+    activities.push({
+      id: "activity-quick-draw", label: "Quick Draw — Sharpen Recall",
+      desc: `Fast recall on weak areas: ${weakNames.join(", ")}`, mins: 5,
+      type: "quick-draw", link: "/train/quick-draw",
+    });
+  }
+
+  // Recommend diagnosis lab for T2+ users
+  if (linuxTier >= 2) {
+    activities.push({
+      id: "activity-diagnosis", label: "Diagnosis Lab",
+      desc: "Practice troubleshooting a real scenario", mins: 10,
+      type: "diagnosis", link: "/train/diagnosis",
+    });
+  }
+
+  // Recommend boot process for Linux T1-T2
+  if (linuxTier <= 2) {
+    activities.push({
+      id: "activity-boot", label: "Boot Process Explorer",
+      desc: "Review the Linux boot sequence or try a triage", mins: 5,
+      type: "boot-process", link: "/explore/boot-process",
+    });
+  }
+
+  // Insert up to 2 activities: one after block 2 (easy review), one before cooldown
+  const picked = activities.slice(0, 2);
+  if (picked.length > 0) {
+    // Find insertion point: after the 2nd block (or end if fewer)
+    const insertAfter = Math.min(2, blocks.length);
+    addActivityBlock([], "", "", "", 0, "", ""); // unused — just for type; actual insertion below
+    // Remove dummy, insert real activities
+    const act1 = picked[0];
+    const actBlock1: ScheduleBlock = {
+      id: act1.id, label: act1.label, description: act1.desc, minutes: act1.mins,
+      blockType: "activity", cardIds: [], tierLabel: "", topicBreakdown: [],
+      activityType: act1.type, link: act1.link,
+    };
+    blocks.splice(insertAfter, 0, actBlock1);
+
+    if (picked.length > 1) {
+      const act2 = picked[1];
+      // Insert before the last block
+      const insertBefore = Math.max(blocks.length - 1, insertAfter + 1);
+      const actBlock2: ScheduleBlock = {
+        id: act2.id, label: act2.label, description: act2.desc, minutes: act2.mins,
+        blockType: "activity", cardIds: [], tierLabel: "", topicBreakdown: [],
+        activityType: act2.type, link: act2.link,
+      };
+      blocks.splice(insertBefore, 0, actBlock2);
+    }
+  }
 
   const allScheduled = blocks.flatMap((b) => b.cardIds);
 

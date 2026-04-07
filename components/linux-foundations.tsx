@@ -1,45 +1,9 @@
+// @ts-nocheck — migrated from JSX, full TS conversion in a future pass
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-
-// ─── CONSTANTS & DATA ───────────────────────────────────────────────────────
-
-const SECTIONS = [
-  { id: 1, title: "What Is an Operating System?", icon: "◈" },
-  { id: 2, title: "What Is Linux?", icon: "◆" },
-  { id: 3, title: "The Command Line", icon: "▸" },
-  { id: 4, title: "How Computers Work", icon: "◧" },
-  { id: 5, title: "Filesystem & Paths", icon: "▤" },
-  { id: 6, title: "Users, Groups & Permissions", icon: "◩" },
-  { id: 7, title: "Processes", icon: "⟳" },
-  { id: 8, title: "Networking Fundamentals", icon: "◎" },
-  { id: 9, title: "Servers & Datacenter", icon: "▥" },
-  { id: 10, title: "Putting It All Together", icon: "✦" },
-];
-
-const QUICK_REF = [
-  { term: "Operating System", def: "Software layer that manages hardware and provides abstractions for programs" },
-  { term: "Kernel", def: "The core of the OS that runs with full hardware access and handles scheduling, memory, and devices" },
-  { term: "Linux Distribution", def: "The kernel packaged with tools, a package manager, and default configuration" },
-  { term: "Terminal", def: "The application that displays your command-line session" },
-  { term: "Shell (Bash)", def: "The program that interprets your typed commands" },
-  { term: "Absolute Path", def: "Full address from root: /var/log/syslog" },
-  { term: "Relative Path", def: "Address from current location: ../log/syslog" },
-  { term: "Root /", def: "The top of the filesystem tree" },
-  { term: "root user", def: "The superuser account with unrestricted system access" },
-  { term: "sudo", def: "Run a single command with root privileges" },
-  { term: "PID", def: "Unique numeric identifier for a running process" },
-  { term: "Daemon", def: "A background process providing a continuous service" },
-  { term: "SIGTERM / SIGKILL", def: "Graceful stop vs. forced stop signals for processes" },
-  { term: "IP Address", def: "Numeric identifier for a device on a network" },
-  { term: "Port", def: "Numeric identifier for a specific service on a device" },
-  { term: "TCP / UDP", def: "Reliable vs. fast transport protocols" },
-  { term: "DNS", def: "Translates hostnames to IP addresses" },
-  { term: "SSH", def: "Encrypted remote command-line access to a server" },
-  { term: "BMC / IPMI", def: "Out-of-band hardware management controller on a server" },
-  { term: "PDU", def: "Power Distribution Unit — distributes electricity within a rack" },
-  { term: "ToR Switch", def: "Top-of-Rack network switch aggregating server connections" },
-];
+import { SECTIONS, QUICK_REF } from "@/lib/seeds/foundations-content";
+import FoundationsNav from "@/components/foundations/foundations-nav";
 
 // ─── REUSABLE COMPONENTS ────────────────────────────────────────────────────
 
@@ -265,6 +229,7 @@ function OsFunctionCards() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong style={{ color: item.color }}>{item.title}</strong>
             <span style={{ color: "#556", fontSize: 12, flexShrink: 0, marginLeft: 12, transition: "transform 0.2s", transform: expanded.has(i) ? "rotate(90deg)" : "none" }}>▸</span>
+            {!expanded.has(i) && <span style={{ color: "#445", fontSize: 11, marginLeft: 6, fontStyle: "italic" }}>click to expand</span>}
           </div>
           {expanded.has(i) && (
             <p style={{ color: "#B8BCC0", fontSize: 15, lineHeight: 1.7, margin: "10px 0 0 0" }}>{item.body}</p>
@@ -300,6 +265,7 @@ function CliTermsCards() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong style={{ color: item.color }}>{item.term}</strong>
             <span style={{ color: "#556", fontSize: 12, flexShrink: 0, marginLeft: 12, transition: "transform 0.2s", transform: expanded.has(i) ? "rotate(90deg)" : "none" }}>▸</span>
+            {!expanded.has(i) && <span style={{ color: "#445", fontSize: 11, marginLeft: 6, fontStyle: "italic" }}>click to expand</span>}
           </div>
           {expanded.has(i) && (
             <p style={{ color: "#B8BCC0", fontSize: 15, lineHeight: 1.7, margin: "10px 0 0 0" }}>{item.desc}</p>
@@ -349,8 +315,14 @@ function LayerSorter({ onComplete }) {
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
       borderRadius: 10, padding: 20, margin: "20px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 14, letterSpacing: "0.5px" }}>
-        ▸ SORT THE LAYERS — Drag to stack from bottom (1 = hardware) to top (4 = applications)
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+          ▸ SORT THE LAYERS — Drag to stack from bottom (1 = hardware) to top (4 = applications)
+        </div>
+        <button onClick={() => { setItems([...correctOrder].sort(() => Math.random() - 0.5)); setChecked(false); setIsCorrect(false); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {items.map((item, i) => (
@@ -745,6 +717,10 @@ Swap:         8.0Gi       0B     8.0Gi`,
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {total > 0 && <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{score}/{total}</span>}
           <span style={{ color: "#556", fontSize: 12 }}>{investigated.size}/4 checked</span>
+          <button onClick={() => { setScIdx(0); setInvestigated(new Set()); setGuess(null); setScore(0); setTotal(0); setActiveRes(null); }} style={{
+            padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+          }}>↻ Reset</button>
         </div>
       </div>
 
@@ -986,8 +962,14 @@ function PathResolver({ onComplete }) {
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
       borderRadius: 10, padding: 20, margin: "20px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 14, letterSpacing: "0.5px" }}>
-        ▸ PATH RESOLVER — Challenge {chIdx + 1}/{challenges.length}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+          ▸ PATH RESOLVER — Challenge {chIdx + 1}/{challenges.length}
+        </div>
+        <button onClick={() => { setChIdx(0); setUserAnswer(""); setRevealed(false); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>
       </div>
       <p style={{ color: "#C8CCD0", margin: "0 0 6px 0", fontSize: 15 }}>
         You are in <Code>{ch.cwd}</Code>. Where does <Code>{ch.path}</Code> resolve to?
@@ -1091,7 +1073,7 @@ function PermissionBuilder({ onComplete }) {
         <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
           ▸ PERMISSION LAB
         </div>
-        <div style={{ display: "flex", gap: 4 }}>
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
           {["decode", "encode"].map((m) => (
             <button key={m} onClick={() => setMode(m)} style={{
               padding: "4px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer",
@@ -1100,6 +1082,10 @@ function PermissionBuilder({ onComplete }) {
               color: mode === m ? "#50C8FF" : "#778899",
             }}>{m === "decode" ? "String → English" : "English → String"}</button>
           ))}
+          <button onClick={() => { setBits([true, true, true, true, false, true, true, false, false]); setUserInput(""); setChecked(false); }} style={{
+            padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778", marginLeft: 4,
+          }}>↻ Reset</button>
         </div>
       </div>
 
@@ -1204,8 +1190,14 @@ function SignalSimulator({ onComplete }) {
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
       borderRadius: 10, padding: 20, margin: "20px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 14, letterSpacing: "0.5px" }}>
-        ▸ SIGNAL SIMULATOR — Send a signal to a running database process
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+          ▸ SIGNAL SIMULATOR — Send a signal to a running database process
+        </div>
+        {signal && <button onClick={() => { setSignal(null); setResult(null); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>}
       </div>
       <div style={{
         background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: 16, marginBottom: 14,
@@ -1275,8 +1267,14 @@ function RackDiagnosis({ onComplete }) {
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
       borderRadius: 10, padding: 20, margin: "20px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 10, letterSpacing: "0.5px" }}>
-        ▸ RACK FAILURE DIAGNOSIS
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+          ▸ RACK FAILURE DIAGNOSIS
+        </div>
+        {checked && <button onClick={() => { setSelected(null); setChecked(false); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>}
       </div>
       <p style={{ color: "#E8ECF0", fontSize: 15, margin: "0 0 16px 0", lineHeight: 1.6 }}>
         A rack of 8 servers goes completely unreachable at the same time. All 8 failing independently at the exact same moment is nearly impossible. <strong>What shared infrastructure component failed?</strong>
@@ -1371,7 +1369,10 @@ function FlashcardRapidFire() {
         <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
           ▸ RAPID-FIRE FLASHCARDS — {idx + 1}/{cards.length}
         </div>
-        <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{score} correct</span>
+        <button onClick={() => { setIdx(0); setFlipped(false); setUserAnswer(""); setScore(0); setDone(false); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>
       </div>
       <div style={{ position: "relative", height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 3, marginBottom: 16 }}>
         <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 3, background: "#50C8FF", width: `${((idx + 1) / cards.length) * 100}%`, transition: "width 0.3s" }} />
@@ -1717,13 +1718,16 @@ function FlipCardChallenge({ onComplete }) {
   const cards = [
     { clue: "$0", clueLabel: "per server", advantage: "Cost", body: "Open-source. No per-server license fees. At 100,000 servers, this matters enormously.", color: "#7AE87A" },
     { clue: "Years", clueLabel: "without reboot", advantage: "Stability", body: "Linux servers routinely run for months or years without rebooting. The kernel is modular — many updates don't require a restart.", color: "#50C8FF" },
-    { clue: "Text Files", clueLabel: "all the way down", advantage: "Control", body: "Configuration is in text files you can read and edit. Logs are in text files you can search. Transparency is the primary tool.", color: "#FFA832" },
+    { clue: "/etc/", clueLabel: "readable configs", advantage: "Transparency", body: "Configuration lives in plain text files you can read, edit, diff, and version-control. No hidden registries or binary formats.", color: "#FFA832" },
     { clue: "5,000", clueLabel: "servers, one script", advantage: "Automation", body: "Every action can be performed from the command line, which means every action can be scripted. At scale, you write scripts, not click menus.", color: "#FF6B6B" },
+    { clue: "1991", clueLabel: "and still growing", advantage: "Community", body: "Decades of contributors, massive package repositories, and thousands of tools. If you have a problem, someone has already solved it and shared the solution.", color: "#C8A0FF" },
+    { clue: "chmod 700", clueLabel: "your rules", advantage: "Security", body: "Granular permission model — control exactly who can read, write, or execute any file. Audit logs, SELinux, and a transparent security model.", color: "#FF8C69" },
   ];
 
   const [flipped, setFlipped] = useState(new Set());
   const [guesses, setGuesses] = useState({});
-  const options = ["Cost", "Stability", "Control", "Automation"];
+  const options = ["Cost", "Stability", "Transparency", "Automation", "Community", "Security"];
+  const optionColors = { Cost: "#7AE87A", Stability: "#50C8FF", Transparency: "#FFA832", Automation: "#FF6B6B", Community: "#C8A0FF", Security: "#FF8C69" };
 
   const handleGuess = (idx, guess) => {
     if (flipped.has(idx)) return;
@@ -1741,6 +1745,8 @@ function FlipCardChallenge({ onComplete }) {
   const allFlipped = flipped.size === cards.length;
   const correctCount = cards.filter((c, i) => guesses[i] === c.advantage).length;
 
+  const handleReset = () => { setFlipped(new Set()); setGuesses({}); };
+
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
@@ -1750,55 +1756,66 @@ function FlipCardChallenge({ onComplete }) {
         <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
           ▸ FLIP CARD CHALLENGE — Guess the advantage from the clue, then flip to reveal
         </div>
-        {allFlipped && <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{correctCount}/4 correct</span>}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {allFlipped && <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{correctCount}/{cards.length} correct</span>}
+          {flipped.size > 0 && (
+            <button onClick={handleReset} style={{
+              padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+              background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+            }}>↻ Reset</button>
+          )}
+        </div>
       </div>
       <p style={{ color: "#778", fontSize: 14, margin: "0 0 14px 0" }}>Each card shows a clue. Pick which Linux advantage it represents, then flip.</p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
         {cards.map((card, i) => {
           const isFlipped = flipped.has(i);
           const guess = guesses[i];
           const wasCorrect = guess === card.advantage;
           return (
             <div key={i} style={{
-              borderRadius: 10, overflow: "hidden",
+              borderRadius: 8, overflow: "hidden",
               border: `1px solid ${isFlipped ? (wasCorrect ? card.color + "55" : "rgba(255,107,107,0.4)") : "rgba(255,255,255,0.08)"}`,
               background: isFlipped ? `${card.color}0D` : "rgba(0,0,0,0.35)",
               transition: "all 0.35s ease",
-              minHeight: 180, display: "flex", flexDirection: "column",
+              display: "flex", flexDirection: "column",
             }}>
               {!isFlipped ? (
-                <div style={{ padding: 16, flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, lineHeight: 1 }}>{card.clue}</div>
-                  <div style={{ color: "#667", fontSize: 12, marginTop: 4, marginBottom: 14 }}>{card.clueLabel}</div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4, justifyContent: "center" }}>
-                    {options.map((opt) => (
+                <div style={{ padding: "12px 10px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ color: "#E8ECF0", fontSize: 22, fontWeight: 800, lineHeight: 1 }}>{card.clue}</div>
+                  <div style={{ color: "#667", fontSize: 11, marginTop: 3, marginBottom: 10 }}>{card.clueLabel}</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, width: "100%" }}>
+                    {options.map((opt) => {
+                      const pillColor = optionColors[opt] || "#778899";
+                      return (
                       <button key={opt} onClick={() => handleGuess(i, opt)} style={{
-                        padding: "4px 10px", borderRadius: 5, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                        background: guess === opt ? "rgba(80,200,255,0.2)" : "rgba(255,255,255,0.04)",
-                        border: guess === opt ? "1px solid rgba(80,200,255,0.5)" : "1px solid rgba(255,255,255,0.08)",
-                        color: guess === opt ? "#50C8FF" : "#778899",
-                        transition: "all 0.15s",
+                        padding: "2px 0", borderRadius: 4, fontSize: 9, fontWeight: 600, cursor: "pointer",
+                        background: guess === opt ? `${pillColor}30` : "rgba(255,255,255,0.04)",
+                        border: guess === opt ? `1px solid ${pillColor}80` : `1px solid ${pillColor}25`,
+                        color: guess === opt ? pillColor : `${pillColor}99`,
+                        transition: "all 0.15s", textAlign: "center",
                       }}>{opt}</button>
-                    ))}
+                      );
+                    })}
                   </div>
                   <button onClick={() => handleFlip(i)} disabled={!guess} style={{
-                    marginTop: 10, padding: "5px 18px", borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: guess ? "pointer" : "not-allowed",
+                    marginTop: 8, padding: "4px 14px", borderRadius: 5, fontSize: 11, fontWeight: 700, cursor: guess ? "pointer" : "not-allowed",
                     background: guess ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
                     border: "1px solid rgba(255,255,255,0.12)", color: guess ? "#CCD" : "#445",
                     transition: "all 0.2s",
                   }}>Flip</button>
                 </div>
               ) : (
-                <div style={{ padding: 16, flex: 1, display: "flex", flexDirection: "column" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <div style={{ color: card.color, fontWeight: 800, fontSize: 16 }}>{card.advantage}</div>
+                <div style={{ padding: "10px 10px", flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <div style={{ color: card.color, fontWeight: 800, fontSize: 14 }}>{card.advantage}</div>
                     <span style={{
-                      fontSize: 11, padding: "2px 8px", borderRadius: 8,
+                      fontSize: 10, padding: "1px 6px", borderRadius: 6,
                       background: wasCorrect ? "rgba(122,232,122,0.2)" : "rgba(255,107,107,0.2)",
                       color: wasCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 700,
-                    }}>{wasCorrect ? "✓" : `✗ You guessed: ${guess}`}</span>
+                    }}>{wasCorrect ? "✓" : "✗"}</span>
                   </div>
-                  <p style={{ color: "#B8BCC0", fontSize: 13, lineHeight: 1.6, margin: 0, flex: 1 }}>{card.body}</p>
+                  <p style={{ color: "#B8BCC0", fontSize: 12, lineHeight: 1.5, margin: 0, flex: 1 }}>{card.body}</p>
                 </div>
               )}
             </div>
@@ -1893,7 +1910,7 @@ function DistroFamilySort({ onComplete }) {
   const bucketStyle = (family) => ({
     flex: "1 1 240px", minHeight: 140, padding: 14, borderRadius: 10,
     background: "rgba(0,0,0,0.3)",
-    border: `2px dashed ${family === "rhel" ? "rgba(255,107,107,0.25)" : "rgba(80,200,255,0.25)"}`,
+    border: `2px dashed ${family === "rhel" ? "rgba(255,107,107,0.25)" : "rgba(167,139,250,0.25)"}`,
     transition: "all 0.2s",
   });
 
@@ -1904,6 +1921,12 @@ function DistroFamilySort({ onComplete }) {
     }}>
       <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 6, letterSpacing: "0.5px" }}>
         ▸ SORT INTO FAMILIES — Drag each card into the correct distribution family
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+        <button onClick={() => { setPool([...allCards].sort(() => Math.random() - 0.5)); setRhel([]); setDebian([]); setChecked(false); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>
       </div>
       <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
         {Object.entries(typeColors).map(([type, color]) => (
@@ -1947,7 +1970,7 @@ function DistroFamilySort({ onComplete }) {
           onDrop={() => handleDrop("debian")}
           style={bucketStyle("debian")}
         >
-          <div style={{ color: "#50C8FF", fontWeight: 800, fontSize: 14, marginBottom: 10, letterSpacing: "0.5px" }}>DEBIAN FAMILY</div>
+          <div style={{ color: "#A78BFA", fontWeight: 800, fontSize: 14, marginBottom: 10, letterSpacing: "0.5px" }}>DEBIAN FAMILY</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {debian.map(c => renderCard(c, "debian"))}
           </div>
@@ -1987,8 +2010,14 @@ function NetworkAddressBuilder() {
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
       borderRadius: 10, padding: 20, margin: "20px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 14, letterSpacing: "0.5px" }}>
-        ▸ NETWORK ADDRESS BUILDER — Construct a connection
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+          ▸ NETWORK ADDRESS BUILDER — Construct a connection
+        </div>
+        <button onClick={() => { setIp("10.0.5.20"); setPort("443"); setProtocol("TCP"); }} style={{
+          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
+        }}>↻ Reset</button>
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
         <div>
@@ -2058,7 +2087,9 @@ export default function LinuxFoundations() {
   const goTo = (id) => {
     setActiveSection(id);
     setSidebarOpen(false);
-    if (contentRef.current) contentRef.current.scrollTop = 0;
+    requestAnimationFrame(() => {
+      if (contentRef.current) contentRef.current.scrollTop = 0;
+    });
   };
 
   // ─── SECTION RENDERERS ──────────────────────────────────────────────────
@@ -2120,37 +2151,7 @@ export default function LinuxFoundations() {
       </div>
 
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {/* ─── SIDEBAR ─── */}
-        <div style={{
-          width: sidebarOpen ? 280 : 0, flexShrink: 0, overflow: "hidden",
-          background: "rgba(15,15,25,0.95)", borderRight: "1px solid rgba(255,255,255,0.06)",
-          transition: "width 0.25s ease", zIndex: 50,
-        }}>
-          <div style={{ width: 280, padding: "16px 12px" }}>
-            <div style={{ color: "#556", fontSize: 12, fontWeight: 700, letterSpacing: "1px", padding: "8px 12px", marginBottom: 4 }}>
-              SECTIONS
-            </div>
-            {SECTIONS.map((s) => (
-              <button key={s.id} onClick={() => goTo(s.id)} style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%",
-                padding: "10px 12px", borderRadius: 8, border: "none", textAlign: "left",
-                background: activeSection === s.id ? "rgba(80,200,255,0.1)" : "transparent",
-                cursor: "pointer", transition: "all 0.15s",
-              }}>
-                <span style={{
-                  width: 28, height: 28, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center",
-                  background: activeSection === s.id ? "rgba(80,200,255,0.2)" : "rgba(255,255,255,0.04)",
-                  color: activeSection === s.id ? "#50C8FF" : "#556", fontSize: 14, fontWeight: 700,
-                  border: `1px solid ${activeSection === s.id ? "rgba(80,200,255,0.3)" : "rgba(255,255,255,0.06)"}`,
-                }}>{s.id}</span>
-                <span style={{
-                  color: activeSection === s.id ? "#E8ECF0" : "#889", fontSize: 14, fontWeight: 500,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                }}>{s.title}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <FoundationsNav activeSection={activeSection} sidebarOpen={sidebarOpen} onGoTo={goTo} />
 
         {/* ─── CONTENT ─── */}
         <div ref={contentRef} style={{

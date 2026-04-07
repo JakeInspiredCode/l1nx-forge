@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { TOPICS } from "@/lib/types";
 import { DailyPlan, ScheduleBlock, PlanDifficulty } from "@/lib/forge/scheduler";
 
@@ -24,6 +25,7 @@ const BLOCK_COLORS: Record<string, { bg: string; border: string; text: string; b
   "block-7-new-mixed":     { bg: "bg-purple-500/8",  border: "border-purple-500/25",  text: "text-purple-400",  bar: "bg-purple-500/40" },
   "block-8-cooldown":      { bg: "bg-teal-500/8",    border: "border-teal-500/25",    text: "text-teal-400",    bar: "bg-teal-500/40" },
   "block-9-backfill":      { bg: "bg-forge-surface-2", border: "border-forge-border",  text: "text-forge-text-dim", bar: "bg-forge-text-muted/20" },
+  "activity":              { bg: "bg-indigo-500/8",   border: "border-indigo-500/25", text: "text-indigo-400",  bar: "bg-indigo-500/40" },
 };
 
 const DEFAULT_COLORS = BLOCK_COLORS["block-9-backfill"];
@@ -70,7 +72,8 @@ function BlockCard({
   onStart: () => void;
   onRetake: () => void;
 }) {
-  const colors = BLOCK_COLORS[block.id] ?? DEFAULT_COLORS;
+  const isActivity = block.blockType === "activity";
+  const colors = isActivity ? BLOCK_COLORS["activity"] : (BLOCK_COLORS[block.id] ?? DEFAULT_COLORS);
   const topicNames = block.topicBreakdown
     .map((tb) => {
       const name = TOPICS.find((t) => t.id === tb.topicId)?.name.split(" ")[0] ?? tb.topicId;
@@ -107,7 +110,9 @@ function BlockCard({
           {done && <span className="text-[10px] mono text-forge-success">DONE</span>}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs mono text-forge-text-dim">{block.minutes}m — {block.cardIds.length} cards</span>
+          <span className="text-xs mono text-forge-text-dim">
+            {block.minutes}m{isActivity ? "" : ` — ${block.cardIds.length} cards`}
+          </span>
           {!done && (
             <span className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] shrink-0 ${
               selected ? `${colors.border} ${colors.text}` : "border-forge-border text-transparent"
@@ -122,21 +127,32 @@ function BlockCard({
 
       {/* Per-block action buttons */}
       <div className="flex gap-2 mt-2 ml-4.5 pl-0.5" onClick={(e) => e.stopPropagation()}>
-        {!done && (
-          <button
-            onClick={onStart}
+        {isActivity && block.link ? (
+          <Link
+            href={block.link}
             className={`text-[11px] mono px-2 py-1 rounded-md transition-colors ${colors.bg} ${colors.text} hover:opacity-80 border ${colors.border}`}
           >
-            ▶ Start this block
-          </button>
-        )}
-        {done && (
-          <button
-            onClick={onRetake}
-            className="text-[11px] mono px-2 py-1 rounded-md transition-colors bg-forge-surface border border-forge-border text-forge-text-dim hover:text-forge-text"
-          >
-            ↻ Retake
-          </button>
+            → Go
+          </Link>
+        ) : (
+          <>
+            {!done && (
+              <button
+                onClick={onStart}
+                className={`text-[11px] mono px-2 py-1 rounded-md transition-colors ${colors.bg} ${colors.text} hover:opacity-80 border ${colors.border}`}
+              >
+                ▶ Start this block
+              </button>
+            )}
+            {done && (
+              <button
+                onClick={onRetake}
+                className="text-[11px] mono px-2 py-1 rounded-md transition-colors bg-forge-surface border border-forge-border text-forge-text-dim hover:text-forge-text"
+              >
+                ↻ Retake
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

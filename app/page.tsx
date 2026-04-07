@@ -16,9 +16,19 @@ import {
 import { getAllSeedCards } from "@/lib/seeds";
 import { generateDailyPlan, PlanDifficulty } from "@/lib/forge/scheduler";
 import ActivityToday from "@/components/activity-today";
+import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import Link from "next/link";
 
 export default function Dashboard() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+    if (!isOnboardingDone()) {
+      setShowOnboarding(true);
+    }
+  }, []);
   const rawCards = useCards();
   const isSeeded = useIsSeeded();
   const seedCards = useSeedCards();
@@ -46,7 +56,8 @@ export default function Dashboard() {
         const batch = allCards.slice(i, i + 50).map((c) => ({
           cardId: c.id, topicId: c.topicId, type: c.type,
           front: c.front, back: c.back, difficulty: c.difficulty,
-          tier: c.tier, steps: c.steps, easeFactor: c.easeFactor,
+          tier: c.tier, steps: c.steps, sortOrder: c.sortOrder,
+          easeFactor: c.easeFactor,
           interval: c.interval, repetitions: c.repetitions,
           dueDate: c.dueDate, lastReview: c.lastReview ?? undefined,
         }));
@@ -62,7 +73,7 @@ export default function Dashboard() {
 
   // Reseed: update existing card text + insert new cards (v2 audit)
   // Bump RESEED_VERSION when seed data changes to trigger a refresh
-  const RESEED_VERSION = 2;
+  const RESEED_VERSION = 4;
   useEffect(() => {
     if (!isSeeded || seeding) return;
     const key = `l1nx-reseed-v${RESEED_VERSION}`;
@@ -74,7 +85,8 @@ export default function Dashboard() {
         const batch = allCards.slice(i, i + 50).map((c) => ({
           cardId: c.id, topicId: c.topicId, type: c.type,
           front: c.front, back: c.back, difficulty: c.difficulty,
-          tier: c.tier, steps: c.steps, easeFactor: c.easeFactor,
+          tier: c.tier, steps: c.steps, sortOrder: c.sortOrder,
+          easeFactor: c.easeFactor,
           interval: c.interval, repetitions: c.repetitions,
           dueDate: c.dueDate, lastReview: c.lastReview ?? undefined,
         }));
@@ -139,6 +151,10 @@ export default function Dashboard() {
     );
   }
 
+  if (hydrated && showOnboarding) {
+    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-forge-bg">
       <Nav />
@@ -147,7 +163,7 @@ export default function Dashboard() {
         <div className="flex items-end justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              L1NX Forge
+              L1NX
             </h1>
             <p className="text-forge-text-dim text-sm">
               {totalCards} cards loaded — {dueCount} due today
@@ -229,13 +245,79 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Topic grid */}
-        <h2 className="text-lg font-semibold mb-4">Topics</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {TOPICS.map((topic) => (
-            <TopicCard key={topic.id} topic={topic}
-              progress={progress.find((p) => p.topicId === topic.id)} />
-          ))}
+        {/* Linux — primary focus */}
+        {(() => {
+          const linuxTopic = TOPICS.find((t) => t.id === "linux")!;
+          const linuxProgress = progress.find((p) => p.topicId === "linux");
+          const tierLabel = linuxProgress ? `Tier ${linuxProgress.currentTier}` : "Tier 1";
+          const tierKey = `tier${linuxProgress?.currentTier ?? 1}` as keyof NonNullable<typeof linuxProgress>["tierProgress"];
+          const tierData = linuxProgress?.tierProgress?.[tierKey];
+          const qualified = tierData?.qualified ?? 0;
+          const total = tierData?.total ?? 0;
+          const pct = total > 0 ? Math.round((qualified / total) * 100) : 0;
+
+          return (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">Linux</h2>
+              <div className="bg-forge-surface border border-forge-border rounded-lg p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className="text-forge-accent mono font-bold text-sm">{linuxTopic.icon}</span>
+                      <span className="font-medium text-forge-text">{linuxTopic.name}</span>
+                    </div>
+                    <p className="text-forge-text-dim text-sm">{linuxTopic.description}</p>
+                  </div>
+                  <span className="mono text-forge-accent text-sm font-medium">{tierLabel}</span>
+                </div>
+                {/* Tier progress bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs text-forge-text-dim mb-1">
+                    <span>{tierLabel} progress</span>
+                    <span>{qualified}/{total} cards mastered ({pct}%)</span>
+                  </div>
+                  <div className="h-2 bg-forge-surface-2 rounded-full overflow-hidden">
+                    <div className="h-full bg-forge-accent rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Link href="/study?topic=linux"
+                    className="px-4 py-2 bg-forge-accent/15 text-forge-accent rounded-md text-sm font-medium hover:bg-forge-accent/25 transition-colors">
+                    Continue studying
+                  </Link>
+                  <Link href="/explore"
+                    className="px-4 py-2 bg-forge-surface-2 text-forge-text-dim rounded-md text-sm hover:text-forge-text hover:bg-forge-border transition-colors">
+                    Explore
+                  </Link>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* DC Fundamentals — compact row */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold mb-3">DC Fundamentals — Tier 1</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+            {TOPICS.filter((t) => t.id !== "linux").map((topic) => {
+              const tp = progress.find((p) => p.topicId === topic.id);
+              const t1 = tp?.tierProgress?.tier1;
+              const pct = t1 && t1.total > 0 ? Math.round((t1.qualified / t1.total) * 100) : 0;
+              return (
+                <Link key={topic.id} href={`/study?topic=${topic.id}`}
+                  className="bg-forge-surface border border-forge-border rounded-lg p-3 hover:border-forge-border-hover transition-colors">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-forge-accent mono text-xs">{topic.icon}</span>
+                    <span className="text-sm font-medium text-forge-text truncate">{topic.name}</span>
+                  </div>
+                  <div className="h-1.5 bg-forge-surface-2 rounded-full overflow-hidden mb-1">
+                    <div className="h-full bg-forge-accent rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-xs text-forge-text-dim">{pct}%</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </main>
     </div>

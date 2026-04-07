@@ -1,7 +1,7 @@
 import { ForgeCard, TopicId, CardType, Difficulty, Tier } from "../types";
 const today = new Date().toISOString().split("T")[0];
-function c(id: string, topicId: TopicId, type: CardType, tier: Tier, difficulty: Difficulty, front: string, back: string, steps?: string[]): ForgeCard {
-  return { id, topicId, type, front, back, difficulty, tier, steps, easeFactor: 2.5, interval: 0, repetitions: 0, dueDate: today, lastReview: null };
+function c(id: string, topicId: TopicId, type: CardType, tier: Tier, difficulty: Difficulty, front: string, back: string, steps?: string[], sortOrder?: number): ForgeCard {
+  return { id, topicId, type, front, back, difficulty, tier, steps, sortOrder, easeFactor: 2.5, interval: 0, repetitions: 0, dueDate: today, lastReview: null };
 }
 
 // ── Tier 2: Intermediate (trimmed for recall) ──

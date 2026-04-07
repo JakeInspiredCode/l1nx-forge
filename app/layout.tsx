@@ -5,8 +5,8 @@ import Mascot from "@/components/mascot/mascot";
 import BadgeBanner from "@/components/badge-banner";
 
 export const metadata: Metadata = {
-  title: "L1NX — Interview Forge",
-  description: "AI-powered spaced repetition interview prep system",
+  title: "L1NX",
+  description: "Train for a data center technician role — Linux, networking, hardware, and ops",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -165,6 +165,7 @@ export const seedCards = mutation({
       difficulty: v.number(),
       tier: v.number(),
       steps: v.optional(v.array(v.string())),
+      sortOrder: v.optional(v.number()),
       easeFactor: v.number(),
       interval: v.number(),
       repetitions: v.number(),
@@ -201,6 +202,7 @@ export const reseedCards = mutation({
       difficulty: v.number(),
       tier: v.number(),
       steps: v.optional(v.array(v.string())),
+      sortOrder: v.optional(v.number()),
       easeFactor: v.number(),
       interval: v.number(),
       repetitions: v.number(),
@@ -226,6 +228,7 @@ export const reseedCards = mutation({
           difficulty: card.difficulty,
           tier: card.tier,
           steps: card.steps,
+          sortOrder: card.sortOrder,
         });
         updated++;
       } else {
