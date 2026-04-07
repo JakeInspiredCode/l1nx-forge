@@ -2,21 +2,31 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import HexPanel from "@/components/ui/hex-panel";
+import ActionButton from "@/components/ui/action-button";
 
 const STORAGE_KEY = "l1nx-onboarding-done";
 
 const SCREENS = [
   {
-    title: "What is L1NX?",
-    body: "L1NX prepares you for an advanced data center technician role. Many users are already working in data centers — this builds the Linux, networking, power, cabling, and ops knowledge that separates a strong tech from an average one.",
+    title: "Welcome, Operator",
+    body: "L1NX is your training platform for data center operations. You'll master Linux administration, networking, hardware, and ops through missions, campaigns, and bounties.",
   },
   {
-    title: "How it works",
-    body: "You learn through flashcards, interactive lessons, a terminal simulator, troubleshooting scenarios, timed games, and hands-on explorers. The app tracks what you know and what you don't, and builds a daily study plan that focuses on your weak spots. You move through four tiers — from basic vocabulary up to complex troubleshooting.",
+    title: "The Star Map",
+    body: "This is your territory. Each star system is a skill you need to master. Complete missions to claim territory. Neglect it and the enemy pushes back. Your goal: light up the map.",
   },
   {
-    title: "What you'll get",
-    body: "If you follow the study plan consistently, you'll be prepared to walk into any data center and confidently handle Linux administration, basic networking, hardware procedures, and incident response. Expect roughly 4-6 weeks of daily practice (15-30 minutes per day) to get through the core material.",
+    title: "Campaigns",
+    body: "Enroll in a campaign for structured learning. The app tells you what to do each day. Show up, complete missions, expand your territory over weeks.",
+  },
+  {
+    title: "Missions & Bounties",
+    body: "Missions are learning chapters — read, practice, then pass a knowledge check to claim the system. Bounties are quick practice rounds — grab one whenever you have 10 minutes.",
+  },
+  {
+    title: "Your Loadout",
+    body: "Every mission has a recommended set of activities. But you choose how to prepare. Skip what you know, add what you need. The only thing that matters: pass the knowledge check.",
   },
 ];
 
@@ -41,47 +51,59 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     onComplete();
   };
 
-  // Final screen — start paths
+  // Final screen — deploy paths
   if (step >= SCREENS.length) {
     return (
-      <div className="fixed inset-0 z-50 bg-forge-bg flex items-center justify-center p-4">
-        <div className="max-w-lg w-full bg-forge-surface border border-forge-border rounded-lg p-8">
-          <h2 className="text-xl font-bold text-forge-text mb-6">Where to start</h2>
+      <div className="fixed inset-0 z-50 bg-v2-bg-deep flex items-center justify-center p-4">
+        <div className="scan-lines absolute inset-0 pointer-events-none" />
+        <div className="relative z-10 max-w-lg w-full">
+          <HexPanel size="lg">
+            <h2 className="display-font text-xl text-v2-cyan tracking-wider mb-6">
+              Deploy
+            </h2>
 
-          <div className="space-y-3 mb-8">
-            <Link
-              href="/foundations"
-              onClick={finish}
-              className="block w-full p-4 bg-forge-surface-2 border border-forge-border rounded-lg hover:border-forge-accent transition-colors text-left"
-            >
-              <p className="text-forge-text font-medium">New to Linux?</p>
-              <p className="text-forge-text-dim text-sm">Start with Linux Foundations</p>
-            </Link>
+            <div className="space-y-3 mb-8">
+              <Link
+                href="/"
+                onClick={finish}
+                className="block w-full"
+              >
+                <div className="p-4 bg-v2-bg-elevated border border-v2-cyan/30 rounded hover:border-v2-cyan transition-colors text-left">
+                  <p className="text-v2-text font-medium">Enroll in Operation Penguin Core</p>
+                  <p className="text-v2-text-dim text-sm">Start the Linux campaign — structured daily missions</p>
+                </div>
+              </Link>
 
-            <Link
-              href="/study"
-              onClick={finish}
-              className="block w-full p-4 bg-forge-surface-2 border border-forge-border rounded-lg hover:border-forge-accent transition-colors text-left"
-            >
-              <p className="text-forge-text font-medium">Want to review DC topics?</p>
-              <p className="text-forge-text-dim text-sm">Start with Tier 1 flashcards</p>
-            </Link>
+              <Link
+                href="/"
+                onClick={finish}
+                className="block w-full"
+              >
+                <div className="p-4 bg-v2-bg-elevated border border-v2-border rounded hover:border-v2-cyan/40 transition-colors text-left">
+                  <p className="text-v2-text font-medium">Browse the Star Map</p>
+                  <p className="text-v2-text-dim text-sm">Explore all campaigns and missions</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/arsenal"
+                onClick={finish}
+                className="block w-full"
+              >
+                <div className="p-4 bg-v2-bg-elevated border border-v2-border rounded hover:border-v2-cyan/40 transition-colors text-left">
+                  <p className="text-v2-text font-medium">Hit the Arsenal</p>
+                  <p className="text-v2-text-dim text-sm">Browse all available activities</p>
+                </div>
+              </Link>
+            </div>
 
             <button
               onClick={finish}
-              className="block w-full p-4 bg-forge-surface-2 border border-forge-border rounded-lg hover:border-forge-accent transition-colors text-left"
+              className="text-v2-text-muted text-sm hover:text-v2-text transition-colors"
             >
-              <p className="text-forge-text font-medium">Just explore</p>
-              <p className="text-forge-text-dim text-sm">Go to the dashboard</p>
+              Skip
             </button>
-          </div>
-
-          <button
-            onClick={finish}
-            className="text-forge-text-dim text-sm hover:text-forge-text transition-colors"
-          >
-            Skip
-          </button>
+          </HexPanel>
         </div>
       </div>
     );
@@ -90,42 +112,44 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const screen = SCREENS[step];
 
   return (
-    <div className="fixed inset-0 z-50 bg-forge-bg flex items-center justify-center p-4">
-      <div className="max-w-lg w-full bg-forge-surface border border-forge-border rounded-lg p-8">
-        {/* Progress dots */}
-        <div className="flex gap-2 mb-6">
-          {SCREENS.map((_, i) => (
+    <div className="fixed inset-0 z-50 bg-v2-bg-deep flex items-center justify-center p-4">
+      <div className="scan-lines absolute inset-0 pointer-events-none" />
+      <div className="relative z-10 max-w-lg w-full">
+        <HexPanel size="lg">
+          {/* Progress dots */}
+          <div className="flex gap-1.5 mb-6">
+            {SCREENS.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  i <= step ? "bg-v2-cyan" : "bg-v2-bg-elevated"
+                }`}
+              />
+            ))}
             <div
-              key={i}
               className={`h-1 flex-1 rounded-full ${
-                i <= step ? "bg-forge-accent" : "bg-forge-surface-2"
+                step >= SCREENS.length ? "bg-v2-cyan" : "bg-v2-bg-elevated"
               }`}
             />
-          ))}
-          <div
-            className={`h-1 flex-1 rounded-full ${
-              step >= SCREENS.length ? "bg-forge-accent" : "bg-forge-surface-2"
-            }`}
-          />
-        </div>
+          </div>
 
-        <h2 className="text-xl font-bold text-forge-text mb-4">{screen.title}</h2>
-        <p className="text-forge-text-dim leading-relaxed mb-8">{screen.body}</p>
+          <h2 className="display-font text-xl text-v2-cyan tracking-wider mb-4">
+            {screen.title}
+          </h2>
+          <p className="text-v2-text-dim leading-relaxed mb-8">{screen.body}</p>
 
-        <div className="flex items-center justify-between">
-          <button
-            onClick={finish}
-            className="text-forge-text-dim text-sm hover:text-forge-text transition-colors"
-          >
-            Skip
-          </button>
-          <button
-            onClick={() => setStep(step + 1)}
-            className="px-6 py-2 bg-forge-accent text-white rounded-lg hover:bg-forge-accent/90 transition-colors font-medium"
-          >
-            Next
-          </button>
-        </div>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={finish}
+              className="text-v2-text-muted text-sm hover:text-v2-text transition-colors"
+            >
+              Skip
+            </button>
+            <ActionButton variant="primary" onClick={() => setStep(step + 1)}>
+              Next
+            </ActionButton>
+          </div>
+        </HexPanel>
       </div>
     </div>
   );

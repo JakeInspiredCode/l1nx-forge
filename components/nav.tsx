@@ -5,20 +5,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { clearOnboardingFlag } from "@/components/onboarding";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: "◆" },
-  { href: "/train", label: "Train", icon: "▶" },
-  { href: "/explore", label: "Explore", icon: "◒" },
-  { href: "/interview", label: "Interview", icon: "◎" },
-  { href: "/agent", label: "Agent", icon: "⬡" },
-  { href: "/progress", label: "Progress", icon: "▲" },
+  { href: "/", label: "Star Map", icon: "✦" },
+  { href: "/missions", label: "Mission Board", icon: "◆" },
+  { href: "/arsenal", label: "Arsenal", icon: "⬡" },
+  { href: "/comms", label: "Comms", icon: "◎" },
+  { href: "/profile", label: "Profile", icon: "▲" },
 ];
 
 // Sub-routes that should highlight each hub
 const HUB_ROUTES: Record<string, string[]> = {
-  "/train": ["/train", "/study", "/forge/speed-run", "/drill"],
-  "/explore": ["/explore", "/foundations", "/terminal", "/cards", "/explore/boot-process"],
-  "/interview": ["/interview", "/stories"],
-  "/agent": ["/agent"],
+  "/missions": ["/missions", "/study"],
+  "/arsenal": ["/arsenal", "/train", "/explore", "/foundations", "/terminal", "/cards", "/drill"],
+  "/comms": ["/comms", "/interview", "/stories", "/agent"],
+  "/profile": ["/profile", "/progress"],
 };
 
 function isActive(pathname: string, href: string): boolean {

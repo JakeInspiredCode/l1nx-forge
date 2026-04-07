@@ -20,6 +20,18 @@ export const getByTopic = query({
   },
 });
 
+export const getByTopicTier = query({
+  args: { topicId: v.string(), tier: v.number() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("forgeCards")
+      .withIndex("by_topic_tier", (q) =>
+        q.eq("topicId", args.topicId).eq("tier", args.tier)
+      )
+      .collect();
+  },
+});
+
 export const getByCardId = query({
   args: { cardId: v.string() },
   handler: async (ctx, args) => {

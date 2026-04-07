@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Nav from "@/components/nav";
 import DiagnosisGame, { DiagnosisResult } from "@/components/forge/diagnosis/diagnosis-game";
 import DiagnosisResults from "@/components/forge/diagnosis/diagnosis-results";
@@ -21,6 +23,10 @@ export default function DiagnosisLabPage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [difficultyFilter, setDifficultyFilter] = useState<DiagnosisDifficulty | "all">("all");
 
+  const addHistory = useMutation(api.forgeDiagnosisHistory.add);
+  const addPoints = useMutation(api.forgeProfile.addPoints);
+  const checkBadges = useMutation(api.forgeProfile.checkAndAwardBadges);
+
   const filtered = difficultyFilter === "all"
     ? scenarios
     : scenarios.filter((s) => s.difficulty === difficultyFilter);
@@ -31,6 +37,29 @@ export default function DiagnosisLabPage() {
     setScreen("playing");
   };
 
+  const handleDiagnosisComplete = async (r: DiagnosisResult) => {
+    setResult(r);
+    setScreen("results");
+
+    const score = r.totalSteps > 0 ? Math.round((r.totalCorrectFirstTry / r.totalSteps) * 100) : 0;
+    const xpEarned = Math.round(10 + (score / 100) * 20);
+
+    try {
+      await addHistory({
+        scenarioId: r.scenario.id,
+        difficulty: r.scenario.difficulty,
+        score,
+        stepsCompleted: r.stepResults.filter((s) => s.correct).length,
+        totalSteps: r.totalSteps,
+        xpEarned,
+      });
+      await addPoints({ points: xpEarned });
+      await checkBadges({});
+    } catch {
+      // Silently handle
+    }
+  };
+
   if (screen === "playing" && activeScenario) {
     return (
       <div className="min-h-screen bg-forge-bg">
@@ -38,7 +67,7 @@ export default function DiagnosisLabPage() {
         <main className="px-4 sm:px-6 py-8">
           <DiagnosisGame
             scenario={activeScenario}
-            onComplete={(r) => { setResult(r); setScreen("results"); }}
+            onComplete={handleDiagnosisComplete}
             onQuit={() => setScreen("browse")}
           />
         </main>

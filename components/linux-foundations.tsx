@@ -2076,8 +2076,8 @@ function NetworkAddressBuilder() {
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export default function LinuxFoundations() {
-  const [activeSection, setActiveSection] = useState(1);
+export default function LinuxFoundations({ initialSection }: { initialSection?: number } = {}) {
+  const [activeSection, setActiveSection] = useState(initialSection ?? 1);
   const [completedInteractions, setCompletedInteractions] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const contentRef = useRef(null);

@@ -143,6 +143,78 @@ export default defineSchema({
     .index("by_scenario", ["scenarioId"])
     .index("by_timestamp", ["timestamp"]),
 
+  // ── Phase 2: Campaign / Mission / Bounty ──
+
+  forgeCampaignProgress: defineTable({
+    campaignId: v.string(),
+    enrolled: v.boolean(),
+    enrolledAt: v.string(),
+    currentMissionIndex: v.number(),
+    completedMissions: v.array(v.string()),
+    lastActivityAt: v.string(),
+  })
+    .index("by_campaignId", ["campaignId"]),
+
+  forgeMissionProgress: defineTable({
+    missionId: v.string(),
+    status: v.string(),          // "locked" | "available" | "in-progress" | "accomplished" | "decaying"
+    customLoadout: v.optional(v.array(v.object({
+      id: v.string(),
+      type: v.string(),
+      label: v.string(),
+      description: v.string(),
+      estimatedMinutes: v.number(),
+      required: v.boolean(),
+      contentRef: v.object({
+        kind: v.string(),
+        id: v.string(),
+        params: v.optional(v.any()),
+      }),
+    }))),
+    stepsCompleted: v.array(v.string()),
+    knowledgeCheckPassed: v.boolean(),
+    knowledgeCheckScore: v.optional(v.number()),
+    bestScore: v.optional(v.number()),
+    accomplishedAt: v.optional(v.string()),
+    lastReviewedAt: v.optional(v.string()),
+    xpEarned: v.number(),
+  })
+    .index("by_missionId", ["missionId"])
+    .index("by_status", ["status"]),
+
+  forgeBountyHistory: defineTable({
+    bountyId: v.string(),
+    completedAt: v.string(),
+    score: v.number(),
+    xpEarned: v.number(),
+  })
+    .index("by_bountyId", ["bountyId"])
+    .index("by_completedAt", ["completedAt"]),
+
+  forgeDiagnosisHistory: defineTable({
+    scenarioId: v.string(),
+    completedAt: v.string(),
+    difficulty: v.string(),       // "learning" | "guided" | "independent" | "full"
+    score: v.number(),            // 0-100
+    stepsCompleted: v.number(),
+    totalSteps: v.number(),
+    xpEarned: v.number(),
+  })
+    .index("by_scenarioId", ["scenarioId"])
+    .index("by_completedAt", ["completedAt"]),
+
+  forgeQuickDrawHistory: defineTable({
+    moduleId: v.string(),
+    completedAt: v.string(),
+    score: v.number(),
+    totalItems: v.number(),
+    correctItems: v.number(),
+    timeMs: v.number(),
+    xpEarned: v.number(),
+  })
+    .index("by_moduleId", ["moduleId"])
+    .index("by_completedAt", ["completedAt"]),
+
   forgeConversations: defineTable({
     threadId: v.string(),          // UUID — client-generated
     title: v.optional(v.string()), // Auto-generated from first user message, editable

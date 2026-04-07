@@ -17,6 +17,7 @@ import { getAllSeedCards } from "@/lib/seeds";
 import { generateDailyPlan, PlanDifficulty } from "@/lib/forge/scheduler";
 import ActivityToday from "@/components/activity-today";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
+import StarMap from "@/components/star-map/star-map";
 import Link from "next/link";
 
 export default function Dashboard() {
@@ -155,170 +156,12 @@ export default function Dashboard() {
     return <Onboarding onComplete={() => setShowOnboarding(false)} />;
   }
 
+  // Phase 2: Star Map is the new home screen
   return (
     <div className="min-h-screen bg-forge-bg">
       <Nav />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header stats */}
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-              L1NX
-            </h1>
-            <p className="text-forge-text-dim text-sm">
-              {totalCards} cards loaded — {dueCount} due today
-            </p>
-          </div>
-          <div className="flex items-center gap-6">
-            {profile && (
-              <>
-                <div className="text-right">
-                  <span className="text-xl font-bold mono text-forge-warning">{profile.streak}</span>
-                  <span className="block text-xs text-forge-text-dim">day streak</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xl font-bold mono text-forge-accent">{profile.totalPoints}</span>
-                  <span className="block text-xs text-forge-text-dim">points</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-xl font-bold mono text-forge-success">{profile.badges.length}</span>
-                  <span className="block text-xs text-forge-text-dim">badges</span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Actions today */}
-        <ActivityToday
-          reviews={recentReviews}
-          sessions={recentSessions}
-          speedRuns={recentSpeedRuns}
-        />
-
-        {/* Daily briefing */}
-        <DailyBriefing progress={progress} dueCount={dueCount} totalCards={totalCards} />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Radar chart */}
-          <div className="lg:col-span-1">
-            <ReadinessRadar progress={progress} />
-          </div>
-
-          {/* Daily plan + quick actions */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Daily training plan */}
-            <DailyPlanDisplay
-              plan={dailyPlan}
-              onStartTraining={handleStartTraining}
-              topicFilter={planTopicFilter}
-              onTopicFilterChange={setPlanTopicFilter}
-              difficulty={planDifficulty}
-              onDifficultyChange={setPlanDifficulty}
-              onResetPlan={() => {
-                localStorage.removeItem("l1nx-plan-done");
-                setPlanResetKey((k) => k + 1);
-              }}
-            />
-
-            {/* Mock interview CTA */}
-            <Link href="/interview" className="block">
-              <div className="bg-forge-surface border border-forge-border rounded-xl p-5 hover:border-forge-border-hover transition-colors">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold mb-0.5">Mock Interview</h3>
-                    <p className="text-sm text-forge-text-dim">Timed practice with AI scoring</p>
-                  </div>
-                  <span className="text-xl text-forge-text-muted">◎</span>
-                </div>
-              </div>
-            </Link>
-
-            {profile && profile.totalSessionMinutes > 0 && (
-              <div className="bg-forge-surface-2 rounded-xl p-4 text-center">
-                <span className="text-sm text-forge-text-dim">Estimated MTTR improvement: </span>
-                <span className="mono text-forge-success font-bold">
-                  {Math.round(profile.totalSessionMinutes * 0.5)}s faster
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Linux — primary focus */}
-        {(() => {
-          const linuxTopic = TOPICS.find((t) => t.id === "linux")!;
-          const linuxProgress = progress.find((p) => p.topicId === "linux");
-          const tierLabel = linuxProgress ? `Tier ${linuxProgress.currentTier}` : "Tier 1";
-          const tierKey = `tier${linuxProgress?.currentTier ?? 1}` as keyof NonNullable<typeof linuxProgress>["tierProgress"];
-          const tierData = linuxProgress?.tierProgress?.[tierKey];
-          const qualified = tierData?.qualified ?? 0;
-          const total = tierData?.total ?? 0;
-          const pct = total > 0 ? Math.round((qualified / total) * 100) : 0;
-
-          return (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-3">Linux</h2>
-              <div className="bg-forge-surface border border-forge-border rounded-lg p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="text-forge-accent mono font-bold text-sm">{linuxTopic.icon}</span>
-                      <span className="font-medium text-forge-text">{linuxTopic.name}</span>
-                    </div>
-                    <p className="text-forge-text-dim text-sm">{linuxTopic.description}</p>
-                  </div>
-                  <span className="mono text-forge-accent text-sm font-medium">{tierLabel}</span>
-                </div>
-                {/* Tier progress bar */}
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs text-forge-text-dim mb-1">
-                    <span>{tierLabel} progress</span>
-                    <span>{qualified}/{total} cards mastered ({pct}%)</span>
-                  </div>
-                  <div className="h-2 bg-forge-surface-2 rounded-full overflow-hidden">
-                    <div className="h-full bg-forge-accent rounded-full transition-all" style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <Link href="/study?topic=linux"
-                    className="px-4 py-2 bg-forge-accent/15 text-forge-accent rounded-md text-sm font-medium hover:bg-forge-accent/25 transition-colors">
-                    Continue studying
-                  </Link>
-                  <Link href="/explore"
-                    className="px-4 py-2 bg-forge-surface-2 text-forge-text-dim rounded-md text-sm hover:text-forge-text hover:bg-forge-border transition-colors">
-                    Explore
-                  </Link>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* DC Fundamentals — compact row */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">DC Fundamentals — Tier 1</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-            {TOPICS.filter((t) => t.id !== "linux").map((topic) => {
-              const tp = progress.find((p) => p.topicId === topic.id);
-              const t1 = tp?.tierProgress?.tier1;
-              const pct = t1 && t1.total > 0 ? Math.round((t1.qualified / t1.total) * 100) : 0;
-              return (
-                <Link key={topic.id} href={`/study?topic=${topic.id}`}
-                  className="bg-forge-surface border border-forge-border rounded-lg p-3 hover:border-forge-border-hover transition-colors">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-forge-accent mono text-xs">{topic.icon}</span>
-                    <span className="text-sm font-medium text-forge-text truncate">{topic.name}</span>
-                  </div>
-                  <div className="h-1.5 bg-forge-surface-2 rounded-full overflow-hidden mb-1">
-                    <div className="h-full bg-forge-accent rounded-full transition-all" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="text-xs text-forge-text-dim">{pct}%</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+      <main>
+        <StarMap />
       </main>
     </div>
   );
