@@ -9,9 +9,14 @@
  */
 
 import type * as forgeAgentContext from "../forgeAgentContext.js";
+import type * as forgeBounties from "../forgeBounties.js";
+import type * as forgeCampaigns from "../forgeCampaigns.js";
 import type * as forgeCards from "../forgeCards.js";
 import type * as forgeConversations from "../forgeConversations.js";
+import type * as forgeDiagnosisHistory from "../forgeDiagnosisHistory.js";
 import type * as forgeDrills from "../forgeDrills.js";
+import type * as forgeMissions from "../forgeMissions.js";
+import type * as forgeQuickDrawHistory from "../forgeQuickDrawHistory.js";
 import type * as forgeProfile from "../forgeProfile.js";
 import type * as forgeProgress from "../forgeProgress.js";
 import type * as forgeProgressRecompute from "../forgeProgressRecompute.js";
@@ -28,9 +33,14 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   forgeAgentContext: typeof forgeAgentContext;
+  forgeBounties: typeof forgeBounties;
+  forgeCampaigns: typeof forgeCampaigns;
   forgeCards: typeof forgeCards;
   forgeConversations: typeof forgeConversations;
+  forgeDiagnosisHistory: typeof forgeDiagnosisHistory;
   forgeDrills: typeof forgeDrills;
+  forgeMissions: typeof forgeMissions;
+  forgeQuickDrawHistory: typeof forgeQuickDrawHistory;
   forgeProfile: typeof forgeProfile;
   forgeProgress: typeof forgeProgress;
   forgeProgressRecompute: typeof forgeProgressRecompute;

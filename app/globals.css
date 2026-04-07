@@ -15,6 +15,39 @@
   --color-forge-text-dim: #888888;
   --color-forge-text-muted: #555555;
 
+  /* ── Phase 2: Hi-Tech Game UI tokens ── */
+  --color-v2-bg-deep: #050508;
+  --color-v2-bg: #0a0b10;
+  --color-v2-bg-surface: #0f1118;
+  --color-v2-bg-elevated: #151822;
+  --color-v2-bg-overlay: #1a1e2a;
+
+  --color-v2-cyan: #06d6d6;
+  --color-v2-cyan-bright: #22f5ee;
+  --color-v2-cyan-dim: #0a4a4a;
+  --color-v2-cyan-glow: rgba(6, 214, 214, 0.15);
+
+  --color-v2-blue: #2563eb;
+  --color-v2-blue-dim: #1e3a5f;
+
+  --color-v2-success: #22c55e;
+  --color-v2-warning: #f59e0b;
+  --color-v2-danger: #ef4444;
+  --color-v2-purple: #a855f7;
+
+  --color-v2-territory-claimed: #06d6d6;
+  --color-v2-territory-decaying: #f59e0b;
+  --color-v2-territory-hostile: #ef4444;
+  --color-v2-territory-locked: #333344;
+
+  --color-v2-text: #e0e4ec;
+  --color-v2-text-dim: #7a8298;
+  --color-v2-text-muted: #444b5c;
+  --color-v2-text-glow: #ffffff;
+
+  --color-v2-border: #1e2233;
+  --color-v2-border-glow: rgba(6, 214, 214, 0.3);
+
   /* ── Z-Index Scale ── */
   --z-mascot: 30;
   --z-nav: 40;
@@ -44,6 +77,13 @@ body {
 
 code, pre, .mono {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.display-font {
+  font-family: 'Rajdhani', 'IBM Plex Sans', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* Card flip animation */
@@ -189,3 +229,145 @@ code, pre, .mono {
   50% { transform: translateY(-4px); }
 }
 .mascot-bounce { animation: mascotBounce 0.3s ease-in-out; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Phase 2: Hi-Tech Game UI Components
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hex panel — angular container */
+.hex-panel {
+  background: var(--color-v2-bg-surface);
+  border: 1px solid var(--color-v2-border);
+  clip-path: polygon(
+    12px 0, calc(100% - 12px) 0,
+    100% 12px, 100% calc(100% - 12px),
+    calc(100% - 12px) 100%, 12px 100%,
+    0 calc(100% - 12px), 0 12px
+  );
+  position: relative;
+}
+.hex-panel::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  clip-path: polygon(
+    12px 0, calc(100% - 12px) 0,
+    100% 12px, 100% calc(100% - 12px),
+    calc(100% - 12px) 100%, 12px 100%,
+    0 calc(100% - 12px), 0 12px
+  );
+  border: 1px solid var(--color-v2-border-glow);
+  pointer-events: none;
+}
+.hex-panel-sm {
+  clip-path: polygon(
+    6px 0, calc(100% - 6px) 0,
+    100% 6px, 100% calc(100% - 6px),
+    calc(100% - 6px) 100%, 6px 100%,
+    0 calc(100% - 6px), 0 6px
+  );
+}
+.hex-panel-sm::before {
+  clip-path: polygon(
+    6px 0, calc(100% - 6px) 0,
+    100% 6px, 100% calc(100% - 6px),
+    calc(100% - 6px) 100%, 6px 100%,
+    0 calc(100% - 6px), 0 6px
+  );
+}
+
+/* Glow text — key numbers and stats */
+.glow-text {
+  color: var(--color-v2-text-glow);
+  text-shadow: 0 0 8px var(--color-v2-cyan-glow), 0 0 20px var(--color-v2-cyan-glow);
+}
+.glow-text-cyan {
+  color: var(--color-v2-cyan);
+  text-shadow: 0 0 8px var(--color-v2-cyan-glow), 0 0 20px var(--color-v2-cyan-glow);
+}
+
+/* Scan line overlay */
+.scan-lines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(6, 214, 214, 0.015) 2px,
+    rgba(6, 214, 214, 0.015) 4px
+  );
+  pointer-events: none;
+}
+
+/* Territory glow effects */
+.territory-glow-claimed {
+  box-shadow: 0 0 12px rgba(6, 214, 214, 0.25), 0 0 4px rgba(6, 214, 214, 0.15);
+}
+.territory-glow-decaying {
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25), 0 0 4px rgba(245, 158, 11, 0.15);
+}
+
+/* Data flow animation (for map connection lines) */
+@keyframes dataFlow {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+.data-flow {
+  stroke-dasharray: 4 6;
+  animation: dataFlow 1.5s linear infinite;
+}
+
+/* Territory pulse */
+@keyframes territoryPulse {
+  0%, 100% { box-shadow: 0 0 8px var(--color-v2-cyan-glow); }
+  50% { box-shadow: 0 0 20px var(--color-v2-cyan-glow), 0 0 40px rgba(6, 214, 214, 0.1); }
+}
+.territory-pulse {
+  animation: territoryPulse 2s ease-in-out infinite;
+}
+
+/* Available node pulse */
+@keyframes availablePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.available-pulse {
+  animation: availablePulse 2s ease-in-out infinite;
+}
+
+/* Decay warning pulse */
+@keyframes decayPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.15); }
+  50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+}
+.decay-pulse {
+  animation: decayPulse 2s ease-in-out infinite;
+}
+
+/* XP counter animation */
+@keyframes xpCountUp {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.xp-tick {
+  animation: xpCountUp 0.15s ease-out;
+}
+
+/* Mission accomplished flash */
+@keyframes accomplishedFlash {
+  0% { opacity: 0; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.accomplished-flash {
+  animation: accomplishedFlash 0.6s ease-out forwards;
+}
+
+/* v2 button glow hover */
+.v2-btn-glow {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.v2-btn-glow:hover {
+  box-shadow: 0 0 12px var(--color-v2-cyan-glow), 0 0 4px var(--color-v2-cyan-glow);
+  border-color: var(--color-v2-cyan);
+}

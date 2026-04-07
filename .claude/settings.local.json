@@ -33,7 +33,10 @@
       "Bash(git rm:*)",
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --no-src-dir --use-npm --no-eslint --no-import-alias)",
+      "Bash(export PATH=\"/usr/local/bin:$PATH\")",
+      "Bash(grep:*)"
     ]
   }
 }

@@ -35,9 +35,16 @@ export default function DrillWalkthrough({
 
   const checkAnswer = useCallback(() => {
     const lower = userInput.toLowerCase();
-    const matched = s.keyTerms.filter((t) =>
-      lower.includes(t.toLowerCase())
-    );
+    const matched = s.keyTerms.filter((t) => {
+      // Check direct term match
+      if (lower.includes(t.toLowerCase())) return true;
+      // Check synonyms if keyTermEntries exist
+      const entry = s.keyTermEntries?.find((e) => e.term === t);
+      if (entry?.synonyms) {
+        return entry.synonyms.some((syn) => lower.includes(syn.toLowerCase()));
+      }
+      return false;
+    });
     setMatchedTerms(matched);
     setShowAnswer(true);
     setResults((prev) => [

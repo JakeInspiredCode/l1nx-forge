@@ -3,11 +3,18 @@
 // Extracted from linux-ops-forge + expanded
 // ═════════════════════��═════════════════════════════════════════
 
+export interface KeyTermEntry {
+  term: string;
+  synonyms?: string[];
+}
+
 export interface ScenarioStep {
   prompt: string;
   hints: string[];
   answer: string;
   keyTerms: string[];
+  /** Phase 2: expanded key-term entries with synonyms for better matching */
+  keyTermEntries?: KeyTermEntry[];
 }
 
 export interface Scenario {
@@ -34,18 +41,40 @@ export const SCENARIOS: Scenario[] = [
         hints: ["Think about in-band vs out-of-band access", "What if SSH times out?"],
         answer: "Attempt SSH first. If it times out, use out-of-band access via BMC/IPMI: ipmitool -I lanplus -H gpu-rack12-node07-bmc chassis status. Also check the top-of-rack switch port status.",
         keyTerms: ["SSH", "BMC", "IPMI", "ipmitool", "out-of-band"],
+        keyTermEntries: [
+          { term: "SSH", synonyms: ["ssh", "remote access", "remote shell"] },
+          { term: "BMC", synonyms: ["baseboard management", "baseboard management controller"] },
+          { term: "IPMI", synonyms: ["ipmi", "out-of-band management"] },
+          { term: "ipmitool", synonyms: ["ipmi tool", "ipmi command"] },
+          { term: "out-of-band", synonyms: ["OOB", "oob", "lights-out", "remote management"] },
+        ],
       },
       {
         prompt: "BMC responds — chassis is powered on. SOL console shows: 'Kernel panic - not syncing: Fatal Machine Check.' What now?",
         hints: ["Capture evidence before taking action", "Check the System Event Log"],
         answer: "Capture the kernel panic output from SOL console for the incident ticket. Check ipmitool sel list for hardware fault details. Then issue ipmitool chassis power cycle to reboot.",
         keyTerms: ["capture", "SOL", "sel list", "power cycle", "evidence"],
+        keyTermEntries: [
+          { term: "capture", synonyms: ["save", "record", "screenshot", "copy", "document"] },
+          { term: "SOL", synonyms: ["serial over lan", "serial console", "console output"] },
+          { term: "sel list", synonyms: ["system event log", "SEL", "event log", "ipmitool sel"] },
+          { term: "power cycle", synonyms: ["reboot", "restart", "reset", "chassis power"] },
+          { term: "evidence", synonyms: ["proof", "documentation", "logs", "incident record"] },
+        ],
       },
       {
         prompt: "Node reboots. dmesg shows: 'EDAC MC0: 1 CE on DIMM 3A' — correctable ECC errors accumulating. How do you proceed?",
         hints: ["Is the DIMM degrading?", "What info do you need for the RMA?"],
         answer: "Check error rate — frequent CEs mean the DIMM is degrading. Run dmidecode -t memory to identify the physical DIMM (serial, part number). Mark node as degraded in fleet management. Drain workloads gracefully. File hardware RMA ticket with DIMM details and EDAC log excerpts.",
         keyTerms: ["EDAC", "dmidecode", "degraded", "drain", "RMA", "serial"],
+        keyTermEntries: [
+          { term: "EDAC", synonyms: ["ECC", "memory error", "correctable error", "CE"] },
+          { term: "dmidecode", synonyms: ["dmi decode", "hardware info", "memory info"] },
+          { term: "degraded", synonyms: ["failing", "degrading", "bad", "faulty"] },
+          { term: "drain", synonyms: ["evacuate", "migrate", "move workloads", "reschedule"] },
+          { term: "RMA", synonyms: ["replacement", "return", "warranty", "hardware ticket"] },
+          { term: "serial", synonyms: ["serial number", "part number", "asset tag"] },
+        ],
       },
       {
         prompt: "While reviewing, nvidia-smi shows GPU 2 has 4 volatile uncorrectable ECC errors. Other GPUs show zero. What additional action?",

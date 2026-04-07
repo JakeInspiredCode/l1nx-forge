@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Nav from "@/components/nav";
 import QuickDrawGame, { QuickDrawSummary } from "@/components/forge/quick-draw/quick-draw-game";
 import QuickDrawResults from "@/components/forge/quick-draw/quick-draw-results";
@@ -15,6 +17,10 @@ export default function QuickDrawPage() {
   const [mode, setMode] = useState<Mode>("type");
   const [summary, setSummary] = useState<QuickDrawSummary | null>(null);
 
+  const addHistory = useMutation(api.forgeQuickDrawHistory.add);
+  const addPoints = useMutation(api.forgeProfile.addPoints);
+  const checkBadges = useMutation(api.forgeProfile.checkAndAwardBadges);
+
   const modules = getAllModules();
 
   const startGame = (mod: QuickDrawModule) => {
@@ -23,9 +29,28 @@ export default function QuickDrawPage() {
     setScreen("playing");
   };
 
-  const handleComplete = (s: QuickDrawSummary) => {
+  const handleComplete = async (s: QuickDrawSummary) => {
     setSummary(s);
     setScreen("results");
+
+    // Persist results + award XP
+    if (selectedModule) {
+      const xpEarned = Math.round(10 + s.accuracy * 20);
+      try {
+        await addHistory({
+          moduleId: selectedModule.id,
+          score: Math.round(s.accuracy * 100),
+          totalItems: s.totalCount,
+          correctItems: s.correctCount,
+          timeMs: s.totalTime,
+          xpEarned,
+        });
+        await addPoints({ points: xpEarned });
+        await checkBadges({});
+      } catch {
+        // Silently handle — game still works without persistence
+      }
+    }
   };
 
   if (screen === "playing" && selectedModule) {
