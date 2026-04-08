@@ -9,14 +9,24 @@ interface SectorNodeProps {
   onClick: (sector: Sector) => void;
 }
 
-const SIZE_SCALE = { sm: 28, md: 36, lg: 46 };
-const NEBULA_SCALE = { sm: 60, md: 80, lg: 110 };
+const SIZE_SCALE = { sm: 25, md: 32, lg: 42 };
+const NEBULA_SCALE = { sm: 55, md: 75, lg: 100 };
+
+/** Flat-top hexagon points string for SVG polygon */
+function hexPoints(cx: number, cy: number, r: number): string {
+  const pts: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 3) * i - Math.PI / 6; // flat-top: start at -30°
+    pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+  }
+  return pts.join(" ");
+}
 
 export default function SectorNode({ sector, progress, onHover, onClick }: SectorNodeProps) {
   const r = SIZE_SCALE[sector.size];
   const nebulaR = NEBULA_SCALE[sector.size];
-  const cx = sector.mapPosition.x * 10; // Scale 0-100 to viewBox 0-1000
-  const cy = sector.mapPosition.y * 10; // Scale 0-100 to viewBox 0-800 (we'll use 8 factor in parent)
+  const cx = sector.mapPosition.x * 10;
+  const cy = sector.mapPosition.y * 10;
 
   const completionPct = progress.totalMissions > 0
     ? progress.completedMissions / progress.totalMissions
@@ -25,10 +35,10 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
   const isActive = progress.hasVolunteered;
   const isComplete = progress.isComplete;
 
-  // Progress ring
-  const ringR = r + 4;
-  const circumference = 2 * Math.PI * ringR;
-  const dashOffset = circumference * (1 - completionPct);
+  // Progress ring (hex perimeter)
+  const ringR = r + 5;
+  const perimeter = 6 * ringR; // regular hexagon side = radius
+  const dashOffset = perimeter * (1 - completionPct);
 
   return (
     <g
@@ -36,53 +46,59 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       onMouseEnter={() => onHover(sector)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(sector)}
-      style={{ filter: isActive ? `drop-shadow(0 0 12px ${sector.color}40)` : undefined }}
+      style={{ filter: isActive ? `drop-shadow(0 0 14px ${sector.color}50)` : undefined }}
     >
-      {/* Nebula glow */}
+      {/* Nebula glow — radial gradient fills the hex area */}
       <circle
         cx={cx}
         cy={cy}
         r={nebulaR}
         fill={`url(#nebula-${sector.id})`}
-        opacity={isActive ? 0.18 : 0.08}
+        opacity={isActive ? 0.22 : 0.1}
         className="transition-opacity duration-500"
       />
 
-      {/* Core circle */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill="rgba(15, 17, 24, 0.8)"
+      {/* Core hexagon */}
+      <polygon
+        points={hexPoints(cx, cy, r)}
+        fill="rgba(10, 12, 20, 0.85)"
         stroke={sector.color}
-        strokeWidth={isActive ? 1.5 : 0.8}
-        opacity={isActive ? 1 : 0.6}
+        strokeWidth={isActive ? 1.8 : 1}
+        opacity={isActive ? 1 : 0.65}
         className="transition-all duration-300"
+        strokeLinejoin="round"
+      />
+
+      {/* Inner hex highlight (subtle top edge shine) */}
+      <polygon
+        points={hexPoints(cx, cy, r - 2)}
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.06)"
+        strokeWidth={0.5}
+        strokeLinejoin="round"
       />
 
       {/* Progress ring (only if volunteered) */}
       {isActive && (
         <>
-          <circle
-            cx={cx}
-            cy={cy}
-            r={ringR}
+          {/* Background hex ring */}
+          <polygon
+            points={hexPoints(cx, cy, ringR)}
             fill="none"
             stroke={sector.color}
-            strokeWidth={1.5}
+            strokeWidth={2}
             opacity={0.15}
+            strokeLinejoin="round"
           />
-          <circle
-            cx={cx}
-            cy={cy}
-            r={ringR}
+          {/* Progress hex ring */}
+          <polygon
+            points={hexPoints(cx, cy, ringR)}
             fill="none"
             stroke={isComplete ? "#22c55e" : sector.color}
-            strokeWidth={1.5}
-            strokeDasharray={circumference}
+            strokeWidth={2}
+            strokeDasharray={perimeter}
             strokeDashoffset={dashOffset}
-            strokeLinecap="round"
-            transform={`rotate(-90 ${cx} ${cy})`}
+            strokeLinejoin="round"
             className="transition-all duration-700"
           />
         </>
@@ -91,7 +107,7 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Icon */}
       <text
         x={cx}
-        y={cy - 4}
+        y={cy - 2}
         textAnchor="middle"
         dominantBaseline="central"
         fontSize={sector.size === "lg" ? 20 : sector.size === "md" ? 16 : 13}
@@ -103,7 +119,7 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Title */}
       <text
         x={cx}
-        y={cy + r - 6}
+        y={cy + r + 2}
         textAnchor="middle"
         dominantBaseline="hanging"
         fill={isActive ? sector.color : "#7a8298"}
@@ -119,7 +135,7 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Mission count */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 8 : 5)}
+        y={cy + r + (sector.size === "lg" ? 14 : 12)}
         textAnchor="middle"
         dominantBaseline="hanging"
         fill="#444b5c"
@@ -127,7 +143,7 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
         fontFamily="'JetBrains Mono', monospace"
         className="pointer-events-none select-none"
       >
-        {progress.totalMissions} missions
+        {progress.completedMissions}/{progress.totalMissions} missions
       </text>
 
       {/* Radial gradient definition for nebula */}

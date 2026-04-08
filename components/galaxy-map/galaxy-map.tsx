@@ -13,6 +13,7 @@ import SectorNode from "./sector-node";
 import SectorTooltip from "./sector-tooltip";
 import SectorOverlay from "./sector-overlay";
 import StatsPanel from "./stats-panel";
+import BottomNav from "@/components/ui/bottom-nav";
 
 export default function GalaxyMap() {
   const router = useRouter();
@@ -125,7 +126,7 @@ export default function GalaxyMap() {
     setMousePos({ x: e.clientX, y: e.clientY });
   }, []);
 
-  // Hyperspace lanes — connect sectors that share topic prerequisites or are thematically close
+  // Hyperspace lanes — directional arrows showing learning progression
   const lanes: [Sector, Sector][] = useMemo(() => {
     const s = (id: string) => ALL_SECTORS.find((sec) => sec.id === id)!;
     return [
@@ -145,81 +146,115 @@ export default function GalaxyMap() {
       <StarfieldCanvas />
       <ScanOverlay />
 
+      {/* Viewport frame */}
+      <div className="viewport-frame fixed inset-0 z-[8]" />
+
       {/* Galaxy header */}
       <div className="absolute top-0 left-0 right-0 z-10">
-        <GalaxyHeader
-          totalXp={profile?.totalPoints ?? 0}
-          streak={profile?.streak ?? 0}
-          sectorsExplored={sectorsExplored}
-          totalSectors={ALL_SECTORS.length}
-        />
+        <GalaxyHeader />
       </div>
 
       {/* Main layout: map + stats */}
-      <div className="absolute inset-0 z-[5] flex pt-12">
-        {/* Galaxy map SVG */}
-        <div className="flex-1 relative">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-v2-text-dim text-sm telemetry-font animate-pulse">
-                Scanning galaxy sectors...
-              </div>
-            </div>
-          ) : (
-            <svg
-              viewBox="0 0 1000 800"
-              preserveAspectRatio="xMidYMid meet"
-              className="w-full h-full"
-            >
-              {/* Hyperspace lanes */}
-              {lanes.map(([a, b], i) => (
-                <line
-                  key={i}
-                  x1={a.mapPosition.x * 10}
-                  y1={a.mapPosition.y * 8}
-                  x2={b.mapPosition.x * 10}
-                  y2={b.mapPosition.y * 8}
-                  stroke="#7a8298"
-                  strokeWidth={0.5}
-                  strokeDasharray="4 8"
-                  opacity={0.15}
-                />
-              ))}
-
-              {/* Sector nodes */}
-              {ALL_SECTORS.map((sector) => (
-                <SectorNode
-                  key={sector.id}
-                  sector={{
-                    ...sector,
-                    mapPosition: {
-                      x: sector.mapPosition.x,
-                      y: sector.mapPosition.y * 0.8, // Scale Y to match viewBox aspect
-                    },
-                  }}
-                  progress={sectorProgressMap[sector.id]}
-                  onHover={handleSectorHover}
-                  onClick={handleSectorClick}
-                />
-              ))}
+      <div className="absolute inset-0 z-[5] flex pt-16 pb-14">
+        {/* Galaxy map — framed panel */}
+        <div className="flex-1 relative flex flex-col mx-2 mb-1">
+          {/* Panel header bar */}
+          <div className="panel-header-bar rounded-t shrink-0">
+            <span>Sector Map</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" className="opacity-40">
+              <rect x="0" y="0" width="6" height="6" rx="1" fill="#06d6d6" />
+              <rect x="8" y="0" width="6" height="6" rx="1" fill="#06d6d6" />
+              <rect x="0" y="8" width="6" height="6" rx="1" fill="#06d6d6" />
+              <rect x="8" y="8" width="6" height="6" rx="1" fill="#06d6d6" />
             </svg>
-          )}
+          </div>
+          <div className="flex-1 metallic-frame rounded-b overflow-hidden">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-v2-text-dim text-sm telemetry-font animate-pulse">
+                  Scanning galaxy sectors...
+                </div>
+              </div>
+            ) : (
+              <svg
+                viewBox="0 0 1000 800"
+                preserveAspectRatio="xMidYMid meet"
+                className="w-full h-full"
+              >
+                {/* Arrow marker definition */}
+                <defs>
+                  <marker
+                    id="arrow-marker"
+                    viewBox="0 0 10 10"
+                    refX="9"
+                    refY="5"
+                    markerWidth="5"
+                    markerHeight="5"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#06d6d6" opacity="0.5" />
+                  </marker>
+                </defs>
+
+                {/* Hyperspace lanes — directional arrows */}
+                {lanes.map(([a, b], i) => (
+                  <line
+                    key={i}
+                    x1={a.mapPosition.x * 10}
+                    y1={a.mapPosition.y * 8}
+                    x2={b.mapPosition.x * 10}
+                    y2={b.mapPosition.y * 8}
+                    stroke="#06d6d6"
+                    strokeWidth={1.2}
+                    opacity={0.3}
+                    markerEnd="url(#arrow-marker)"
+                  />
+                ))}
+
+                {/* Sector nodes */}
+                {ALL_SECTORS.map((sector) => (
+                  <SectorNode
+                    key={sector.id}
+                    sector={{
+                      ...sector,
+                      mapPosition: {
+                        x: sector.mapPosition.x,
+                        y: sector.mapPosition.y * 0.8,
+                      },
+                    }}
+                    progress={sectorProgressMap[sector.id]}
+                    onHover={handleSectorHover}
+                    onClick={handleSectorClick}
+                  />
+                ))}
+              </svg>
+            )}
+          </div>
         </div>
 
-        {/* Stats panel */}
-        <div className="w-[220px] shrink-0 border-l border-v2-border bg-v2-bg-surface/60 backdrop-blur-sm">
-          <StatsPanel
-            totalXp={profile?.totalPoints ?? 0}
-            streak={profile?.streak ?? 0}
-            sectorsExplored={sectorsExplored}
-            totalSectors={ALL_SECTORS.length}
-            missionsAccomplished={totalAccomplished}
-            totalMissions={totalMissions}
-            activeCampaignTitle={activeCampaign?.title}
-            activeCampaignPct={activeCampaignPct}
-          />
+        {/* Stats panel — framed */}
+        <div className="w-[240px] shrink-0 flex flex-col mr-2 mb-1">
+          <div className="panel-header-bar rounded-t shrink-0">
+            <span>Navigation Board</span>
+            <button className="text-v2-text-muted hover:text-v2-text text-xs">···</button>
+          </div>
+          <div className="flex-1 metallic-frame rounded-b bg-v2-bg-surface/60 backdrop-blur-sm overflow-hidden">
+            <StatsPanel
+              totalXp={profile?.totalPoints ?? 0}
+              streak={profile?.streak ?? 0}
+              sectorsExplored={sectorsExplored}
+              totalSectors={ALL_SECTORS.length}
+              missionsAccomplished={totalAccomplished}
+              totalMissions={totalMissions}
+              activeCampaignTitle={activeCampaign?.title}
+              activeCampaignPct={activeCampaignPct}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Bottom navigation bar */}
+      <BottomNav activePage="galaxy-map" />
 
       {/* Hover tooltip */}
       {hoveredSector && !selectedSector && (

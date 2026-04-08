@@ -31,9 +31,9 @@ export default function CampaignPath({ nodes, currentMissionIndex, pathColor }: 
             x2={node.cx}
             y2={node.cy}
             stroke={isCompleted ? pathColor : "#7a8298"}
-            strokeWidth={isCompleted ? 1.5 : 0.8}
+            strokeWidth={isCompleted ? 2.5 : 1}
             strokeDasharray={isCompleted ? "none" : "4 6"}
-            opacity={isCompleted ? 0.6 : 0.2}
+            opacity={isCompleted ? 0.8 : 0.25}
             className={isCompleted ? "" : "animate-[dataFlow_1.5s_linear_infinite]"}
           />
         );

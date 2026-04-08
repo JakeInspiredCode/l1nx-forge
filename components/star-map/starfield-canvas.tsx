@@ -35,8 +35,9 @@ interface Particle {
 }
 
 const STAR_COUNT = 400;
-const NEBULA_COUNT = 3;
+const NEBULA_COUNT = 5;
 const PARTICLE_COUNT = 60;
+const DUST_COUNT = 200;
 
 function createStars(w: number, h: number): Star[] {
   const stars: Star[] = [];
@@ -54,22 +55,52 @@ function createStars(w: number, h: number): Star[] {
   return stars;
 }
 
+interface DustMote {
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  color: [number, number, number];
+}
+
 function createNebulae(w: number, h: number): Nebula[] {
   const colors: [number, number, number][] = [
     [6, 100, 180],    // deep blue
     [80, 20, 140],    // purple
     [6, 140, 140],    // teal
+    [120, 30, 60],    // reddish-purple
+    [60, 40, 10],     // deep gold
   ];
-  return colors.map((color, i) => ({
-    x: w * (0.2 + Math.random() * 0.6),
-    y: h * (0.2 + Math.random() * 0.6),
-    radiusX: w * (0.15 + Math.random() * 0.15),
-    radiusY: h * (0.12 + Math.random() * 0.12),
+  return colors.map((color) => ({
+    x: w * (0.15 + Math.random() * 0.7),
+    y: h * (0.15 + Math.random() * 0.7),
+    radiusX: w * (0.18 + Math.random() * 0.18),
+    radiusY: h * (0.14 + Math.random() * 0.14),
     color,
-    opacity: 0.04 + Math.random() * 0.03,
+    opacity: 0.05 + Math.random() * 0.05,
     rotation: Math.random() * Math.PI * 2,
     rotationSpeed: (Math.random() - 0.5) * 0.0001,
   }));
+}
+
+function createDust(w: number, h: number): DustMote[] {
+  const dustColors: [number, number, number][] = [
+    [140, 120, 80],   // warm dust
+    [100, 80, 60],    // brown dust
+    [80, 100, 140],   // cool dust
+    [120, 100, 140],  // purple dust
+  ];
+  const motes: DustMote[] = [];
+  for (let i = 0; i < DUST_COUNT; i++) {
+    motes.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: Math.random() * 0.4 + 0.2,
+      opacity: Math.random() * 0.04 + 0.02,
+      color: dustColors[Math.floor(Math.random() * dustColors.length)],
+    });
+  }
+  return motes;
 }
 
 function createParticles(w: number, h: number): Particle[] {
@@ -100,6 +131,7 @@ export default function StarfieldCanvas() {
   const starsRef = useRef<Star[]>([]);
   const nebulaeRef = useRef<Nebula[]>([]);
   const particlesRef = useRef<Particle[]>([]);
+  const dustRef = useRef<DustMote[]>([]);
   const animRef = useRef<number>(0);
   const timeRef = useRef<number>(0);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -108,7 +140,7 @@ export default function StarfieldCanvas() {
     const time = timeRef.current;
 
     // Clear
-    ctx.fillStyle = "#050508";
+    ctx.fillStyle = "#060510";
     ctx.fillRect(0, 0, w, h);
 
     // Draw nebulae
@@ -132,6 +164,15 @@ export default function StarfieldCanvas() {
       ctx.fill();
       ctx.restore();
     }
+
+    // Draw cosmic dust (static warm-toned particles for depth)
+    for (const mote of dustRef.current) {
+      const [r, g, b] = mote.color;
+      ctx.globalAlpha = mote.opacity;
+      ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+      ctx.fillRect(mote.x, mote.y, mote.size, mote.size);
+    }
+    ctx.globalAlpha = 1;
 
     // Draw stars
     for (const star of starsRef.current) {
@@ -234,6 +275,7 @@ export default function StarfieldCanvas() {
       starsRef.current = createStars(w, h);
       nebulaeRef.current = createNebulae(w, h);
       particlesRef.current = createParticles(w, h);
+      dustRef.current = createDust(w, h);
     }
 
     resize();

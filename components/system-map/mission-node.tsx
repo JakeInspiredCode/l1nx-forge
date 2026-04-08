@@ -37,24 +37,25 @@ export default function MissionNode({
   if (isDecaying) animClass = "animate-[decayPulse_2s_ease-in-out_infinite]";
   if (isCurrent) animClass = "animate-[territoryPulse_2s_ease-in-out_infinite]";
 
+  const orbitRadius = Math.sqrt((cx - 500) ** 2 + (cy - 400) ** 2);
+
   return (
     <g
       className={`${isInteractive ? "cursor-pointer" : "cursor-default"} transition-transform duration-200`}
       onMouseEnter={() => isInteractive && onHover(mission)}
       onMouseLeave={() => onHover(null)}
       onClick={() => isInteractive && onClick(mission)}
-      style={colors.glow !== "none" ? { filter: `drop-shadow(0 0 8px ${colors.glow})` } : undefined}
+      style={colors.glow !== "none" ? { filter: `drop-shadow(0 0 10px ${colors.glow})` } : undefined}
     >
-      {/* Orbit ring hint (faint) */}
+      {/* Orbit ring — solid, more visible */}
       <circle
         cx={500}
         cy={400}
-        r={Math.sqrt((cx - 500) ** 2 + (cy - 400) ** 2)}
+        r={orbitRadius}
         fill="none"
         stroke="#7a8298"
-        strokeWidth={0.3}
-        opacity={0.08}
-        strokeDasharray="2 6"
+        strokeWidth={0.6}
+        opacity={0.15}
       />
 
       {/* Celestial body */}
@@ -70,20 +71,41 @@ export default function MissionNode({
       )}
 
       {celestialType === "moon" && (
-        <circle
-          cx={cx}
-          cy={cy}
-          r={size}
-          fill={colors.fill}
-          stroke={colors.stroke}
-          strokeWidth={1.2}
-          opacity={status === "locked" ? 0.3 : 0.9}
-          className={animClass}
-        />
+        <>
+          <circle
+            cx={cx}
+            cy={cy}
+            r={size}
+            fill={colors.fill}
+            stroke={colors.stroke}
+            strokeWidth={1.2}
+            opacity={status === "locked" ? 0.3 : 0.9}
+            className={animClass}
+          />
+          {/* Subtle highlight for 3D effect */}
+          {status !== "locked" && (
+            <circle
+              cx={cx - size * 0.25}
+              cy={cy - size * 0.25}
+              r={size * 0.4}
+              fill="rgba(255,255,255,0.08)"
+            />
+          )}
+        </>
       )}
 
       {celestialType === "planet" && (
         <>
+          {/* Atmosphere ring */}
+          {status !== "locked" && (
+            <circle
+              cx={cx}
+              cy={cy}
+              r={size + 4}
+              fill={`url(#atmo-${mission.id})`}
+            />
+          )}
+          {/* Planet body */}
           <circle
             cx={cx}
             cy={cy}
@@ -94,10 +116,28 @@ export default function MissionNode({
             opacity={status === "locked" ? 0.3 : 0.9}
             className={animClass}
           />
+          {/* Inner highlight for 3D sphere */}
+          {status !== "locked" && (
+            <circle
+              cx={cx - size * 0.2}
+              cy={cy - size * 0.2}
+              r={size * 0.5}
+              fill={`url(#highlight-${mission.id})`}
+            />
+          )}
           <defs>
             <radialGradient id={`planet-${mission.id}`} cx="35%" cy="35%">
               <stop offset="0%" stopColor={colors.stroke} stopOpacity={0.3} />
               <stop offset="100%" stopColor={colors.fill} />
+            </radialGradient>
+            <radialGradient id={`atmo-${mission.id}`} cx="50%" cy="50%" r="50%">
+              <stop offset="60%" stopColor={colors.stroke} stopOpacity={0} />
+              <stop offset="85%" stopColor={colors.stroke} stopOpacity={0.06} />
+              <stop offset="100%" stopColor={colors.stroke} stopOpacity={0} />
+            </radialGradient>
+            <radialGradient id={`highlight-${mission.id}`} cx="30%" cy="30%">
+              <stop offset="0%" stopColor="white" stopOpacity={0.12} />
+              <stop offset="100%" stopColor="white" stopOpacity={0} />
             </radialGradient>
           </defs>
         </>
@@ -115,7 +155,7 @@ export default function MissionNode({
             opacity={status === "locked" ? 0.3 : 0.9}
             className={animClass}
           />
-          {/* Station ring */}
+          {/* Primary station ring */}
           <ellipse
             cx={cx}
             cy={cy}
@@ -125,6 +165,18 @@ export default function MissionNode({
             stroke={colors.stroke}
             strokeWidth={0.8}
             opacity={status === "locked" ? 0.15 : 0.4}
+          />
+          {/* Secondary ring at 60° */}
+          <ellipse
+            cx={cx}
+            cy={cy}
+            rx={size + 5}
+            ry={size * 0.3}
+            fill="none"
+            stroke={colors.stroke}
+            strokeWidth={0.5}
+            opacity={status === "locked" ? 0.08 : 0.2}
+            transform={`rotate(60 ${cx} ${cy})`}
           />
           <defs>
             <radialGradient id={`station-${mission.id}`} cx="30%" cy="30%">

@@ -9,11 +9,22 @@ interface SectorTooltipProps {
   mousePos: { x: number; y: number };
 }
 
+const SECTOR_GREEK: Record<string, string> = {
+  "sector-linux": "Alpha",
+  "sector-hardware": "Beta",
+  "sector-networking": "Gamma",
+  "sector-fiber": "Delta",
+  "sector-power": "Epsilon",
+  "sector-ops": "Zeta",
+  "sector-scale": "Eta",
+};
+
 export default function SectorTooltip({ sector, progress, mousePos }: SectorTooltipProps) {
   const campaign = getCampaign(sector.campaignIds[0]);
   const pct = progress.totalMissions > 0
     ? Math.round((progress.completedMissions / progress.totalMissions) * 100)
     : 0;
+  const greekName = SECTOR_GREEK[sector.id] ?? "";
 
   return (
     <div
@@ -24,14 +35,14 @@ export default function SectorTooltip({ sector, progress, mousePos }: SectorTool
       }}
     >
       <div
-        className="hex-panel px-4 py-3 min-w-[180px] max-w-[240px]"
+        className="hex-panel px-4 py-3 min-w-[200px] max-w-[260px]"
         style={{
           borderColor: `${sector.color}40`,
           boxShadow: `0 0 16px ${sector.color}15`,
         }}
       >
         {/* Title */}
-        <div className="flex items-center gap-2 mb-1.5">
+        <div className="flex items-center gap-2 mb-0.5">
           <span className="text-sm">{sector.icon}</span>
           <span
             className="display-font text-xs tracking-wider uppercase"
@@ -41,21 +52,14 @@ export default function SectorTooltip({ sector, progress, mousePos }: SectorTool
           </span>
         </div>
 
-        {/* Description */}
-        <p className="text-[10px] text-v2-text-dim leading-tight mb-2 line-clamp-2">
-          {sector.description}
-        </p>
+        {/* Sector sub-label */}
+        <div className="text-[8px] telemetry-font text-v2-text-muted uppercase tracking-[0.2em] mb-2 ml-6">
+          (Sector {greekName})
+        </div>
 
-        {/* Campaign name */}
-        {campaign && (
-          <div className="text-[9px] telemetry-font text-v2-text-muted mb-2 uppercase tracking-wider">
-            {campaign.title}
-          </div>
-        )}
-
-        {/* Progress bar */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-1 rounded-full bg-v2-border overflow-hidden">
+        {/* Progress count — prominent */}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex-1 h-1.5 rounded-full bg-v2-border overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
@@ -64,20 +68,24 @@ export default function SectorTooltip({ sector, progress, mousePos }: SectorTool
               }}
             />
           </div>
-          <span className="text-[9px] telemetry-font text-v2-text-muted">
+          <span
+            className="text-sm telemetry-font font-semibold"
+            style={{ color: sector.color }}
+          >
             {progress.completedMissions}/{progress.totalMissions}
           </span>
         </div>
 
-        {/* Status */}
-        <div className="mt-1.5 text-[9px] telemetry-font uppercase tracking-wider">
-          {progress.isComplete ? (
-            <span className="text-green-400">Secured</span>
-          ) : progress.hasVolunteered ? (
-            <span style={{ color: sector.color }}>Active</span>
-          ) : (
-            <span className="text-v2-text-muted">Unexplored</span>
-          )}
+        {/* Jump to System indicator */}
+        <div
+          className="mt-2 pt-2 border-t border-v2-border text-center"
+        >
+          <span
+            className="text-[9px] display-font tracking-[0.15em] uppercase"
+            style={{ color: sector.color, textShadow: `0 0 8px ${sector.color}30` }}
+          >
+            Jump to System
+          </span>
         </div>
       </div>
     </div>

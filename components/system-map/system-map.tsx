@@ -14,6 +14,7 @@ import MissionNode from "./mission-node";
 import CampaignPath from "./campaign-path";
 import MissionOverlay from "./mission-overlay";
 import StatsSidebar from "./stats-sidebar";
+import BottomNav from "@/components/ui/bottom-nav";
 
 // ── Orbital position computation ──
 
@@ -60,7 +61,7 @@ function computeOrbitalPositions(count: number): OrbitalPos[] {
   return positions;
 }
 
-// ── Effective mission status (same logic as galaxy-map) ──
+// ── Effective mission status ──
 
 function getEffectiveStatus(
   missionId: string,
@@ -169,7 +170,6 @@ export default function SystemMap() {
 
   const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
     setSelectedMission(null);
-    // Pass custom loadout via sessionStorage so mission-player can pick it up
     sessionStorage.setItem(
       `loadout:${missionId}`,
       JSON.stringify(loadout.map((s) => s.id)),
@@ -193,22 +193,41 @@ export default function SystemMap() {
       <StarfieldCanvas />
       <ScanOverlay />
 
-      <div className="absolute inset-0 z-[5] flex">
-        {/* Stats sidebar */}
-        <div className="w-[220px] shrink-0 border-r border-v2-border bg-v2-bg-surface/60 backdrop-blur-sm">
-          <StatsSidebar
-            campaign={activeCampaign}
-            completedCount={completedCount}
-            totalMissions={missions.length}
-            currentMissionIndex={currentMissionIndex}
-            totalXp={profile?.totalPoints ?? 0}
-            streak={profile?.streak ?? 0}
-            decayingMissionIds={decayingMissionIds}
-            hasNoCampaign={hasNoCampaign}
-          />
-        </div>
+      {/* Viewport frame */}
+      <div className="viewport-frame fixed inset-0 z-[8]" />
 
-        {/* Solar system SVG */}
+      {/* HUD Stats bar at top */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-2">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] telemetry-font text-v2-text-muted uppercase">XP:</span>
+          <span className="text-xs telemetry-font text-v2-cyan font-semibold">
+            {(profile?.totalPoints ?? 0).toLocaleString()}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] telemetry-font text-v2-text-muted uppercase">Streak:</span>
+          <span className="text-xs telemetry-font text-v2-amber font-semibold">
+            {profile?.streak ?? 0} d
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] telemetry-font text-v2-text-muted uppercase">Missions:</span>
+          <span className="text-xs telemetry-font text-v2-text font-semibold">
+            {completedCount} / {missions.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Metallic title */}
+      <div className="absolute top-8 left-0 right-0 z-10 text-center pointer-events-none">
+        <h1 className="metallic-title text-xl md:text-2xl">
+          Solar System Mission View
+        </h1>
+      </div>
+
+      {/* Main layout: map + sidebar */}
+      <div className="absolute inset-0 z-[5] flex pt-16 pb-14">
+        {/* Solar system SVG — main area */}
         <div className="flex-1 relative">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
@@ -266,7 +285,29 @@ export default function SystemMap() {
             </svg>
           )}
         </div>
+
+        {/* Stats sidebar — now on the right, framed */}
+        <div className="w-[240px] shrink-0 flex flex-col mr-2 mb-1">
+          <div className="panel-header-bar rounded-t shrink-0">
+            <span>Mission Briefing</span>
+          </div>
+          <div className="flex-1 metallic-frame rounded-b bg-v2-bg-surface/60 backdrop-blur-sm overflow-hidden">
+            <StatsSidebar
+              campaign={activeCampaign}
+              completedCount={completedCount}
+              totalMissions={missions.length}
+              currentMissionIndex={currentMissionIndex}
+              totalXp={profile?.totalPoints ?? 0}
+              streak={profile?.streak ?? 0}
+              decayingMissionIds={decayingMissionIds}
+              hasNoCampaign={hasNoCampaign}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* Bottom navigation bar */}
+      <BottomNav activePage="missions" />
 
       {/* Hover tooltip */}
       {hoveredMission && !selectedMission && (
