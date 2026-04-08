@@ -159,6 +159,29 @@ export interface PlayerBountyRecord {
   xpEarned: number;
 }
 
+// ── Sector ──
+
+export interface Sector {
+  id: string;                     // "sector-linux"
+  title: string;                  // "Linux Operations"
+  description: string;            // flavor text for hover tooltip
+  topicId: TopicId;
+  icon: string;                   // emoji
+  color: string;                  // accent color
+  campaignIds: string[];          // campaigns in this sector
+  mapPosition: { x: number; y: number }; // 0-100 percentage coords
+  size: "sm" | "md" | "lg";      // visual size on galaxy map
+}
+
+export interface SectorProgress {
+  sectorId: string;
+  totalMissions: number;
+  completedMissions: number;
+  activeCampaignId: string | null;
+  hasVolunteered: boolean;
+  isComplete: boolean;
+}
+
 // ── XP Constants ──
 
 export const XP = {

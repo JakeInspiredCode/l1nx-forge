@@ -3,10 +3,10 @@
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
-type RoomName = "star-map" | "missions" | "arsenal" | "comms" | "profile";
+type RoomName = "galaxy-map" | "missions" | "arsenal" | "comms" | "profile";
 
 const ROUTE_TO_ROOM: Record<string, RoomName> = {
-  "/": "star-map",
+  "/": "galaxy-map",
   "/missions": "missions",
   "/arsenal": "arsenal",
   "/comms": "comms",
@@ -40,14 +40,14 @@ function resolveRoom(pathname: string): RoomName {
   for (const { prefix, room } of HUB_PREFIXES) {
     if (pathname.startsWith(prefix)) return room;
   }
-  return "star-map";
+  return "galaxy-map";
 }
 
 interface RoomContextValue {
   room: RoomName;
 }
 
-const RoomContext = createContext<RoomContextValue>({ room: "star-map" });
+const RoomContext = createContext<RoomContextValue>({ room: "galaxy-map" });
 
 export function useRoom() {
   return useContext(RoomContext);

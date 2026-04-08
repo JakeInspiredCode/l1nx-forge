@@ -92,10 +92,10 @@ export default function MissionBoard() {
             <div className="flex-1 flex items-center justify-center">
               <HexPanel className="text-center">
                 <p className="text-sm text-v2-text-dim mb-3">
-                  No active campaign. Enroll from the Star Map.
+                  No active campaign. Volunteer from the Galaxy Map.
                 </p>
                 <ActionButton variant="primary" onClick={() => router.push("/")}>
-                  Browse Star Map
+                  Browse Galaxy Map
                 </ActionButton>
               </HexPanel>
             </div>

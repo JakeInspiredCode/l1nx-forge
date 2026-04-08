@@ -1,13 +1,5 @@
-"use client";
-
-import StarMap from "@/components/star-map/star-map";
+import { redirect } from "next/navigation";
 
 export default function StarMapPage() {
-  return (
-    <>
-      <main>
-        <StarMap />
-      </main>
-    </>
-  );
+  redirect("/");
 }

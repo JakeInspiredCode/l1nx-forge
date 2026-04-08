@@ -19,10 +19,10 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    id: "star-map",
+    id: "galaxy-map",
     href: "/",
-    label: "Star Map",
-    room: "star-map",
+    label: "Galaxy Map",
+    room: "galaxy-map",
     color: "#06d6d6",
     colorBright: "#22f5ee",
     glow: "rgba(6, 214, 214, 0.3)",

@@ -13,12 +13,12 @@ const SCREENS = [
     body: "L1NX is your training platform for data center operations. You'll master Linux administration, networking, hardware, and ops through missions, campaigns, and bounties.",
   },
   {
-    title: "The Star Map",
-    body: "This is your territory. Each star system is a skill you need to master. Complete missions to claim territory. Neglect it and the enemy pushes back. Your goal: light up the map.",
+    title: "The Galaxy Map",
+    body: "This is your territory. Each sector of the galaxy is a skill domain to master. Volunteer for campaigns to unlock missions. Your goal: secure every sector.",
   },
   {
     title: "Campaigns",
-    body: "Enroll in a campaign for structured learning. The app tells you what to do each day. Show up, complete missions, expand your territory over weeks.",
+    body: "Volunteer for a campaign in any sector for structured learning. The app tells you what to do each day. Show up, complete missions, expand your territory over weeks.",
   },
   {
     title: "Missions & Bounties",
@@ -69,7 +69,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 className="block w-full"
               >
                 <div className="p-4 bg-v2-bg-elevated border border-v2-cyan/30 rounded hover:border-v2-cyan transition-colors text-left">
-                  <p className="text-v2-text font-medium">Enroll in Operation Penguin Core</p>
+                  <p className="text-v2-text font-medium">Volunteer for Operation Penguin Core</p>
                   <p className="text-v2-text-dim text-sm">Start the Linux campaign — structured daily missions</p>
                 </div>
               </Link>
@@ -80,8 +80,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 className="block w-full"
               >
                 <div className="p-4 bg-v2-bg-elevated border border-v2-border rounded hover:border-v2-cyan/40 transition-colors text-left">
-                  <p className="text-v2-text font-medium">Browse the Star Map</p>
-                  <p className="text-v2-text-dim text-sm">Explore all campaigns and missions</p>
+                  <p className="text-v2-text font-medium">Browse the Galaxy Map</p>
+                  <p className="text-v2-text-dim text-sm">Explore all sectors and campaigns</p>
                 </div>
               </Link>
 

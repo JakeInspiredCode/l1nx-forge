@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { clearOnboardingFlag } from "@/components/onboarding";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Star Map", icon: "✦" },
+  { href: "/", label: "Galaxy Map", icon: "✦" },
   { href: "/missions", label: "Mission Board", icon: "◆" },
   { href: "/arsenal", label: "Arsenal", icon: "⬡" },
   { href: "/comms", label: "Comms", icon: "◎" },

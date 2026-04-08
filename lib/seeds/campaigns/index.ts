@@ -1,6 +1,7 @@
 import { ALL_LINUX_CAMPAIGNS, ALL_LINUX_MISSIONS } from "./linux-campaign";
 import { ALL_DC_CAMPAIGNS, ALL_DC_MISSIONS } from "./dc-fundamentals";
 import { BOUNTY_TEMPLATES } from "../bounties";
+export { ALL_SECTORS, getSector, getSectorForCampaign, getSectorByTopic } from "../sectors";
 
 export const ALL_CAMPAIGNS = [...ALL_LINUX_CAMPAIGNS, ...ALL_DC_CAMPAIGNS];
 export const ALL_MISSIONS = [...ALL_LINUX_MISSIONS, ...ALL_DC_MISSIONS];

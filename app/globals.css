@@ -116,7 +116,7 @@ code, pre, .mono {
   --room-accent-glow: var(--color-v2-cyan-glow);
 }
 
-[data-room="star-map"] {
+[data-room="galaxy-map"] {
   --room-accent: var(--color-v2-cyan);
   --room-accent-bright: var(--color-v2-cyan-bright);
   --room-accent-dim: var(--color-v2-cyan-dim);

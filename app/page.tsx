@@ -10,7 +10,7 @@ import {
 } from "@/lib/convex-hooks";
 import { getAllSeedCards } from "@/lib/seeds";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
-import StarMap from "@/components/star-map/star-map";
+import GalaxyMap from "@/components/galaxy-map/galaxy-map";
 
 export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -122,5 +122,5 @@ export default function Dashboard() {
     return <Onboarding onComplete={() => setShowOnboarding(false)} />;
   }
 
-  return <StarMap />;
+  return <GalaxyMap />;
 }

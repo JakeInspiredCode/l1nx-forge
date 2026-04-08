@@ -72,7 +72,7 @@ export const V2 = {
 
 // Room accent lookup
 export const ROOM_COLORS = {
-  "star-map": V2.cyan,
+  "galaxy-map": V2.cyan,
   missions: V2.amber,
   arsenal: V2.green,
   comms: V2.purple,

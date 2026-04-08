@@ -31,7 +31,7 @@ export default function MissionPage({
               onClick={() => router.push("/")}
               className="text-v2-cyan hover:text-v2-cyan-bright text-sm transition-colors"
             >
-              ← Return to Star Map
+              ← Return to Galaxy Map
             </button>
           </div>
         </main>
