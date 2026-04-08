@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { Mission, MissionStatus } from "@/lib/types/campaign";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Mission, MissionStatus, MissionStep } from "@/lib/types/campaign";
 import { STEP_TYPE_ICONS } from "@/lib/constants/mission";
 import ActionButton from "@/components/ui/action-button";
 import StatusBadge from "@/components/ui/status-badge";
@@ -13,8 +13,8 @@ interface MissionOverlayProps {
   missionNumber: number;
   totalMissions: number;
   campaignColor: string;
-  onDeploy: (missionId: string) => void;
-  onCustomize: (missionId: string) => void;
+  onDeploy: (missionId: string, loadout: MissionStep[]) => void;
+  onSkipToCheck: (missionId: string) => void;
   onDismiss: () => void;
 }
 
@@ -25,12 +25,36 @@ export default function MissionOverlay({
   totalMissions,
   campaignColor,
   onDeploy,
-  onCustomize,
+  onSkipToCheck,
   onDismiss,
 }: MissionOverlayProps) {
   const sound = useSoundEngine();
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
 
+  // ── Loadout toggle state ──
+  const [enabled, setEnabled] = useState<Record<string, boolean>>(() => {
+    const map: Record<string, boolean> = {};
+    for (const step of mission.defaultLoadout) {
+      map[step.id] = true;
+    }
+    return map;
+  });
+
+  const toggle = useCallback((stepId: string, required: boolean) => {
+    if (required) return;
+    setEnabled((prev) => ({ ...prev, [stepId]: !prev[stepId] }));
+  }, []);
+
+  const activeSteps = useMemo(
+    () => mission.defaultLoadout.filter((s) => enabled[s.id]),
+    [mission.defaultLoadout, enabled],
+  );
+  const totalMinutes = useMemo(
+    () => activeSteps.reduce((sum, s) => sum + s.estimatedMinutes, 0),
+    [activeSteps],
+  );
+
+  // ── Mouse parallax ──
   useEffect(() => {
     const handle = (e: MouseEvent) => {
       const cx = window.innerWidth / 2;
@@ -44,6 +68,7 @@ export default function MissionOverlay({
     return () => window.removeEventListener("mousemove", handle);
   }, []);
 
+  // ── Escape to dismiss ──
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
       if (e.key === "Escape") onDismiss();
@@ -52,17 +77,17 @@ export default function MissionOverlay({
     return () => window.removeEventListener("keydown", handle);
   }, [onDismiss]);
 
+  // ── Actions ──
   const handleDeploy = useCallback(() => {
     sound.play("deploy");
-    onDeploy(mission.id);
-  }, [mission.id, onDeploy, sound]);
+    onDeploy(mission.id, activeSteps);
+  }, [mission.id, activeSteps, onDeploy, sound]);
 
-  const handleCustomize = useCallback(() => {
+  const handleSkipToCheck = useCallback(() => {
     sound.play("deploy");
-    onCustomize(mission.id);
-  }, [mission.id, onCustomize, sound]);
+    onSkipToCheck(mission.id);
+  }, [mission.id, onSkipToCheck, sound]);
 
-  const isDeployable = status === "available" || status === "in-progress" || status === "decaying";
   const isLocked = status === "locked";
   const isAccomplished = status === "accomplished";
 
@@ -117,26 +142,42 @@ export default function MissionOverlay({
               {mission.description}
             </p>
 
-            {/* Estimated time */}
-            <div className="text-[10px] telemetry-font text-v2-text-muted mb-4">
-              Estimated: {mission.estimatedMinutes} min
-            </div>
-
-            {/* Loadout */}
+            {/* Loadout with inline toggles */}
             <div className="mb-4">
               <h3 className="text-[9px] telemetry-font text-v2-text-muted uppercase tracking-wider mb-2">
                 Mission Loadout
               </h3>
               <div className="space-y-1">
                 {mission.defaultLoadout.map((step) => (
-                  <div
+                  <button
                     key={step.id}
-                    className="flex items-center gap-2 py-1 px-2 rounded text-[11px]"
+                    type="button"
+                    onClick={() => toggle(step.id, step.required)}
+                    className={`w-full flex items-center gap-2 py-1.5 px-2 rounded text-[11px] text-left transition-colors ${
+                      enabled[step.id]
+                        ? "bg-v2-bg-elevated/40"
+                        : "opacity-40"
+                    } ${step.required ? "cursor-default" : "cursor-pointer hover:bg-v2-bg-elevated/60"}`}
                   >
+                    {/* Toggle indicator */}
+                    <div
+                      className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 ${
+                        step.required
+                          ? "border-v2-text-muted/40 bg-v2-cyan/10"
+                          : enabled[step.id]
+                          ? "border-v2-cyan/60 bg-v2-cyan/15"
+                          : "border-v2-border"
+                      }`}
+                    >
+                      {(enabled[step.id] || step.required) && (
+                        <span className="text-v2-cyan text-[8px]">✓</span>
+                      )}
+                    </div>
+
                     <span className="text-[10px] w-4 text-center">
                       {STEP_TYPE_ICONS[step.type] ?? "•"}
                     </span>
-                    <span className="text-v2-text-dim flex-1">{step.label}</span>
+                    <span className="text-v2-text-dim flex-1 truncate">{step.label}</span>
                     <span className="text-[9px] telemetry-font text-v2-text-muted">
                       {step.estimatedMinutes}m
                     </span>
@@ -145,8 +186,11 @@ export default function MissionOverlay({
                         REQ
                       </span>
                     )}
-                  </div>
+                  </button>
                 ))}
+              </div>
+              <div className="text-[9px] telemetry-font text-v2-text-muted mt-2">
+                {activeSteps.length} steps · ~{totalMinutes} min
               </div>
             </div>
 
@@ -183,11 +227,11 @@ export default function MissionOverlay({
                     Deploy Mission
                   </ActionButton>
                   <ActionButton
-                    onClick={handleCustomize}
-                    variant="secondary"
-                    className="flex-1"
+                    onClick={handleSkipToCheck}
+                    variant="ghost"
+                    size="sm"
                   >
-                    Customize Loadout
+                    Skip to Check
                   </ActionButton>
                 </>
               )}

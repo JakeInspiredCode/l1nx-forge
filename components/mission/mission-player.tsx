@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -19,6 +19,21 @@ import ActionButton from "@/components/ui/action-button";
 
 type Phase = "briefing" | "playing" | "knowledge-check" | "debrief";
 
+/** Resolve custom loadout from sessionStorage (set by system-map overlay) */
+function resolveLoadout(mission: Mission): MissionStep[] {
+  if (typeof window === "undefined") return mission.defaultLoadout;
+  const stored = sessionStorage.getItem(`loadout:${mission.id}`);
+  if (!stored) return mission.defaultLoadout;
+  try {
+    const stepIds: string[] = JSON.parse(stored);
+    sessionStorage.removeItem(`loadout:${mission.id}`);
+    const filtered = mission.defaultLoadout.filter((s) => stepIds.includes(s.id));
+    return filtered.length > 0 ? filtered : mission.defaultLoadout;
+  } catch {
+    return mission.defaultLoadout;
+  }
+}
+
 interface MissionPlayerProps {
   mission: Mission;
 }
@@ -33,19 +48,33 @@ export default function MissionPlayer({ mission }: MissionPlayerProps) {
   const advanceMission = useMutation(api.forgeCampaigns.advanceMission);
   const addPoints = useMutation(api.forgeProfile.addPoints);
 
-  const [phase, setPhase] = useState<Phase>("briefing");
-  const [loadout, setLoadout] = useState<MissionStep[]>(mission.defaultLoadout);
+  // Determine initial phase from query params (system-map passes autostart/skipToCheck)
+  const autostart = searchParams.get("autostart") === "true";
+  const skipToCheck = searchParams.get("skipToCheck") === "true";
+
+  const [phase, setPhase] = useState<Phase>(
+    skipToCheck ? "knowledge-check" : autostart ? "playing" : "briefing",
+  );
+  const [loadout, setLoadout] = useState<MissionStep[]>(() => resolveLoadout(mission));
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepsCompleted, setStepsCompleted] = useState<string[]>([]);
-  const [showLoadoutEditor, setShowLoadoutEditor] = useState(
-    searchParams.get("customize") === "true"
-  );
+  const [showLoadoutEditor, setShowLoadoutEditor] = useState(false);
   const [debriefData, setDebriefData] = useState<{
     passed: boolean;
     score: number;
     total: number;
     xpEarned: number;
   } | null>(null);
+
+  // Auto-init mission state when arriving from system-map with autostart or skipToCheck
+  const didAutoInit = useRef(false);
+  useEffect(() => {
+    if ((autostart || skipToCheck) && !didAutoInit.current) {
+      didAutoInit.current = true;
+      initMissionState({ missionId: mission.id, status: "in-progress" });
+      updateMissionStatus({ missionId: mission.id, status: "in-progress" });
+    }
+  }, [autostart, skipToCheck, mission.id, initMissionState, updateMissionStatus]);
 
   const campaign = getCampaign(mission.campaignId);
   const currentStep = loadout[currentStepIndex];

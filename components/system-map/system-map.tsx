@@ -6,7 +6,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { ALL_CAMPAIGNS, getMissionsForCampaign } from "@/lib/seeds/campaigns";
 import { getSectorForCampaign } from "@/lib/seeds/sectors";
-import type { Mission, MissionStatus } from "@/lib/types/campaign";
+import type { Mission, MissionStatus, MissionStep } from "@/lib/types/campaign";
 import StarfieldCanvas from "@/components/star-map/starfield-canvas";
 import ScanOverlay from "@/components/ui/scan-overlay";
 import CentralStar from "./central-star";
@@ -167,14 +167,19 @@ export default function SystemMap() {
     setSelectedMission(null);
   }, []);
 
-  const handleDeploy = useCallback((missionId: string) => {
+  const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
     setSelectedMission(null);
-    router.push(`/missions/${missionId}`);
+    // Pass custom loadout via sessionStorage so mission-player can pick it up
+    sessionStorage.setItem(
+      `loadout:${missionId}`,
+      JSON.stringify(loadout.map((s) => s.id)),
+    );
+    router.push(`/missions/${missionId}?autostart=true`);
   }, [router]);
 
-  const handleCustomize = useCallback((missionId: string) => {
+  const handleSkipToCheck = useCallback((missionId: string) => {
     setSelectedMission(null);
-    router.push(`/missions/${missionId}?customize=true`);
+    router.push(`/missions/${missionId}?skipToCheck=true`);
   }, [router]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -282,7 +287,7 @@ export default function SystemMap() {
           totalMissions={missions.length}
           campaignColor={campaignColor}
           onDeploy={handleDeploy}
-          onCustomize={handleCustomize}
+          onSkipToCheck={handleSkipToCheck}
           onDismiss={handleDismissOverlay}
         />
       )}
