@@ -16,6 +16,7 @@ import {
 } from "convex/react";
 import { DEMO_MODE } from "@/components/convex-provider";
 import { getAllSeedCards } from "@/lib/seeds";
+import { ALL_MISSIONS } from "@/lib/seeds/campaigns";
 import type { ForgeCard } from "@/lib/types";
 
 const FN_NAME = Symbol.for("functionName");
@@ -61,7 +62,7 @@ const DEMO_PROFILE = {
   totalSessionMinutes: 180,
 };
 
-// ── Demo campaign states ──
+// ── Demo campaign states — all enrolled ──
 
 const DEMO_CAMPAIGN_IDS = [
   "linux-core", "hardware-core", "networking-core",
@@ -75,6 +76,24 @@ const DEMO_CAMPAIGN_STATES = DEMO_CAMPAIGN_IDS.map((id) => ({
   currentMissionIndex: 0,
   completedMissions: [],
 }));
+
+// ── Demo mission states — all unlocked ("available") ──
+
+let _demoMissionStates: unknown[] | null = null;
+function getDemoMissionStates() {
+  if (!_demoMissionStates) {
+    _demoMissionStates = ALL_MISSIONS.map((m) => ({
+      _id: `demo-${m.id}`,
+      _creationTime: 0,
+      missionId: m.id,
+      status: "available",
+      stepsCompleted: [],
+      knowledgeCheckPassed: false,
+      xpEarned: 0,
+    }));
+  }
+  return _demoMissionStates;
+}
 
 // ── Demo defaults ──
 
@@ -108,7 +127,23 @@ function getDemoDefault(fnRef: unknown, args: any): unknown {
       return true;
   }
 
-  // Non-card single-value defaults
+  // Mission state queries
+  switch (name) {
+    case "forgeMissions:getAllMissionStates":
+      return getDemoMissionStates();
+    case "forgeMissions:getMissionsByStatus":
+      return getDemoMissionStates().filter(
+        (m: any) => m.status === args?.status
+      );
+    case "forgeMissions:getMissionState": {
+      const ms = getDemoMissionStates().find(
+        (m: any) => m.missionId === args?.missionId
+      );
+      return ms ?? null;
+    }
+  }
+
+  // Non-card, non-mission single-value defaults
   const singles: Record<string, unknown> = {
     "forgeProfile:get": DEMO_PROFILE,
     "forgeAgentContext:get": {
@@ -127,7 +162,6 @@ function getDemoDefault(fnRef: unknown, args: any): unknown {
     "forgeCampaigns:getCampaignState": null,
     "forgeCampaigns:getAllCampaignStates": DEMO_CAMPAIGN_STATES,
     "forgeCampaigns:getEnrolledCampaigns": DEMO_CAMPAIGN_STATES,
-    "forgeMissions:getMissionState": null,
   };
 
   if (name && name in singles) return singles[name];
