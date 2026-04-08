@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import type { Mission, MissionStatus } from "@/lib/types/campaign";
+import { STEP_TYPE_ICONS } from "@/lib/constants/mission";
 import { useSoundEngine } from "@/lib/sound-engine";
 
 interface HoloBriefingProps {
@@ -13,16 +14,6 @@ interface HoloBriefingProps {
   onDeploy: (missionId: string) => void;
   onDismiss: () => void;
 }
-
-const STEP_TYPE_ICONS: Record<string, string> = {
-  reading: "📖",
-  flashcards: "🃏",
-  interactive: "🔧",
-  "quick-draw": "⚡",
-  diagnosis: "🔍",
-  terminal: "💻",
-  assessment: "📋",
-};
 
 export default function HoloBriefing({
   mission,

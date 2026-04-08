@@ -116,9 +116,10 @@ export default function GalaxyMap() {
   }, [enrollCampaign]);
 
   const handleEmbark = useCallback(() => {
+    const campaignId = selectedSector?.campaignIds[0];
     setSelectedSector(null);
-    router.push("/missions");
-  }, [router]);
+    router.push(campaignId ? `/missions?campaign=${campaignId}` : "/missions");
+  }, [router, selectedSector]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY });
