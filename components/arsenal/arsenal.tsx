@@ -14,6 +14,7 @@ interface Activity {
   icon: string;
   category: "learn" | "practice" | "test" | "prepare" | "tools";
   blooms: string;
+  difficulty?: "Easy" | "Medium" | "Hard" | "Mixed";
   topics: string[];
   estimatedMinutes: number;
   route: string;
@@ -21,26 +22,29 @@ interface Activity {
 
 const ACTIVITIES: Activity[] = [
   // LEARN
-  { id: "foundations", title: "Linux Foundations", description: "10-section guided course covering OS fundamentals through troubleshooting", icon: "📖", category: "learn", blooms: "Understand", topics: ["linux"], estimatedMinutes: 60, route: "/foundations" },
-  { id: "boot-learn", title: "Boot Process — Learn", description: "Interactive 3-layer boot sequence walkthrough", icon: "🔄", category: "learn", blooms: "Understand", topics: ["linux"], estimatedMinutes: 15, route: "/explore/boot-process" },
-  { id: "filesystem-explorer", title: "Filesystem Navigator", description: "Interactive Linux directory tree with descriptions", icon: "📁", category: "learn", blooms: "Remember", topics: ["linux"], estimatedMinutes: 10, route: "/explore/visual-explorer" },
-  { id: "command-dissector", title: "Command Dissector", description: "Break down commands into parts — command, flags, arguments", icon: "🔬", category: "learn", blooms: "Understand", topics: ["linux"], estimatedMinutes: 10, route: "/explore/visual-explorer" },
-  { id: "fs-types", title: "Filesystem Types", description: "Compare ext4, XFS, btrfs, NFS, tmpfs, overlay", icon: "💾", category: "learn", blooms: "Remember", topics: ["linux"], estimatedMinutes: 8, route: "/explore/visual-explorer" },
+  { id: "boot-learn", title: "Boot Process — Learn", description: "Interactive 3-layer boot sequence walkthrough", icon: "🔄", category: "learn", blooms: "Understand", topics: ["linux"], estimatedMinutes: 15, route: "/boot-learn" },
+  { id: "filesystem-explorer", title: "Filesystem Navigator", description: "Interactive Linux directory tree with descriptions", icon: "📁", category: "learn", blooms: "Remember", topics: ["linux"], estimatedMinutes: 10, route: "/filesystem-navigator" },
+  { id: "command-dissector", title: "Command Dissector", description: "Break down commands into parts — command, flags, arguments", icon: "🔬", category: "learn", blooms: "Understand", topics: ["linux"], estimatedMinutes: 10, route: "/command-dissector" },
+  { id: "fs-types", title: "Filesystem Types", description: "Compare ext4, XFS, btrfs, NFS, tmpfs, overlay", icon: "💾", category: "learn", blooms: "Remember", topics: ["linux"], estimatedMinutes: 8, route: "/filesystem-types" },
 
   // PRACTICE
   { id: "flashcards", title: "Flashcard Review", description: "Spaced-repetition review by topic, tier, or mixed", icon: "🃏", category: "practice", blooms: "Remember", topics: ["linux", "hardware", "networking", "fiber", "power-cooling", "ops-processes", "scale"], estimatedMinutes: 10, route: "/study" },
-  { id: "qd-permissions", title: "Quick Draw: Permissions", description: "Convert between rwx and octal notation", icon: "⚡", category: "practice", blooms: "Apply", topics: ["linux"], estimatedMinutes: 5, route: "/train/quick-draw" },
-  { id: "qd-ports", title: "Quick Draw: Ports", description: "Match services to port numbers", icon: "⚡", category: "practice", blooms: "Remember", topics: ["networking"], estimatedMinutes: 5, route: "/train/quick-draw" },
-  { id: "qd-signals", title: "Quick Draw: Signals", description: "Signal names, numbers, and when to use them", icon: "⚡", category: "practice", blooms: "Remember", topics: ["linux"], estimatedMinutes: 4, route: "/train/quick-draw" },
-  { id: "qd-ip", title: "Quick Draw: IP Ranges", description: "Private ranges, subnets, CIDR notation", icon: "⚡", category: "practice", blooms: "Apply", topics: ["networking"], estimatedMinutes: 5, route: "/train/quick-draw" },
-  { id: "qd-ssh", title: "Quick Draw: SSH", description: "Build SSH and SCP commands from requirements", icon: "⚡", category: "practice", blooms: "Apply", topics: ["linux"], estimatedMinutes: 5, route: "/train/quick-draw" },
-  { id: "qd-commands", title: "Quick Draw: Commands", description: "Name the command from its description", icon: "⚡", category: "practice", blooms: "Remember", topics: ["linux"], estimatedMinutes: 5, route: "/train/quick-draw" },
+  { id: "qd-permissions", title: "Quick Draw: Permissions", description: "Convert between rwx and octal notation", icon: "⚡", category: "practice", blooms: "Apply", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 5, route: "/train/quick-draw" },
+  { id: "qd-ports", title: "Quick Draw: Ports", description: "Match services to port numbers", icon: "⚡", category: "practice", blooms: "Remember", difficulty: "Easy", topics: ["networking"], estimatedMinutes: 5, route: "/train/quick-draw" },
+  { id: "qd-signals", title: "Quick Draw: Signals", description: "Signal names, numbers, and when to use them", icon: "⚡", category: "practice", blooms: "Remember", difficulty: "Easy", topics: ["linux"], estimatedMinutes: 4, route: "/train/quick-draw" },
+  { id: "qd-ip", title: "Quick Draw: IP Ranges", description: "Private ranges, subnets, CIDR notation", icon: "⚡", category: "practice", blooms: "Apply", difficulty: "Medium", topics: ["networking"], estimatedMinutes: 5, route: "/train/quick-draw" },
+  { id: "qd-ssh", title: "Quick Draw: SSH", description: "Build SSH and SCP commands from requirements", icon: "⚡", category: "practice", blooms: "Apply", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 5, route: "/train/quick-draw" },
+  { id: "qd-commands", title: "Quick Draw: Commands", description: "Name the command from its description", icon: "⚡", category: "practice", blooms: "Remember", difficulty: "Easy", topics: ["linux"], estimatedMinutes: 5, route: "/train/quick-draw" },
+  { id: "qd-command-recall", title: "Quick Draw: Command Recall", description: "75 commands — given a description, name the command", icon: "⚡", category: "practice", blooms: "Remember", difficulty: "Hard", topics: ["linux"], estimatedMinutes: 8, route: "/train/quick-draw" },
+  { id: "qd-flag-sniper", title: "Quick Draw: Flag Sniper", description: "100+ flags — given a flag, name what it does", icon: "⚡", category: "practice", blooms: "Remember", difficulty: "Hard", topics: ["linux"], estimatedMinutes: 8, route: "/train/quick-draw" },
+  { id: "fs-label-quiz", title: "Filesystem Label Quiz", description: "Given a description, type the correct Linux path", icon: "🏷", category: "practice", blooms: "Apply", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 8, route: "/filesystem-navigator?mode=label" },
   { id: "terminal", title: "Terminal Simulator", description: "Practice Linux commands in a simulated environment", icon: "💻", category: "practice", blooms: "Apply", topics: ["linux"], estimatedMinutes: 15, route: "/terminal" },
 
   // TEST
-  { id: "diagnosis", title: "Diagnosis Lab", description: "Multi-step troubleshooting scenarios by difficulty", icon: "🔍", category: "test", blooms: "Analyze", topics: ["linux", "hardware", "networking"], estimatedMinutes: 10, route: "/train/diagnosis" },
-  { id: "drills", title: "Incident Drills", description: "Live incident response scenarios with key-term scoring", icon: "🚨", category: "test", blooms: "Evaluate", topics: ["linux", "hardware", "networking"], estimatedMinutes: 10, route: "/drill" },
-  { id: "boot-triage", title: "Boot Triage", description: "Diagnose boot failures from symptoms and logs", icon: "🔧", category: "test", blooms: "Analyze", topics: ["linux"], estimatedMinutes: 10, route: "/explore/boot-process" },
+  { id: "diagnosis", title: "Diagnosis Lab", description: "Multi-step troubleshooting scenarios by difficulty", icon: "🔍", category: "test", blooms: "Analyze", difficulty: "Mixed", topics: ["linux", "hardware", "networking"], estimatedMinutes: 10, route: "/train/diagnosis" },
+  { id: "drills", title: "Incident Drills", description: "Live incident response scenarios with key-term scoring", icon: "🚨", category: "test", blooms: "Evaluate", difficulty: "Hard", topics: ["linux", "hardware", "networking"], estimatedMinutes: 10, route: "/drill" },
+  { id: "boot-triage", title: "Boot Triage", description: "Diagnose boot failures from symptoms and logs", icon: "🔧", category: "test", blooms: "Analyze", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 10, route: "/boot-triage" },
+  { id: "fs-types-quiz", title: "Filesystem Types Quiz", description: "Identify the filesystem from a scenario description", icon: "🎯", category: "test", blooms: "Analyze", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 6, route: "/filesystem-types?mode=quiz" },
 
   // PREPARE
   { id: "mock-interview", title: "Mock Interview", description: "AI-scored behavioral and technical interview practice", icon: "🎤", category: "prepare", blooms: "Evaluate", topics: ["behavioral"], estimatedMinutes: 15, route: "/interview/mock" },
@@ -66,6 +70,12 @@ const bloomsVariant = (b: string) =>
   b === "Analyze" ? "purple" :
   b === "Evaluate" ? "warning" : "cyan";
 
+const difficultyVariant = (d: string) =>
+  d === "Easy" ? "success" :
+  d === "Medium" ? "warning" :
+  d === "Hard" ? "danger" :
+  d === "Mixed" ? "purple" : "muted";
+
 export default function Arsenal() {
   const router = useRouter();
   const [filter, setFilter] = useState<string>("");
@@ -75,7 +85,8 @@ export default function Arsenal() {
         (a) =>
           a.title.toLowerCase().includes(filter.toLowerCase()) ||
           a.topics.some((t) => t.includes(filter.toLowerCase())) ||
-          a.blooms.toLowerCase().includes(filter.toLowerCase())
+          a.blooms.toLowerCase().includes(filter.toLowerCase()) ||
+          (a.difficulty && a.difficulty.toLowerCase().includes(filter.toLowerCase()))
       )
     : ACTIVITIES;
 
@@ -123,8 +134,11 @@ export default function Arsenal() {
                         <p className="text-xs text-v2-text-dim line-clamp-1">
                           {activity.description}
                         </p>
-                        <div className="flex items-center gap-1.5 mt-1">
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                           <StatusBadge label={activity.blooms} variant={bloomsVariant(activity.blooms) as any} />
+                          {activity.difficulty && (
+                            <StatusBadge label={activity.difficulty} variant={difficultyVariant(activity.difficulty) as any} />
+                          )}
                           <StatusBadge label={`~${activity.estimatedMinutes}m`} variant="muted" />
                         </div>
                       </div>

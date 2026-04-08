@@ -306,8 +306,8 @@ function QuizMode() {
 // MAIN EXPORT — Learn / Quiz Toggle
 // ═══════════════════════════════════════
 
-export default function FilesystemTypes() {
-  const [mode, setMode] = useState<"learn" | "quiz">("learn");
+export default function FilesystemTypes({ defaultMode = "learn" }: { defaultMode?: "learn" | "quiz" } = {}) {
+  const [mode, setMode] = useState<"learn" | "quiz">(defaultMode);
 
   return (
     <div className="space-y-4">
