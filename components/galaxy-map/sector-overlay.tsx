@@ -102,11 +102,14 @@ export default function SectorOverlay({
       {/* Panel */}
       <div
         ref={panelRef}
-        className="fixed z-[65] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-h-[85vh] overflow-auto scroll-container"
-        style={{
-          transform: `translate(-50%, -50%) translate(${mouseOffset.x}px, ${mouseOffset.y}px)`,
-        }}
+        className="fixed z-[65] inset-0 flex items-center justify-center pointer-events-none"
       >
+        <div
+          className="pointer-events-auto w-[420px] max-h-[85vh] overflow-auto scroll-container"
+          style={{
+            transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)`,
+          }}
+        >
         <div
           className="holo-panel p-6 animate-[holoMaterialize_0.3s_ease-out]"
           style={{
@@ -244,6 +247,7 @@ export default function SectorOverlay({
               </ActionButton>
             )}
           </div>
+        </div>
         </div>
       </div>
     </>
