@@ -15,8 +15,40 @@ import {
   useMutation as realUseMutation,
 } from "convex/react";
 import { DEMO_MODE } from "@/components/convex-provider";
+import { getAllSeedCards } from "@/lib/seeds";
+import type { ForgeCard } from "@/lib/types";
 
 const FN_NAME = Symbol.for("functionName");
+
+// ── Demo seed cards (converted to Convex document shape) ──
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _demoCards: any[] | null = null;
+function getDemoCards() {
+  if (!_demoCards) {
+    _demoCards = getAllSeedCards().map((c: ForgeCard) => ({
+      _id: c.id,
+      _creationTime: 0,
+      cardId: c.id,
+      topicId: c.topicId,
+      type: c.type,
+      front: c.front,
+      back: c.back,
+      difficulty: c.difficulty,
+      tier: c.tier,
+      steps: c.steps,
+      sortOrder: c.sortOrder,
+      easeFactor: c.easeFactor,
+      interval: c.interval,
+      repetitions: c.repetitions,
+      dueDate: c.dueDate,
+      lastReview: c.lastReview,
+    }));
+  }
+  return _demoCards;
+}
+
+// ── Demo profile ──
 
 const DEMO_PROFILE = {
   _id: "demo" as const,
@@ -29,7 +61,8 @@ const DEMO_PROFILE = {
   totalSessionMinutes: 180,
 };
 
-// Demo campaign states — all campaigns enrolled so user can embark directly
+// ── Demo campaign states ──
+
 const DEMO_CAMPAIGN_IDS = [
   "linux-core", "hardware-core", "networking-core",
   "fiber-core", "power-core", "ops-core", "scale-core",
@@ -43,58 +76,73 @@ const DEMO_CAMPAIGN_STATES = DEMO_CAMPAIGN_IDS.map((id) => ({
   completedMissions: [],
 }));
 
-// Queries that return non-array values.
-// Everything not listed defaults to [].
-const SINGLE_DEFAULTS: Record<string, unknown> = {
-  "forgeProfile:get": DEMO_PROFILE,
-  "forgeAgentContext:get": {
-    progress: [],
-    dueCards: [],
-    strugglingCards: [],
-    recentReviews: [],
-    recentSessions: [],
-    profile: DEMO_PROFILE,
-    stats: { totalCards: 0, totalReviews: 0, avgQuality: 0 },
-  },
-  "forgeCards:getByCardId": null,
-  "forgeCards:isSeeded": true,
-  "forgeConversations:getByThreadId": null,
-  "forgeDrills:getBestByScenario": null,
-  "forgeSpeedRuns:getBestScore": null,
-  "forgeProgress:getByTopic": null,
-  "forgeDiagnosisHistory:getBestByScenario": null,
-  "forgeQuickDrawHistory:getBestByModule": null,
-  "forgeBounties:getBestBountyScore": null,
-  "forgeCampaigns:getCampaignState": null,
-  "forgeCampaigns:getAllCampaignStates": DEMO_CAMPAIGN_STATES,
-  "forgeCampaigns:getEnrolledCampaigns": DEMO_CAMPAIGN_STATES,
-  "forgeMissions:getMissionState": null,
-};
+// ── Demo defaults ──
 
-function getDemoDefault(fnRef: unknown): unknown {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getDemoDefault(fnRef: unknown, args: any): unknown {
   const name = (fnRef as Record<symbol, string>)?.[FN_NAME];
-  if (name && name in SINGLE_DEFAULTS) {
-    return SINGLE_DEFAULTS[name];
+
+  // Card queries — return seed cards, filtered by args
+  switch (name) {
+    case "forgeCards:getAll":
+      return getDemoCards();
+    case "forgeCards:getByTopic":
+      return getDemoCards().filter((c) => c.topicId === args?.topicId);
+    case "forgeCards:getByTopicTier":
+      return getDemoCards().filter(
+        (c) => c.topicId === args?.topicId && c.tier === args?.tier
+      );
+    case "forgeCards:getDue":
+      return args?.topicId
+        ? getDemoCards().filter((c) => c.topicId === args.topicId).slice(0, 10)
+        : getDemoCards().slice(0, 10);
+    case "forgeCards:getNew":
+      return getDemoCards()
+        .filter((c) => c.repetitions === 0 && (!args?.topicId || c.topicId === args.topicId))
+        .slice(0, 20);
+    case "forgeCards:getByCardId": {
+      const card = getDemoCards().find((c) => c.cardId === args?.cardId);
+      return card ?? null;
+    }
+    case "forgeCards:isSeeded":
+      return true;
   }
+
+  // Non-card single-value defaults
+  const singles: Record<string, unknown> = {
+    "forgeProfile:get": DEMO_PROFILE,
+    "forgeAgentContext:get": {
+      progress: [], dueCards: [], strugglingCards: [],
+      recentReviews: [], recentSessions: [],
+      profile: DEMO_PROFILE,
+      stats: { totalCards: 0, totalReviews: 0, avgQuality: 0 },
+    },
+    "forgeConversations:getByThreadId": null,
+    "forgeDrills:getBestByScenario": null,
+    "forgeSpeedRuns:getBestScore": null,
+    "forgeProgress:getByTopic": null,
+    "forgeDiagnosisHistory:getBestByScenario": null,
+    "forgeQuickDrawHistory:getBestByModule": null,
+    "forgeBounties:getBestBountyScore": null,
+    "forgeCampaigns:getCampaignState": null,
+    "forgeCampaigns:getAllCampaignStates": DEMO_CAMPAIGN_STATES,
+    "forgeCampaigns:getEnrolledCampaigns": DEMO_CAMPAIGN_STATES,
+    "forgeMissions:getMissionState": null,
+  };
+
+  if (name && name in singles) return singles[name];
   return [];
 }
 
-/**
- * Drop-in replacement for Convex's useQuery.
- * In demo mode, returns type-appropriate empty defaults.
- * Uses 'any' to match Convex's own overloaded signatures.
- */
+// ── Exports ──
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const useQuery: typeof realUseQuery = ((...args: any[]) => {
   const real = (realUseQuery as any)(...args);
-  if (DEMO_MODE) return getDemoDefault(args[0]);
+  if (DEMO_MODE) return getDemoDefault(args[0], args[1]);
   return real;
 }) as any;
 
-/**
- * Drop-in replacement for Convex's useMutation.
- * In demo mode, returns an async no-op.
- */
 export const useMutation: typeof realUseMutation = ((...args: any[]) => {
   const real = (realUseMutation as any)(...args);
   if (DEMO_MODE) return (async () => {}) as any;
