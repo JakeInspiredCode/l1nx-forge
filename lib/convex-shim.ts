@@ -29,8 +29,22 @@ const DEMO_PROFILE = {
   totalSessionMinutes: 180,
 };
 
-// Queries that return a single object (not an array).
-// Everything else defaults to [].
+// Demo campaign states — all campaigns enrolled so user can embark directly
+const DEMO_CAMPAIGN_IDS = [
+  "linux-core", "hardware-core", "networking-core",
+  "fiber-core", "power-core", "ops-core", "scale-core",
+];
+const DEMO_CAMPAIGN_STATES = DEMO_CAMPAIGN_IDS.map((id) => ({
+  _id: `demo-${id}`,
+  _creationTime: 0,
+  campaignId: id,
+  enrolled: true,
+  currentMissionIndex: 0,
+  completedMissionIds: [],
+}));
+
+// Queries that return non-array values.
+// Everything not listed defaults to [].
 const SINGLE_DEFAULTS: Record<string, unknown> = {
   "forgeProfile:get": DEMO_PROFILE,
   "forgeAgentContext:get": {
@@ -52,6 +66,8 @@ const SINGLE_DEFAULTS: Record<string, unknown> = {
   "forgeQuickDrawHistory:getBestByModule": null,
   "forgeBounties:getBestBountyScore": null,
   "forgeCampaigns:getCampaignState": null,
+  "forgeCampaigns:getAllCampaignStates": DEMO_CAMPAIGN_STATES,
+  "forgeCampaigns:getEnrolledCampaigns": DEMO_CAMPAIGN_STATES,
   "forgeMissions:getMissionState": null,
 };
 
