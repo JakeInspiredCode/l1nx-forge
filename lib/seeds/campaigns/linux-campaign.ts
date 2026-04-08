@@ -181,15 +181,6 @@ export const LINUX_MISSIONS: Mission[] = [
       },
       {
         id: "m03-s2",
-        type: "interactive",
-        label: "Explore: Filesystem Navigator",
-        description: "Interactive filesystem tree exploration",
-        estimatedMinutes: 5,
-        required: false,
-        contentRef: { kind: "explorer", id: "filesystem" },
-      },
-      {
-        id: "m03-s3",
         type: "flashcards",
         label: "Review: Filesystem Paths",
         description: "8 flashcards on directory paths",
@@ -199,6 +190,15 @@ export const LINUX_MISSIONS: Mission[] = [
           topicId: "linux", tier: 1,
           cardIds: ["linux-004", "linux-005", "linux-006", "linux-007", "linux-049", "linux-008", "linux-030", "linux-031"],
         } },
+      },
+      {
+        id: "m03-s3",
+        type: "interactive",
+        label: "Explore: Filesystem Navigator",
+        description: "Interactive filesystem tree and navigation exercise (10 questions — full version in Arsenal)",
+        estimatedMinutes: 5,
+        required: false,
+        contentRef: { kind: "explorer", id: "filesystem" },
       },
     ],
     knowledgeCheck: {

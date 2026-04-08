@@ -86,14 +86,17 @@ export default function HoloBriefing({
         onClick={onDismiss}
       />
 
-      {/* Holographic panel */}
+      {/* Holographic panel — outer wrapper handles centering, inner handles animation */}
       <div
-        ref={panelRef}
-        className={`fixed z-[65] left-1/2 top-1/2 w-[90vw] max-w-[560px] ${mounted ? "holo-enter" : ""}`}
-        style={{
-          transform: `translate(-50%, -50%) translate(${mouseOffset.x}px, ${mouseOffset.y}px)`,
-        }}
+        className="fixed z-[65] inset-0 flex items-center justify-center pointer-events-none"
       >
+        <div
+          ref={panelRef}
+          className={`w-[90vw] max-w-[560px] pointer-events-auto ${mounted ? "holo-enter" : ""}`}
+          style={{
+            transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)`,
+          }}
+        >
         <div className="holo-panel holo-corners rounded-lg overflow-hidden">
           {/* Scan line sweep on entry */}
           {mounted && (
@@ -207,6 +210,7 @@ export default function HoloBriefing({
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
     </>

@@ -10,7 +10,7 @@ function FilesystemNavigatorContent() {
   const mode = searchParams.get("mode") === "label" ? "label" : "learn";
 
   return (
-    <div className="h-screen overflow-hidden bg-v2-bg-deep">
+    <div className="min-h-screen bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <FilesystemGame mode={mode as "learn" | "label"} onBack={() => router.push("/arsenal")} />
       </main>

@@ -188,7 +188,7 @@ function TerminalStep({ step, onStepComplete }: StepRendererProps) {
 // ── Explorer Step ──
 function ExplorerStep({ step, onStepComplete }: StepRendererProps) {
   const mode = (step.contentRef.id === "label" ? "label" : "learn") as "learn" | "label";
-  return <FilesystemGame mode={mode} onBack={onStepComplete} />;
+  return <FilesystemGame mode={mode} onBack={onStepComplete} maxQuestions={10} difficulty="easy" />;
 }
 
 // ── Helpers ──

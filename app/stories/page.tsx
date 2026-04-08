@@ -595,7 +595,7 @@ export default function StoriesPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-v2-bg-deep">
+    <div className="min-h-screen bg-v2-bg-deep">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-start justify-between mb-6">
           <div>

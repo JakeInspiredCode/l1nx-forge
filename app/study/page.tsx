@@ -98,7 +98,7 @@ export default function StudyPage() {
   // Active session
   if (mode && sessionCards.length > 0) {
     return (
-      <div className="h-screen overflow-hidden bg-v2-bg-deep">
+      <div className="min-h-screen bg-v2-bg-deep">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <button
             onClick={() => { setMode(null); setSessionCards([]); }}
@@ -117,7 +117,7 @@ export default function StudyPage() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-v2-bg-deep">
+    <div className="min-h-screen bg-v2-bg-deep">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
           Study Mode

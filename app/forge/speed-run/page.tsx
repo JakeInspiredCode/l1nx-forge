@@ -221,7 +221,7 @@ export default function SpeedRunPage() {
 
   if (screen === "playing") {
     return (
-      <div className="h-screen overflow-hidden bg-v2-bg-deep">
+      <div className="min-h-screen bg-v2-bg-deep">
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <SpeedRunGame
             cards={gameCards}
@@ -237,7 +237,7 @@ export default function SpeedRunPage() {
 
   if (screen === "review-misses" && reviewCards.length > 0) {
     return (
-      <div className="h-screen overflow-hidden bg-v2-bg-deep">
+      <div className="min-h-screen bg-v2-bg-deep">
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -263,7 +263,7 @@ export default function SpeedRunPage() {
 
   if (screen === "results" && summary) {
     return (
-      <div className="h-screen overflow-hidden bg-v2-bg-deep">
+      <div className="min-h-screen bg-v2-bg-deep">
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <SpeedRunResults
             summary={summary}
@@ -280,7 +280,7 @@ export default function SpeedRunPage() {
 
   // Setup screen
   return (
-    <div className="h-screen overflow-hidden bg-v2-bg-deep">
+    <div className="min-h-screen bg-v2-bg-deep">
       <main className="max-w-lg mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div>
           <h1 className="text-xl font-bold mono mb-1">⚡ Speed Run</h1>

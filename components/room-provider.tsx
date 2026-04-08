@@ -59,7 +59,7 @@ export default function RoomProvider({ children }: { children: ReactNode }) {
 
   return (
     <RoomContext.Provider value={{ room }}>
-      <div data-room={room} className="h-screen w-screen overflow-hidden">
+      <div data-room={room} className="min-h-screen">
         {children}
       </div>
     </RoomContext.Provider>

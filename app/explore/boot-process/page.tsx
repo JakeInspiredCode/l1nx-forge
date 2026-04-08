@@ -10,7 +10,7 @@ export default function BootProcessPage() {
   const [mode, setMode] = useState<Mode>("hub");
 
   return (
-    <div className="h-screen overflow-hidden bg-v2-bg-deep">
+    <div className="min-h-screen bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {mode === "hub" && (
           <BootHub onLearn={() => setMode("learn")} onTriage={() => setMode("triage")} />
