@@ -645,6 +645,7 @@ Swap:         8.0Gi       0B     8.0Gi`,
     },
   ];
 
+  const containerRef = useRef(null);
   const [scenarioIdx, setScenarioIdx] = useState(0);
   const [investigated, setInvestigated] = useState(new Set());
   const [expandedResource, setExpandedResource] = useState(null);
@@ -654,6 +655,22 @@ Swap:         8.0Gi       0B     8.0Gi`,
   const [total, setTotal] = useState(0);
   const [scenarioResults, setScenarioResults] = useState({}); // { idx: "correct" | "wrong" }
 
+  // ── Guided instruction system ──
+  // Steps: 0=intro banner, 1=click-first-resource hint, 2=read-output hint, 3=diagnose hint, 4=done (hidden)
+  const [guideStep, setGuideStep] = useState(0);
+  const [guideDismissed, setGuideDismissed] = useState(false);
+
+  // Auto-advance guide based on user actions
+  const guideVisible = !guideDismissed && guideStep < 4;
+  const advanceGuide = (toStep) => {
+    if (toStep > guideStep) setGuideStep(toStep);
+  };
+
+  const restartGuide = () => {
+    setGuideStep(0);
+    setGuideDismissed(false);
+  };
+
   const s = scenarios[scenarioIdx];
   const allInvestigated = investigated.size === 4;
   const resourceOrder = ["CPU", "RAM", "Storage", "Network"];
@@ -661,9 +678,37 @@ Swap:         8.0Gi       0B     8.0Gi`,
   const statusColors = { critical: "#FF4444", warning: "#DDAA22", healthy: "#4A9A5A" };
   const statusLabels = { critical: "CRITICAL", warning: "WARNING", healthy: "OK" };
 
+  const scrollToContainer = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const investigate = (name) => {
-    setExpandedResource(expandedResource === name ? null : name);
+    const wasExpanded = expandedResource === name;
+    const wasNew = !investigated.has(name);
+    // If collapsing, just collapse
+    if (wasExpanded) {
+      setExpandedResource(null);
+      return;
+    }
+    // If expanding: first close any open panel, mark investigated, then expand
+    setExpandedResource(null);
     setInvestigated(prev => new Set([...prev, name]));
+    // Delay expansion so the layout settles before the panel opens
+    requestAnimationFrame(() => {
+      setExpandedResource(name);
+      // After expansion renders, scroll panel into view and advance guide
+      requestAnimationFrame(() => {
+        const panel = document.getElementById(`ri-panel-${name}`);
+        if (panel) panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        // Delay guide hint swap until after scroll starts — avoids layout shift
+        // from hint unmount/mount coinciding with panel expansion
+        if (wasNew && guideStep <= 1) {
+          setTimeout(() => advanceGuide(2), 350);
+        }
+      });
+    });
   };
 
   const jumpTo = (idx) => {
@@ -672,6 +717,8 @@ Swap:         8.0Gi       0B     8.0Gi`,
     setExpandedResource(null);
     setDiagnosis(null);
     setChecked(false);
+    // Scroll back to top of component
+    requestAnimationFrame(() => scrollToContainer());
   };
 
   const check = () => {
@@ -680,15 +727,13 @@ Swap:         8.0Gi       0B     8.0Gi`,
     const correct = diagnosis === s.answer;
     if (correct) setScore(sc => sc + 1);
     setScenarioResults(prev => ({ ...prev, [scenarioIdx]: correct ? "correct" : "wrong" }));
+    // Guide complete after first diagnosis attempt
+    advanceGuide(4);
   };
 
   const next = () => {
     if (scenarioIdx < scenarios.length - 1) {
-      setScenarioIdx(i => i + 1);
-      setInvestigated(new Set());
-      setExpandedResource(null);
-      setDiagnosis(null);
-      setChecked(false);
+      jumpTo(scenarioIdx + 1);
     } else {
       if (onComplete) onComplete();
     }
@@ -706,23 +751,60 @@ Swap:         8.0Gi       0B     8.0Gi`,
   };
 
   return (
-    <div style={{
+    <div ref={containerRef} style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
       borderRadius: 10, padding: 20, margin: "20px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
-          ▸ RESOURCE INVESTIGATION
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+            ▸ RESOURCE INVESTIGATION
+          </span>
+          <button
+            onClick={restartGuide}
+            title="Show instructions"
+            style={{
+              width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+              background: "rgba(80,200,255,0.1)", border: "1px solid rgba(80,200,255,0.25)", color: "#50C8FF",
+              fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
+            }}
+          >?</button>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {total > 0 && <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{score}/{total}</span>}
           <span style={{ color: "#556", fontSize: 12 }}>{investigated.size}/4 checked</span>
-          <button onClick={() => { setScIdx(0); setInvestigated(new Set()); setGuess(null); setScore(0); setTotal(0); setActiveRes(null); }} style={{
+          <button onClick={() => { jumpTo(0); setScore(0); setTotal(0); setScenarioResults({}); }} style={{
             padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
             background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
           }}>↻ Reset</button>
         </div>
       </div>
+
+      {/* ── Guide: Step 0 — Intro banner ── */}
+      {guideVisible && guideStep === 0 && (
+        <div style={{
+          padding: "12px 16px", borderRadius: 8, marginBottom: 14,
+          background: "rgba(80,200,255,0.06)", border: "1px solid rgba(80,200,255,0.2)",
+          display: "flex", alignItems: "flex-start", gap: 12,
+        }}>
+          <span style={{ fontSize: 18, flexShrink: 0 }}>🔍</span>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13, marginBottom: 4 }}>How this works</div>
+            <div style={{ color: "#C8CCD0", fontSize: 13, lineHeight: 1.5 }}>
+              You're an ops engineer responding to a server incident. Click each resource panel below to run a diagnostic command and see the output.
+              Look for <span style={{ color: "#FF5555", fontWeight: 600 }}>red/highlighted values</span> — they indicate trouble.
+              After checking all 4 resources, pick which one is the bottleneck.
+            </div>
+            <button onClick={() => advanceGuide(1)} style={{
+              marginTop: 8, padding: "5px 14px", borderRadius: 5, fontSize: 12, fontWeight: 600, cursor: "pointer",
+              background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.35)", color: "#50C8FF",
+            }}>Got it</button>
+          </div>
+          <button onClick={() => setGuideDismissed(true)} style={{
+            background: "none", border: "none", color: "#556", cursor: "pointer", fontSize: 14, padding: 2, flexShrink: 0,
+          }}>✕</button>
+        </div>
+      )}
 
       {/* Scenario Selector */}
       <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
@@ -759,20 +841,38 @@ Swap:         8.0Gi       0B     8.0Gi`,
         <span style={{ color: "#E0D8CF", fontSize: 15 }}>{s.prompt}</span>
       </div>
 
+      {/* ── Guide: Step 1 — Click first resource hint ── */}
+      {guideVisible && guideStep === 1 && investigated.size === 0 && (
+        <div style={{
+          padding: "8px 14px", borderRadius: 6, marginBottom: 10,
+          background: "rgba(80,200,255,0.05)", border: "1px dashed rgba(80,200,255,0.25)",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ color: "#50C8FF", fontSize: 14 }}>↓</span>
+          <span style={{ color: "#50C8FF", fontSize: 12, fontWeight: 600 }}>
+            Click any resource panel below to run its diagnostic command
+          </span>
+        </div>
+      )}
+
       {/* Resource Panels */}
       <div style={{ display: "grid", gap: 8, marginBottom: 16 }}>
-        {resourceOrder.map((name) => {
+        {resourceOrder.map((name, ri) => {
           const r = s.resources[name];
           const isInvestigated = investigated.has(name);
           const isExpanded = expandedResource === name;
+          // Pulse the first panel when guide is on step 1 and nothing investigated yet
+          const shouldPulse = guideVisible && guideStep === 1 && investigated.size === 0 && ri === 0;
           const color = resourceColors[name];
 
           return (
-            <div key={name} style={{
+            <div key={name} id={`ri-panel-${name}`} style={{
               borderRadius: 8, overflow: "hidden",
-              border: `1px solid ${isInvestigated ? (r.status === "critical" ? "rgba(255,68,68,0.3)" : r.status === "warning" ? "rgba(221,170,34,0.3)" : "rgba(74,154,90,0.25)") : "rgba(255,255,255,0.08)"}`,
-              background: isExpanded ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.2)",
+              border: `1px solid ${shouldPulse ? "rgba(80,200,255,0.5)" : isInvestigated ? (r.status === "critical" ? "rgba(255,68,68,0.3)" : r.status === "warning" ? "rgba(221,170,34,0.3)" : "rgba(74,154,90,0.25)") : "rgba(255,255,255,0.08)"}`,
+              background: shouldPulse ? "rgba(80,200,255,0.04)" : isExpanded ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,0.2)",
               transition: "all 0.25s",
+              boxShadow: shouldPulse ? "0 0 12px rgba(80,200,255,0.15)" : "none",
+              animation: shouldPulse ? "resourcePulse 2s ease-in-out infinite" : "none",
             }}>
               {/* Header */}
               <div
@@ -789,29 +889,33 @@ Swap:         8.0Gi       0B     8.0Gi`,
                 }} />
                 <span style={{ color, fontWeight: 700, fontSize: 15, minWidth: 70 }}>{name}</span>
 
-                {!isInvestigated && (
-                  <span style={{
-                    fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 13,
-                    color: "#50C8FF", background: "rgba(80,200,255,0.08)",
-                    padding: "3px 10px", borderRadius: 4, border: "1px solid rgba(80,200,255,0.2)",
-                  }}>
-                    $ {r.cmd}
-                  </span>
-                )}
-                {!isInvestigated && (
-                  <span style={{ color: "#50C8FF", fontSize: 12, fontWeight: 600, marginLeft: "auto" }}>Click to run ▸</span>
-                )}
+                {/* Command badge — always visible, dims after investigation */}
+                <span style={{
+                  fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 12,
+                  color: isInvestigated ? "#445" : "#50C8FF",
+                  background: isInvestigated ? "rgba(255,255,255,0.02)" : "rgba(80,200,255,0.08)",
+                  padding: "3px 10px", borderRadius: 4,
+                  border: `1px solid ${isInvestigated ? "rgba(255,255,255,0.05)" : "rgba(80,200,255,0.2)"}`,
+                  transition: "all 0.3s",
+                }}>
+                  $ {r.cmd}
+                </span>
 
-                {isInvestigated && (
-                  <span style={{
-                    fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
-                    background: `${statusColors[r.status]}22`,
-                    color: statusColors[r.status],
-                  }}>{statusLabels[r.status]}</span>
-                )}
-                {isInvestigated && (
-                  <span style={{ color: "#556", fontSize: 12, marginLeft: "auto", transition: "transform 0.2s", transform: isExpanded ? "rotate(90deg)" : "none" }}>▸</span>
-                )}
+                {/* Status badge — always reserve space to prevent reflow */}
+                <span style={{
+                  fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
+                  background: isInvestigated ? `${statusColors[r.status]}22` : "transparent",
+                  color: isInvestigated ? statusColors[r.status] : "transparent",
+                  minWidth: 60, textAlign: "center",
+                  transition: "all 0.3s",
+                }}>{isInvestigated ? statusLabels[r.status] : "—"}</span>
+
+                {/* Right side — CTA or toggle arrow */}
+                <span style={{
+                  color: isInvestigated ? "#556" : "#50C8FF", fontSize: 12, fontWeight: 600, marginLeft: "auto",
+                  transition: "transform 0.2s, color 0.3s",
+                  transform: isExpanded ? "rotate(90deg)" : "none",
+                }}>{isInvestigated ? "▸" : "Click to run ▸"}</span>
               </div>
 
               {/* Expanded Terminal Output */}
@@ -859,6 +963,36 @@ Swap:         8.0Gi       0B     8.0Gi`,
           );
         })}
       </div>
+
+      {/* ── Guide: Step 2 — Read the output hint ── */}
+      {guideVisible && guideStep === 2 && investigated.size >= 1 && investigated.size < 4 && (
+        <div style={{
+          padding: "8px 14px", borderRadius: 6, marginBottom: 10,
+          background: "rgba(80,200,255,0.04)", border: "1px solid rgba(80,200,255,0.15)",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ color: "#50C8FF", fontSize: 13 }}>💡</span>
+          <span style={{ color: "#AAB4BE", fontSize: 12 }}>
+            Look for <span style={{ color: "#FF5555", fontWeight: 600 }}>red highlighted values</span> in the output — they point to the problem.
+            Keep checking all 4 resources to compare.
+          </span>
+        </div>
+      )}
+
+      {/* ── Guide: Step 3 — Time to diagnose hint ── */}
+      {guideVisible && guideStep >= 2 && allInvestigated && !checked && (
+        <div style={{
+          padding: "8px 14px", borderRadius: 6, marginBottom: 10,
+          background: "rgba(122,232,122,0.05)", border: "1px solid rgba(122,232,122,0.2)",
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <span style={{ color: "#7AE87A", fontSize: 13 }}>✓</span>
+          <span style={{ color: "#AAB4BE", fontSize: 12 }}>
+            All resources checked. Now pick which one is the bottleneck from the dropdown below.
+            Which resource had <span style={{ color: "#FF5555", fontWeight: 600 }}>CRITICAL</span> status?
+          </span>
+        </div>
+      )}
 
       {/* Diagnosis */}
       {!checked && (
@@ -2076,7 +2210,7 @@ function NetworkAddressBuilder() {
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export default function LinuxFoundations({ initialSection }: { initialSection?: number } = {}) {
+export default function LinuxFoundations({ initialSection, missionMode, onMissionComplete }: { initialSection?: number; missionMode?: boolean; onMissionComplete?: () => void } = {}) {
   const [activeSection, setActiveSection] = useState(initialSection ?? 1);
   const [completedInteractions, setCompletedInteractions] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -2159,19 +2293,42 @@ export default function LinuxFoundations({ initialSection }: { initialSection?: 
         }}>
           {renderSection()}
           {/* ─── NAVIGATION ─── */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 40, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-            {activeSection > 1 && (
-              <button onClick={() => goTo(activeSection - 1)} style={{
-                padding: "10px 24px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 8, color: "#AAB4BE", fontWeight: 600, fontSize: 14, cursor: "pointer",
-              }}>← Previous</button>
-            )}
-            <div style={{ flex: 1 }} />
-            {activeSection < 10 && (
-              <button onClick={() => goTo(activeSection + 1)} style={{
-                padding: "10px 24px", background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.3)",
-                borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 14, cursor: "pointer",
-              }}>Next Section →</button>
+          <div style={{ marginTop: 40, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            {missionMode && onMissionComplete ? (
+              /* Mission mode: primary = complete mission step, secondary = keep reading */
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "center" }}>
+                <button onClick={onMissionComplete} style={{
+                  padding: "12px 32px", background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.4)",
+                  borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 15, cursor: "pointer",
+                  width: "100%", maxWidth: 360,
+                  transition: "all 0.2s",
+                  boxShadow: "0 0 8px rgba(80,200,255,0.1)",
+                }}>Completed reading, Continue mission</button>
+                {activeSection < 10 && (
+                  <button onClick={() => goTo(activeSection + 1)} style={{
+                    padding: "6px 16px", background: "transparent", border: "none",
+                    color: "#556", fontSize: 12, cursor: "pointer",
+                    transition: "color 0.2s",
+                  }}>Leave the mission for now and read on →</button>
+                )}
+              </div>
+            ) : (
+              /* Standalone mode: normal prev/next navigation */
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                {activeSection > 1 && (
+                  <button onClick={() => goTo(activeSection - 1)} style={{
+                    padding: "10px 24px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 8, color: "#AAB4BE", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                  }}>← Previous</button>
+                )}
+                <div style={{ flex: 1 }} />
+                {activeSection < 10 && (
+                  <button onClick={() => goTo(activeSection + 1)} style={{
+                    padding: "10px 24px", background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.3)",
+                    borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                  }}>Next Section →</button>
+                )}
+              </div>
             )}
           </div>
         </div>

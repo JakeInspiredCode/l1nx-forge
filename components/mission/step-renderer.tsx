@@ -20,8 +20,9 @@ const DrillWalkthrough = dynamic(() => import("@/components/drill-walkthrough"),
 const LinuxFoundations = dynamic(() => import("@/components/linux-foundations"), { ssr: false });
 const BootLearn = dynamic(() => import("@/components/forge/boot-process/boot-learn"), { ssr: false });
 const BootTriage = dynamic(() => import("@/components/forge/boot-process/boot-triage"), { ssr: false });
-const TerminalSim = dynamic(() => import("@/components/terminal-sim"), { ssr: false });
 const FilesystemGame = dynamic(() => import("@/components/forge/explorer/filesystem-game"), { ssr: false });
+
+import GuidedTerminal, { getGuidedTaskSet } from "@/components/mission/guided-terminal";
 
 interface StepRendererProps {
   step: MissionStep;
@@ -39,24 +40,37 @@ function shuffle<T>(arr: T[]): T[] {
 
 // ── Card Set Step ──
 function CardSetStep({ step, onStepComplete }: StepRendererProps) {
-  const params = step.contentRef.params as { topicId?: string; tier?: number; count?: number } | undefined;
+  const params = step.contentRef.params as {
+    topicId?: string; tier?: number; count?: number; cardIds?: string[];
+  } | undefined;
+  const cardIds = params?.cardIds;
   const topicId = params?.topicId ?? "linux";
   const tier = params?.tier ?? 1;
   const count = params?.count ?? 8;
 
+  // If specific cardIds are provided, fetch all cards and filter.
+  // Otherwise fall back to topic+tier random selection.
+  // Both queries always run (hooks can't be conditional) but only the
+  // relevant result is used.
   const rawCards = useQuery(api.forgeCards.getByTopicTier, { topicId, tier });
+  const allCards = useQuery(api.forgeCards.getAll);
 
   const cards = useMemo(() => {
+    if (cardIds && allCards) {
+      const idSet = new Set(cardIds);
+      const matched = allCards.filter((c) => idSet.has(c.cardId)).map(mapConvexCard);
+      return shuffle(matched);
+    }
     if (!rawCards || rawCards.length === 0) return [];
     return shuffle(rawCards).slice(0, count).map(mapConvexCard);
-  }, [rawCards, count]);
+  }, [cardIds, allCards, rawCards, count]);
 
-  if (!rawCards) {
+  if (cardIds ? !allCards : !rawCards) {
     return <LoadingStep />;
   }
 
   if (cards.length === 0) {
-    return <FallbackStep label="No cards found for this topic/tier" onComplete={onStepComplete} />;
+    return <FallbackStep label="No cards found for this selection" onComplete={onStepComplete} />;
   }
 
   return <CardQueue cards={cards} sessionType="topic-drill" onComplete={onStepComplete} />;
@@ -65,16 +79,41 @@ function CardSetStep({ step, onStepComplete }: StepRendererProps) {
 // ── Quick Draw Step ──
 function QuickDrawStep({ step, onStepComplete }: StepRendererProps) {
   const moduleId = step.contentRef.id;
+  const params = step.contentRef.params as {
+    categories?: string[];
+    count?: number;
+  } | undefined;
+
   const modules = getAllModules();
   const mod = modules.find((m) => m.id === moduleId);
+
+  const items = useMemo(() => {
+    if (!mod) return [];
+    let filtered = mod.items;
+    // Filter by categories if specified (e.g. ["file-ops", "text-processing"])
+    if (params?.categories && params.categories.length > 0) {
+      const cats = new Set(params.categories);
+      filtered = filtered.filter((item) => item.category && cats.has(item.category));
+    }
+    // Shuffle and limit
+    const shuffled = shuffle(filtered);
+    if (params?.count && params.count < shuffled.length) {
+      return shuffled.slice(0, params.count);
+    }
+    return shuffled;
+  }, [mod, params]);
 
   if (!mod) {
     return <FallbackStep label={`Quick Draw module "${moduleId}" not found`} onComplete={onStepComplete} />;
   }
 
+  if (items.length === 0) {
+    return <FallbackStep label="No items found for this Quick Draw selection" onComplete={onStepComplete} />;
+  }
+
   return (
     <QuickDrawGame
-      items={mod.items}
+      items={items}
       mode="type"
       onComplete={() => onStepComplete()}
       onQuit={() => onStepComplete()}
@@ -117,14 +156,11 @@ function ReadingStep({ step, onStepComplete }: StepRendererProps) {
   const sectionId = Number(step.contentRef.id);
 
   return (
-    <div className="relative">
-      <LinuxFoundations initialSection={sectionId} />
-      <div className="sticky bottom-4 flex justify-center pt-4">
-        <ActionButton variant="primary" size="lg" onClick={onStepComplete}>
-          Done Reading
-        </ActionButton>
-      </div>
-    </div>
+    <LinuxFoundations
+      initialSection={sectionId}
+      missionMode
+      onMissionComplete={onStepComplete}
+    />
   );
 }
 
@@ -136,17 +172,16 @@ function BootStep({ step, onStepComplete }: StepRendererProps) {
   return <BootLearn onBack={onStepComplete} />;
 }
 
-// ── Terminal Step ──
-function TerminalStep({ onStepComplete }: { onStepComplete: () => void }) {
+// ── Terminal Step (guided practice in mission context) ──
+function TerminalStep({ step, onStepComplete }: StepRendererProps) {
+  const taskSet = getGuidedTaskSet(step.contentRef.id);
   return (
-    <div>
-      <TerminalSim height={300} />
-      <div className="flex justify-center pt-4">
-        <ActionButton variant="primary" onClick={onStepComplete}>
-          Done Practicing
-        </ActionButton>
-      </div>
-    </div>
+    <GuidedTerminal
+      tasks={taskSet.tasks}
+      title={taskSet.title}
+      intro={taskSet.intro}
+      onComplete={onStepComplete}
+    />
   );
 }
 
@@ -196,7 +231,7 @@ export default function StepRenderer({ step, onStepComplete }: StepRendererProps
     case "boot-process":
       return <BootStep step={step} onStepComplete={onStepComplete} />;
     case "terminal-exercise":
-      return <TerminalStep onStepComplete={onStepComplete} />;
+      return <TerminalStep step={step} onStepComplete={onStepComplete} />;
     case "explorer":
       return <ExplorerStep step={step} onStepComplete={onStepComplete} />;
     default:

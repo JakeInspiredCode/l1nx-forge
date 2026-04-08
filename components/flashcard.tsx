@@ -20,17 +20,12 @@ const RATING_BUTTONS: { label: string; quality: Quality; color: string; key: str
 ];
 
 export default function Flashcard({ card, onRate, index, total }: FlashcardProps) {
+  // Each card gets a fresh mount via key={card.id} from CardQueue,
+  // so initial state is always clean — no reset logic needed.
   const [flipped, setFlipped] = useState(false);
   const [hasRevealed, setHasRevealed] = useState(false);
   const timerStart = useRef<number>(Date.now());
   const flipTime = useRef<number>(0);
-
-  useEffect(() => {
-    setFlipped(false);
-    setHasRevealed(false);
-    timerStart.current = Date.now();
-    flipTime.current = 0;
-  }, [card.id]);
 
   const handleFlip = useCallback(() => {
     if (!hasRevealed) {
@@ -65,10 +60,10 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
   const tierColor = ["", "text-forge-text-dim", "text-forge-accent", "text-forge-warning", "text-forge-danger"][card.tier];
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto">
       {/* Progress bar */}
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex-1 h-1.5 bg-forge-surface-2 rounded-full overflow-hidden">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex-1 h-1 bg-forge-surface-2 rounded-full overflow-hidden">
           <div
             className="h-full bg-forge-accent rounded-full transition-all duration-300"
             style={{ width: `${((index + 1) / total) * 100}%` }}
@@ -77,31 +72,44 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
         <span className="text-xs text-forge-text-dim mono">{index + 1}/{total}</span>
       </div>
 
-      {/* Card */}
-      <div className="card-flip cursor-pointer" onClick={handleFlip}>
-        <div className={`card-flip-inner ${flipped ? "flipped" : ""}`}>
+      {/* Rating buttons — above card, visible once revealed */}
+      <div className={`mb-3 flex gap-2 justify-center transition-opacity duration-150 ${hasRevealed ? "opacity-100" : "opacity-0 pointer-events-none"}`} style={{ minHeight: 36 }}>
+        {RATING_BUTTONS.map((btn) => (
+          <button
+            key={btn.label}
+            onClick={() => handleRate(btn.quality)}
+            className={`px-3 py-1.5 rounded border text-xs font-medium transition-all duration-150 ${btn.color}`}
+          >
+            {btn.label} <span className="opacity-50 mono">[{btn.key}]</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Card — fixed height to prevent jitter */}
+      <div className="card-flip cursor-pointer" onClick={handleFlip} style={{ height: 240 }}>
+        <div className={`card-flip-inner ${flipped ? "flipped" : ""}`} style={{ height: "100%" }}>
           {/* Front */}
-          <div className="card-front">
-            <div className="bg-forge-surface border border-forge-border rounded-xl p-8 min-h-[320px] flex flex-col hover:border-forge-border-hover transition-colors">
-              <div className="flex items-center justify-between mb-6">
+          <div className="card-front" style={{ height: "100%" }}>
+            <div className="bg-forge-surface border border-forge-border rounded-xl p-6 h-full flex flex-col hover:border-forge-border-hover transition-colors">
+              <div className="flex items-center justify-between mb-3">
                 <span className={`text-xs mono ${tierColor}`}>{tierLabel}</span>
                 <span className="text-xs text-forge-text-muted mono">{card.topicId}</span>
               </div>
-              <div className="flex-1 flex items-center justify-center">
-                <div className="markdown-content text-center text-lg leading-relaxed">
+              <div className="flex-1 flex items-center justify-center overflow-y-auto">
+                <div className="markdown-content text-center text-base leading-relaxed">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{card.front}</ReactMarkdown>
                 </div>
               </div>
-              <div className="text-center mt-6">
-                <span className="text-xs text-forge-text-muted">Press Space or tap to reveal</span>
+              <div className="text-center mt-2">
+                <span className="text-[10px] text-forge-text-muted">Space or tap to reveal</span>
               </div>
             </div>
           </div>
 
           {/* Back */}
-          <div className="card-back">
-            <div className="bg-forge-surface border border-forge-accent/30 rounded-xl p-8 min-h-[320px] flex flex-col forge-glow">
-              <div className="flex items-center justify-between mb-4">
+          <div className="card-back" style={{ height: "100%" }}>
+            <div className="bg-forge-surface border border-forge-accent/30 rounded-xl p-6 h-full flex flex-col forge-glow">
+              <div className="flex items-center justify-between mb-2">
                 <span className={`text-xs mono ${tierColor}`}>{tierLabel}</span>
                 <span className="text-xs text-forge-accent mono">ANSWER</span>
               </div>
@@ -114,22 +122,6 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
           </div>
         </div>
       </div>
-
-      {/* Rating buttons — visible once card has been revealed */}
-      {hasRevealed && (
-        <div className="mt-6 flex gap-3 justify-center">
-          {RATING_BUTTONS.map((btn) => (
-            <button
-              key={btn.label}
-              onClick={() => handleRate(btn.quality)}
-              className={`px-5 py-2.5 rounded-lg border text-sm font-medium transition-all duration-150 ${btn.color}`}
-            >
-              {btn.label}
-              <span className="block text-[10px] opacity-60 mono mt-0.5">[{btn.key}]</span>
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

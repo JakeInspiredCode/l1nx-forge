@@ -60,11 +60,11 @@ const CATEGORIES = [
 ] as const;
 
 const bloomsVariant = (b: string) =>
-  b === "Remember" ? "muted" :
+  b === "Remember" ? "success" :
   b === "Understand" ? "cyan" :
   b === "Apply" ? "blue" :
   b === "Analyze" ? "purple" :
-  b === "Evaluate" ? "warning" : "muted";
+  b === "Evaluate" ? "warning" : "cyan";
 
 export default function Arsenal() {
   const router = useRouter();

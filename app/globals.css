@@ -95,6 +95,9 @@ code, pre, .mono {
   transition: transform 0.5s;
   transform-style: preserve-3d;
 }
+.card-flip-inner.no-transition {
+  transition: none;
+}
 .card-flip-inner.flipped {
   transform: rotateY(180deg);
 }
@@ -222,6 +225,12 @@ code, pre, .mono {
 }
 .mascot-bubble-enter { animation: mascotBubbleIn 0.2s ease-out forwards; }
 .mascot-bubble-exit { animation: mascotBubbleOut 0.2s ease-in forwards; }
+
+/* Resource Investigator panel pulse */
+@keyframes resourcePulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(80,200,255,0.1); }
+  50% { box-shadow: 0 0 16px rgba(80,200,255,0.25); }
+}
 
 /* Mascot bounce */
 @keyframes mascotBounce {

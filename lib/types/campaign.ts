@@ -83,7 +83,17 @@ export interface KnowledgeCheck {
 
 export interface KnowledgeCheckItem {
   type: "flashcard" | "quick-draw" | "multiple-choice";
-  contentRef: string;           // card ID, quick-draw item ID, etc.
+  contentRef: string;           // card ID, quick-draw item ID, or MC question ID
+}
+
+// ── Multiple Choice Questions ──
+
+export interface MCQuestion {
+  id: string;
+  question: string;
+  choices: { label: string; text: string }[];  // A/B/C/D
+  correctAnswer: string;                        // "A" | "B" | "C" | "D"
+  explanation: string;
 }
 
 // ── Bounty ──

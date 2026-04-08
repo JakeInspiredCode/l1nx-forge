@@ -1,0 +1,36 @@
+import type { MCQuestion } from "@/lib/types/campaign";
+import { MISSION_01_QUESTIONS } from "./mission-01";
+import { MISSION_02_QUESTIONS } from "./mission-02";
+import { MISSION_03_QUESTIONS } from "./mission-03";
+import { MISSION_04_QUESTIONS } from "./mission-04";
+import { MISSION_05_QUESTIONS } from "./mission-05";
+import { MISSION_06_QUESTIONS } from "./mission-06";
+import { MISSION_07_QUESTIONS } from "./mission-07";
+import { MISSION_08_QUESTIONS } from "./mission-08";
+import { MISSION_09_QUESTIONS } from "./mission-09";
+import { MISSION_10_QUESTIONS } from "./mission-10";
+import { MISSION_11_QUESTIONS } from "./mission-11";
+import { MISSION_12_QUESTIONS } from "./mission-12";
+
+const QUESTION_BANK: Record<string, MCQuestion[]> = {
+  "linux-m01": MISSION_01_QUESTIONS,
+  "linux-m02": MISSION_02_QUESTIONS,
+  "linux-m03": MISSION_03_QUESTIONS,
+  "linux-m04": MISSION_04_QUESTIONS,
+  "linux-m05": MISSION_05_QUESTIONS,
+  "linux-m06": MISSION_06_QUESTIONS,
+  "linux-m07": MISSION_07_QUESTIONS,
+  "linux-m08": MISSION_08_QUESTIONS,
+  "linux-m09": MISSION_09_QUESTIONS,
+  "linux-m10": MISSION_10_QUESTIONS,
+  "linux-m11": MISSION_11_QUESTIONS,
+  "linux-m12": MISSION_12_QUESTIONS,
+};
+
+export function getMCQuestions(missionId: string): MCQuestion[] | null {
+  return QUESTION_BANK[missionId] ?? null;
+}
+
+export function hasMCQuestions(missionId: string): boolean {
+  return missionId in QUESTION_BANK;
+}

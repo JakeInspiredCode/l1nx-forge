@@ -10,8 +10,10 @@ import { getCampaign, getMissionsForCampaign } from "@/lib/seeds/campaigns";
 import MissionBriefing from "./mission-briefing";
 import LoadoutEditor from "./loadout-editor";
 import KnowledgeCheckScreen from "./knowledge-check";
+import MCKnowledgeCheck from "./mc-knowledge-check";
 import MissionDebrief from "./mission-debrief";
 import StepRenderer from "./step-renderer";
+import { getMCQuestions } from "@/lib/seeds/knowledge-checks";
 import TelemetryBar from "@/components/ui/telemetry-bar";
 import ActionButton from "@/components/ui/action-button";
 
@@ -213,6 +215,17 @@ export default function MissionPlayer({ mission }: MissionPlayerProps) {
   }
 
   if (phase === "knowledge-check") {
+    // Use multiple-choice questions if available for this mission, otherwise fall back to flashcard self-assessment
+    const mcQuestions = getMCQuestions(mission.id);
+    if (mcQuestions) {
+      return (
+        <MCKnowledgeCheck
+          questions={mcQuestions}
+          passThreshold={mission.knowledgeCheck.passThreshold}
+          onComplete={handleKnowledgeCheckComplete}
+        />
+      );
+    }
     return (
       <KnowledgeCheckScreen
         check={mission.knowledgeCheck}

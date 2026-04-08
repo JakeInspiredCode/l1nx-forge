@@ -49,6 +49,9 @@ function clearCheckpoint() {
 }
 
 export default function CardQueue({ cards, sessionType, onComplete }: CardQueueProps) {
+  // Snapshot the card array on mount so Convex reactivity doesn't
+  // mutate the deck mid-session (which causes card peek/flash bugs)
+  const [deck] = useState<ForgeCard[]>(() => [...cards]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<ReviewResult[]>([]);
   const [finished, setFinished] = useState(false);
@@ -80,7 +83,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
   const checkBadges = useMutation(api.forgeProfile.checkAndAwardBadges);
 
   const handleRate = useCallback(async (quality: Quality, responseTime: number) => {
-    const card = cards[currentIndex];
+    const card = deck[currentIndex];
     if (!card) return;
 
     // Run SM-2 (pure function — no DB dependency)
@@ -101,7 +104,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     };
     dispatchMascotEvent(triggerMap[quality], { quality, topicId: card.topicId });
 
-    const isLast = currentIndex + 1 >= cards.length;
+    const isLast = currentIndex + 1 >= deck.length;
     if (!isLast) {
       setCurrentIndex(currentIndex + 1);
     }
@@ -123,7 +126,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
       // Checkpoint only after critical mutations succeed
       saveCheckpoint({
         sessionType,
-        cardIds: cards.map((c) => c.id),
+        cardIds: deck.map((c) => c.id),
         completedCount: updatedResults.length,
         sessionStart,
       });
@@ -147,7 +150,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
           type: sessionType,
           startTime: new Date(sessionStart).toISOString(),
           endTime: new Date().toISOString(),
-          cardIds: cards.map((c) => c.id),
+          cardIds: deck.map((c) => c.id),
           answers: [],
           overallScore: undefined,
         });
@@ -161,21 +164,21 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
             if (badge === "streak-7") dispatchMascotEvent("streak-7");
           }
         }
-        dispatchMascotEvent("session-complete", { cardCount: cards.length });
+        dispatchMascotEvent("session-complete", { cardCount: deck.length });
         clearCheckpoint();
       } catch (err) {
         console.error("Session save error:", err);
       }
       setFinished(true);
     }
-  }, [cards, currentIndex, results, sessionStart, sessionType,
+  }, [deck, currentIndex, results, sessionStart, sessionType,
       updateCard, addReview, addPoints, recomputeProgress, addSession, recordSession, checkBadges]);
 
   if (finished) {
     return (
       <SessionSummary
         results={results}
-        cards={cards}
+        cards={deck}
         duration={Math.round((Date.now() - sessionStart) / 1000)}
         onClose={onComplete}
       />
@@ -188,7 +191,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
         <span className="text-4xl mb-4 block">&#x21bb;</span>
         <h2 className="text-xl font-semibold mb-2">Resume Session?</h2>
         <p className="text-forge-text-dim text-sm mb-6">
-          You completed {showResume.completedCount} of {cards.length} cards before leaving.
+          You completed {showResume.completedCount} of {deck.length} cards before leaving.
           Those cards were already saved — pick up where you left off?
         </p>
         <div className="flex gap-3 justify-center">
@@ -199,7 +202,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
             }}
             className="px-6 py-3 bg-forge-accent text-white rounded-xl font-medium hover:bg-forge-accent/90 transition-colors"
           >
-            Resume ({cards.length - showResume.completedCount} remaining)
+            Resume ({deck.length - showResume.completedCount} remaining)
           </button>
           <button
             onClick={() => {
@@ -215,7 +218,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     );
   }
 
-  if (cards.length === 0) {
+  if (deck.length === 0) {
     return (
       <div className="text-center py-20">
         <span className="text-4xl mb-4 block">◇</span>
@@ -225,7 +228,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
     );
   }
 
-  const card = cards[currentIndex];
+  const card = deck[currentIndex];
 
   // Tier 4 branching cards use step-reveal
   if (card.tier === 4 && card.steps && card.steps.length > 0) {
@@ -235,7 +238,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
           <TierUnlockToast topicId={tierUnlock.topicId} newTier={tierUnlock.newTier}
             onDismiss={() => setTierUnlock(null)} />
         )}
-        <StepReveal card={card} onRate={handleRate} index={currentIndex} total={cards.length} />
+        <StepReveal card={card} onRate={handleRate} index={currentIndex} total={deck.length} />
       </>
     );
   }
@@ -246,7 +249,7 @@ export default function CardQueue({ cards, sessionType, onComplete }: CardQueueP
         <TierUnlockToast topicId={tierUnlock.topicId} newTier={tierUnlock.newTier}
           onDismiss={() => setTierUnlock(null)} />
       )}
-      <Flashcard card={card} onRate={handleRate} index={currentIndex} total={cards.length} />
+      <Flashcard key={card.id} card={card} onRate={handleRate} index={currentIndex} total={deck.length} />
     </>
   );
 }
