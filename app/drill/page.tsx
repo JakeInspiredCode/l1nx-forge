@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Nav from "@/components/nav";
 import DrillWalkthrough from "@/components/drill-walkthrough";
 import { SCENARIOS, type Scenario } from "@/lib/scenarios";
 
@@ -98,7 +97,6 @@ export default function DrillPage() {
   if (activeScenario) {
     return (
       <>
-        <Nav />
         <main className="py-6">
           <DrillWalkthrough
             scenario={activeScenario}
@@ -111,7 +109,6 @@ export default function DrillPage() {
 
   return (
     <>
-      <Nav />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
           <h1 className="mono text-xl font-bold text-forge-danger mb-1">

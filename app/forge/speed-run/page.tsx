@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/nav";
 import SpeedRunGame, { SpeedRunSummary, CardResult } from "@/components/forge/speed-run/speed-run-game";
 import SpeedRunResults from "@/components/forge/speed-run/speed-run-results";
 import CardQueue from "@/components/card-queue";
@@ -222,8 +221,7 @@ export default function SpeedRunPage() {
 
   if (screen === "playing") {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <SpeedRunGame
             cards={gameCards}
@@ -239,8 +237,7 @@ export default function SpeedRunPage() {
 
   if (screen === "review-misses" && reviewCards.length > 0) {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-6 flex items-center justify-between">
             <div>
@@ -266,8 +263,7 @@ export default function SpeedRunPage() {
 
   if (screen === "results" && summary) {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <SpeedRunResults
             summary={summary}
@@ -284,8 +280,7 @@ export default function SpeedRunPage() {
 
   // Setup screen
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-lg mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div>
           <h1 className="text-xl font-bold mono mb-1">⚡ Speed Run</h1>

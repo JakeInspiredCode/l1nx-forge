@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import Nav from "@/components/nav";
 import { TOPICS, mapConvexCard, ForgeCard } from "@/lib/types";
 import { useCards, useSeedCards } from "@/lib/convex-hooks";
 import CardEditor from "@/components/card-editor";
@@ -93,8 +92,7 @@ export default function CardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-end justify-between mb-6">
           <div>

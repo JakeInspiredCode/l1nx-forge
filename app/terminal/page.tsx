@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import Nav from "@/components/nav";
 import TerminalSim from "@/components/terminal-sim";
 
 // ── Command reference data ──
@@ -299,7 +298,6 @@ export default function TerminalPage() {
 
   return (
     <>
-      <Nav />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {/* Header */}
         <div className="flex items-end justify-between mb-4">

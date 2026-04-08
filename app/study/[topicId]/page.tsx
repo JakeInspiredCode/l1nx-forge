@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, use } from "react";
-import Nav from "@/components/nav";
 import CardQueue from "@/components/card-queue";
 import { TOPICS, ForgeCard, TopicId, mapConvexCard } from "@/lib/types";
 import { useCardsByTopic, useDueCards, useNewCards, useAllProgress, useRecomputeProgress } from "@/lib/convex-hooks";
@@ -45,25 +44,21 @@ export default function TopicStudyPage({ params }: { params: Promise<{ topicId: 
   };
 
   if (!topic) {
-    return (<div className="min-h-screen bg-forge-bg"><Nav />
-      <main className="max-w-3xl mx-auto px-4 py-8"><p className="text-forge-text-dim">Topic not found.</p></main></div>);
+    return (<main className="max-w-3xl mx-auto px-4 py-8"><p className="text-forge-text-dim">Topic not found.</p></main>);
   }
 
   if (active && sessionCards.length > 0) {
     return (
-      <div className="min-h-screen bg-forge-bg"><Nav />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <button onClick={() => { setActive(false); setSessionCards([]); }}
             className="text-sm text-forge-text-dim hover:text-forge-text mb-6 flex items-center gap-1">← End session</button>
           <CardQueue cards={sessionCards} sessionType="topic-drill"
             onComplete={() => { setActive(false); setSessionCards([]); }} />
         </main>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-forge-bg"><Nav />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <button onClick={() => router.push("/study")}
           className="text-sm text-forge-text-dim hover:text-forge-text mb-6 flex items-center gap-1">← Back to study</button>
@@ -150,6 +145,5 @@ export default function TopicStudyPage({ params }: { params: Promise<{ topicId: 
           </button>
         </div>
       </main>
-    </div>
   );
 }

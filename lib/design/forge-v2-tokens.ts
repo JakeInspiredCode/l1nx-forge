@@ -18,6 +18,30 @@ export const V2 = {
     glow: "rgba(6, 214, 214, 0.15)",
     glowStrong: "rgba(6, 214, 214, 0.3)",
   },
+  amber: {
+    base: "#f59e0b",
+    bright: "#fbbf24",
+    dim: "#4a3a0a",
+    glow: "rgba(245, 158, 11, 0.15)",
+  },
+  green: {
+    base: "#22c55e",
+    bright: "#4ade80",
+    dim: "#0a4a1e",
+    glow: "rgba(34, 197, 94, 0.15)",
+  },
+  purple: {
+    base: "#a855f7",
+    bright: "#c084fc",
+    dim: "#2e1065",
+    glow: "rgba(168, 85, 247, 0.15)",
+  },
+  silver: {
+    base: "#e0e4ec",
+    bright: "#f1f3f8",
+    dim: "#3a3d47",
+    glow: "rgba(224, 228, 236, 0.1)",
+  },
   blue: {
     base: "#2563eb",
     dim: "#1e3a5f",
@@ -44,6 +68,15 @@ export const V2 = {
     base: "#1e2233",
     glow: "rgba(6, 214, 214, 0.3)",
   },
+} as const;
+
+// Room accent lookup
+export const ROOM_COLORS = {
+  "star-map": V2.cyan,
+  missions: V2.amber,
+  arsenal: V2.green,
+  comms: V2.purple,
+  profile: V2.silver,
 } as const;
 
 // Mission node state → visual mapping

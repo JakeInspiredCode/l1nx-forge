@@ -2,7 +2,6 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/nav";
 import MissionPlayer from "@/components/mission/mission-player";
 import { getMission } from "@/lib/seeds/campaigns";
 import ScanOverlay from "@/components/ui/scan-overlay";
@@ -19,7 +18,6 @@ export default function MissionPage({
   if (!mission) {
     return (
       <>
-        <Nav />
         <main className="relative min-h-screen bg-v2-bg-deep">
           <ScanOverlay />
           <div className="relative z-10 max-w-2xl mx-auto px-4 py-20 text-center">
@@ -43,7 +41,6 @@ export default function MissionPage({
 
   return (
     <>
-      <Nav />
       <main className="relative min-h-screen bg-v2-bg-deep">
         <ScanOverlay />
         <div className="relative z-10 px-4 py-6">

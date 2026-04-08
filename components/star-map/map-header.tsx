@@ -1,7 +1,5 @@
 "use client";
 
-import GlowStat from "@/components/ui/glow-stat";
-
 interface MapHeaderProps {
   totalXp: number;
   streak: number;
@@ -18,28 +16,78 @@ export default function MapHeader({
   activeCampaign,
 }: MapHeaderProps) {
   return (
-    <div className="hex-panel p-4 mb-6">
-      <div className="flex items-center justify-between">
+    <div
+      className="flex items-center justify-between px-5 py-3 rounded-lg"
+      style={{
+        background: "rgba(5, 5, 8, 0.6)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(30, 34, 51, 0.4)",
+      }}
+    >
+      {/* Left — callsign + campaign */}
+      <div className="flex items-center gap-4">
         <div>
-          <h1 className="display-font text-xl text-v2-cyan tracking-widest">
+          <h1
+            className="display-font text-lg tracking-[0.15em]"
+            style={{
+              color: "#06d6d6",
+              textShadow: "0 0 12px rgba(6, 214, 214, 0.3)",
+            }}
+          >
             Star Map
           </h1>
           {activeCampaign && (
-            <p className="text-xs text-v2-text-dim mt-0.5">
+            <p className="text-[10px] telemetry-font text-v2-text-muted tracking-wider mt-0.5">
               Active: {activeCampaign}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-6">
-          <GlowStat value={totalXp} label="XP" size="sm" />
-          <GlowStat value={streak} label="Streak" icon="🔥" size="sm" />
-          <GlowStat
-            value={`${missionsAccomplished}/${totalMissions}`}
-            label="Missions"
-            size="sm"
-          />
-        </div>
       </div>
+
+      {/* Right — telemetry readouts */}
+      <div className="flex items-center gap-6">
+        <HudStat value={totalXp.toLocaleString()} label="XP" />
+        <HudStat value={streak.toString()} label="Streak" suffix="d" />
+        <HudStat
+          value={`${missionsAccomplished}`}
+          label="Missions"
+          suffix={`/${totalMissions}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function HudStat({
+  value,
+  label,
+  suffix,
+}: {
+  value: string;
+  label: string;
+  suffix?: string;
+}) {
+  return (
+    <div className="flex flex-col items-end">
+      <div className="flex items-baseline gap-0.5">
+        <span
+          className="telemetry-font text-lg font-bold"
+          style={{
+            color: "#06d6d6",
+            textShadow: "0 0 8px rgba(6, 214, 214, 0.3)",
+          }}
+        >
+          {value}
+        </span>
+        {suffix && (
+          <span className="telemetry-font text-xs text-v2-text-muted">
+            {suffix}
+          </span>
+        )}
+      </div>
+      <span className="text-[9px] uppercase tracking-[0.15em] text-v2-text-muted">
+        {label}
+      </span>
     </div>
   );
 }

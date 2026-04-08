@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Nav from "@/components/nav";
 import QuickDrawGame, { QuickDrawSummary } from "@/components/forge/quick-draw/quick-draw-game";
 import QuickDrawResults from "@/components/forge/quick-draw/quick-draw-results";
 import { getAllModules, QuickDrawModule } from "@/lib/seeds/quick-draw-modules";
@@ -55,8 +54,7 @@ export default function QuickDrawPage() {
 
   if (screen === "playing" && selectedModule) {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="px-4 sm:px-6 py-8">
           <QuickDrawGame
             items={selectedModule.items}
@@ -71,8 +69,7 @@ export default function QuickDrawPage() {
 
   if (screen === "results" && summary && selectedModule) {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="px-4 sm:px-6 py-8">
           <QuickDrawResults
             summary={summary}
@@ -87,8 +84,7 @@ export default function QuickDrawPage() {
 
   // Setup
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mono mb-1">Quick Draw</h1>
         <p className="text-sm text-forge-text-dim mb-6">

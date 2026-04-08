@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import Nav from "@/components/nav";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ForgeCard, TOPICS, mapConvexCard, Quality } from "@/lib/types";
@@ -193,7 +192,6 @@ export default function InterviewPage() {
 
   if (state === "scoring") {
     return (
-      <div className="min-h-screen bg-forge-bg"><Nav />
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 text-center">
           <div className="mt-16">
             <div className="text-4xl mb-4 animate-pulse">AI</div>
@@ -201,13 +199,11 @@ export default function InterviewPage() {
             <p className="text-forge-text-dim text-sm">Claude is evaluating {answers.length} answer{answers.length !== 1 ? "s" : ""} for technical accuracy, structure, and depth.</p>
           </div>
         </main>
-      </div>
     );
   }
 
   if (state === "setup") {
     return (
-      <div className="min-h-screen bg-forge-bg"><Nav />
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <h1 className="text-2xl font-bold mb-6 mono">Mock Interview</h1>
           <div className="space-y-4">
@@ -244,7 +240,6 @@ export default function InterviewPage() {
             </button>
           </div>
         </main>
-      </div>
     );
   }
 
@@ -252,7 +247,6 @@ export default function InterviewPage() {
   if (state === "active" && questions[currentQ]) {
     const q = questions[currentQ];
     return (
-      <div className="min-h-screen bg-forge-bg"><Nav />
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs text-forge-text-dim mono">Q{currentQ + 1}/{questions.length}</span>
@@ -284,7 +278,6 @@ export default function InterviewPage() {
             Submit Answer
           </button>
         </main>
-      </div>
     );
   }
 
@@ -294,7 +287,6 @@ export default function InterviewPage() {
       ? Math.round(answers.reduce((s, a) => s + (a.score?.technical ?? 0) + (a.score?.structure ?? 0) + (a.score?.ownership ?? 0), 0) / (answers.length * 3) * 20)
       : 0;
     return (
-      <div className="min-h-screen bg-forge-bg"><Nav />
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <h1 className="text-2xl font-bold mb-2 mono">Interview Review</h1>
           <p className="text-forge-text-dim mb-6">
@@ -342,7 +334,6 @@ export default function InterviewPage() {
             New Interview
           </button>
         </main>
-      </div>
     );
   }
 

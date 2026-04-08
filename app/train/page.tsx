@@ -1,6 +1,5 @@
 "use client";
 
-import Nav from "@/components/nav";
 import Link from "next/link";
 import { useDueCards, useAllProgress } from "@/lib/convex-hooks";
 
@@ -58,8 +57,7 @@ export default function TrainHub() {
   const weakCount = progress.filter((p) => p.weakFlag).length;
 
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mono mb-1">Train</h1>
         <p className="text-sm text-forge-text-dim mb-6">

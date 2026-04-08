@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import AgentChat from "@/components/agent-chat";
-import Nav from "@/components/nav";
 import {
   PersonalityType,
   PERSONALITY_META,
@@ -141,7 +140,6 @@ export default function AgentPage() {
 
   return (
     <div className="h-screen bg-forge-bg flex flex-col">
-      <Nav />
 
       {/* Top bar */}
       <div className="flex items-center gap-3 px-4 py-2 border-b border-white/10 shrink-0">

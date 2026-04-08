@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Nav from "@/components/nav";
 import FilesystemGame from "@/components/forge/explorer/filesystem-game";
 import CommandDissector from "@/components/forge/explorer/command-dissector";
 import FilesystemTypes from "@/components/forge/explorer/filesystem-types";
@@ -14,8 +13,7 @@ export default function VisualExplorerPage() {
   const [fsMode, setFsMode] = useState<FSMode>(null);
 
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mono mb-1">Visual Explorer</h1>
         <p className="text-sm text-forge-text-dim mb-6">

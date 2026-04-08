@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Nav from "@/components/nav";
 import BootLearn from "@/components/forge/boot-process/boot-learn";
 import BootTriage from "@/components/forge/boot-process/boot-triage";
 
@@ -11,8 +10,7 @@ export default function BootProcessPage() {
   const [mode, setMode] = useState<Mode>("hub");
 
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {mode === "hub" && (
           <BootHub onLearn={() => setMode("learn")} onTriage={() => setMode("triage")} />

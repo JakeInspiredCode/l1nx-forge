@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Nav from "@/components/nav";
 import DiagnosisGame, { DiagnosisResult } from "@/components/forge/diagnosis/diagnosis-game";
 import DiagnosisResults from "@/components/forge/diagnosis/diagnosis-results";
 import scenarios, { DiagnosisScenario, DiagnosisDifficulty } from "@/lib/seeds/diagnosis-scenarios";
@@ -62,8 +61,7 @@ export default function DiagnosisLabPage() {
 
   if (screen === "playing" && activeScenario) {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="px-4 sm:px-6 py-8">
           <DiagnosisGame
             scenario={activeScenario}
@@ -77,8 +75,7 @@ export default function DiagnosisLabPage() {
 
   if (screen === "results" && result && activeScenario) {
     return (
-      <div className="min-h-screen bg-forge-bg">
-        <Nav />
+      <div className="h-screen overflow-hidden bg-v2-bg-deep">
         <main className="px-4 sm:px-6 py-8">
           <DiagnosisResults
             result={result}
@@ -92,8 +89,7 @@ export default function DiagnosisLabPage() {
 
   // Browse scenarios
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mono mb-1">Diagnosis Lab</h1>
         <p className="text-sm text-forge-text-dim mb-6">

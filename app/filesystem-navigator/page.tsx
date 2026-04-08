@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Nav from "@/components/nav";
 import FilesystemGame from "@/components/forge/explorer/filesystem-game";
 
 function FilesystemNavigatorContent() {
@@ -11,8 +10,7 @@ function FilesystemNavigatorContent() {
   const mode = searchParams.get("mode") === "label" ? "label" : "learn";
 
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <FilesystemGame mode={mode as "learn" | "label"} onBack={() => router.push("/arsenal")} />
       </main>

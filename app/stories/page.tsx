@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import Nav from "@/components/nav";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -596,8 +595,7 @@ export default function StoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-forge-bg">
-      <Nav />
+    <div className="h-screen overflow-hidden bg-v2-bg-deep">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-start justify-between mb-6">
           <div>

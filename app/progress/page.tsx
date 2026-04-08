@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Nav from "@/components/nav";
 import { TOPICS, BADGE_DEFS } from "@/lib/types";
 import { useAllProgress, useProfile, useSessions, useReviews, useCards, useRecentSessions, useSpeedRunsRecent } from "@/lib/convex-hooks";
 
@@ -46,7 +45,6 @@ export default function ProgressPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-forge-bg"><Nav />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-bold mb-6 mono">Progress</h1>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
@@ -124,7 +122,6 @@ export default function ProgressPage() {
           setExpanded={setExpanded}
         />
       </main>
-    </div>
   );
 }
 
