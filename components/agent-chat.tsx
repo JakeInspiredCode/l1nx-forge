@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

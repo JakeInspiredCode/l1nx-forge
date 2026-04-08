@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation } from "@/lib/convex-shim";
 import { api } from "../convex/_generated/api";
 import { TOPICS, TopicId } from "@/lib/types";
 

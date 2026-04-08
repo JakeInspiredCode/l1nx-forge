@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import { ALL_CAMPAIGNS, getMissionsForCampaign, ALL_SECTORS } from "@/lib/seeds/campaigns";
 import type { Sector, SectorProgress, MissionStatus } from "@/lib/types/campaign";

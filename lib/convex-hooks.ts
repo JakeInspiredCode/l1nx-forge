@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "../convex/_generated/api";
 import { ForgeCard, TopicId, Tier, TopicProgress, ForgeProfile, TOPICS } from "./types";
 

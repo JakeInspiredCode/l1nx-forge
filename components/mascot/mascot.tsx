@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import MascotAvatar from "./mascot-avatar";
 import SpeechBubble from "./speech-bubble";

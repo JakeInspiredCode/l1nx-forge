@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useMutation } from "@/lib/convex-shim";
 import { api } from "../convex/_generated/api";
 import { ForgeCard, Quality } from "@/lib/types";
 import { sm2 } from "@/lib/sm2";

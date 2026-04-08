@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import DrillWalkthrough from "@/components/drill-walkthrough";
 import { SCENARIOS, type Scenario } from "@/lib/scenarios";

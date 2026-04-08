@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import type { MissionStep } from "@/lib/types/campaign";
 import { mapConvexCard } from "@/lib/types";

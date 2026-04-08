@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation } from "convex/react";
+import { useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import type { Mission, MissionStep } from "@/lib/types/campaign";
 import { XP, XP_MULTIPLIERS } from "@/lib/types/campaign";

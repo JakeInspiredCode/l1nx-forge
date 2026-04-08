@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import { ALL_CAMPAIGNS, getMissionsForCampaign, ALL_BOUNTIES, getMission } from "@/lib/seeds/campaigns";
 import type { MissionStatus } from "@/lib/types/campaign";

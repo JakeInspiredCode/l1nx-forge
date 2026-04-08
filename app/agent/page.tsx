@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import AgentChat from "@/components/agent-chat";
 import {

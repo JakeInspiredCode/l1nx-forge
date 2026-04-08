@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import HexPanel from "@/components/ui/hex-panel";
 import GlowStat from "@/components/ui/glow-stat";

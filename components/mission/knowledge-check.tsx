@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useQuery } from "convex/react";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import type { KnowledgeCheck, KnowledgeCheckItem } from "@/lib/types/campaign";
 import HexPanel from "@/components/ui/hex-panel";
