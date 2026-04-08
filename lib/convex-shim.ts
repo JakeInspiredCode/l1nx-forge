@@ -40,7 +40,7 @@ const DEMO_CAMPAIGN_STATES = DEMO_CAMPAIGN_IDS.map((id) => ({
   campaignId: id,
   enrolled: true,
   currentMissionIndex: 0,
-  completedMissionIds: [],
+  completedMissions: [],
 }));
 
 // Queries that return non-array values.
