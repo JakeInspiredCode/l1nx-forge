@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Mission, MissionStep } from "@/lib/types/campaign";
@@ -25,6 +25,7 @@ interface MissionPlayerProps {
 
 export default function MissionPlayer({ mission }: MissionPlayerProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const completeMissionStep = useMutation(api.forgeMissions.completeMissionStep);
   const submitKnowledgeCheck = useMutation(api.forgeMissions.submitKnowledgeCheck);
   const updateMissionStatus = useMutation(api.forgeMissions.updateMissionStatus);
@@ -36,7 +37,9 @@ export default function MissionPlayer({ mission }: MissionPlayerProps) {
   const [loadout, setLoadout] = useState<MissionStep[]>(mission.defaultLoadout);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepsCompleted, setStepsCompleted] = useState<string[]>([]);
-  const [showLoadoutEditor, setShowLoadoutEditor] = useState(false);
+  const [showLoadoutEditor, setShowLoadoutEditor] = useState(
+    searchParams.get("customize") === "true"
+  );
   const [debriefData, setDebriefData] = useState<{
     passed: boolean;
     score: number;

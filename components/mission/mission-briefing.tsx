@@ -1,6 +1,7 @@
 "use client";
 
 import type { Mission, MissionStep } from "@/lib/types/campaign";
+import { STEP_TYPE_ICONS } from "@/lib/constants/mission";
 import HexPanel from "@/components/ui/hex-panel";
 import StatusBadge from "@/components/ui/status-badge";
 import ActionButton from "@/components/ui/action-button";
@@ -13,16 +14,6 @@ interface MissionBriefingProps {
   onCustomize: () => void;
   onSkipToCheck: () => void;
 }
-
-const stepTypeIcons: Record<string, string> = {
-  reading: "📖",
-  flashcards: "🃏",
-  interactive: "🔬",
-  "quick-draw": "⚡",
-  diagnosis: "🔍",
-  terminal: "💻",
-  assessment: "📋",
-};
 
 export default function MissionBriefing({
   mission,
@@ -64,7 +55,7 @@ export default function MissionBriefing({
               key={step.id}
               className="flex items-center gap-3 p-2 rounded bg-v2-bg-elevated/50"
             >
-              <span className="text-sm w-5 text-center">{stepTypeIcons[step.type] ?? "•"}</span>
+              <span className="text-sm w-5 text-center">{STEP_TYPE_ICONS[step.type] ?? "•"}</span>
               <div className="flex-1 min-w-0">
                 <div className="text-sm text-v2-text truncate">{step.label}</div>
                 <div className="text-xs text-v2-text-muted">
