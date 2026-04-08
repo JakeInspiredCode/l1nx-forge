@@ -11,6 +11,7 @@ import {
 import { getAllSeedCards } from "@/lib/seeds";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import GalaxyMap from "@/components/galaxy-map/galaxy-map";
+import { DEMO_MODE } from "@/components/convex-provider";
 
 export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -35,7 +36,7 @@ export default function Dashboard() {
 
   // Seed on first load if DB is empty
   useEffect(() => {
-    if (isSeeded || seeding) return;
+    if (DEMO_MODE || isSeeded || seeding) return;
     const doSeed = async () => {
       setSeeding(true);
       const allCards = getAllSeedCards();
@@ -61,7 +62,7 @@ export default function Dashboard() {
   // Reseed
   const RESEED_VERSION = 4;
   useEffect(() => {
-    if (!isSeeded || seeding) return;
+    if (DEMO_MODE || !isSeeded || seeding) return;
     const key = `l1nx-reseed-v${RESEED_VERSION}`;
     if (typeof window !== "undefined" && localStorage.getItem(key)) return;
     const doReseed = async () => {
