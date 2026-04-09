@@ -19,8 +19,14 @@ type Screen = "browse" | "playing";
 
 export default function BattleStationPage() {
   const [screen, setScreen] = useState<Screen>("browse");
-  const [activeTicket, setActiveTicket] = useState<TicketScenario | null>(null);
+  const [activeQueue, setActiveQueue] = useState<TicketScenario[]>([]);
+  const [activeQueueIdx, setActiveQueueIdx] = useState(0);
   const [activeDifficulty, setActiveDifficulty] = useState<TicketDifficulty>("orientation");
+
+  // Key to force remount of TicketTerminal when advancing to next ticket
+  const [terminalKey, setTerminalKey] = useState(0);
+
+  const activeTicket = activeQueue[activeQueueIdx] ?? null;
 
   // Convex hooks
   const ticketHistory = useQuery(api.forgeTicketHistory.getAll, {}) ?? [];
@@ -51,7 +57,12 @@ export default function BattleStationPage() {
   const completedInLevel = activeTickets.filter((t) => bestScores[t.id] !== undefined).length;
 
   const startTicket = (ticket: TicketScenario) => {
-    setActiveTicket(ticket);
+    // Build queue: from the clicked ticket to end of the level
+    const idx = activeTickets.findIndex((t) => t.id === ticket.id);
+    const queue = idx >= 0 ? activeTickets.slice(idx) : [ticket];
+    setActiveQueue(queue);
+    setActiveQueueIdx(0);
+    setTerminalKey((k) => k + 1);
     setScreen("playing");
   };
 
@@ -62,7 +73,9 @@ export default function BattleStationPage() {
     startTicket(random);
   };
 
-  const handleComplete = async (result: TicketAttemptResult) => {
+  const isLastInQueue = activeQueueIdx >= activeQueue.length - 1;
+
+  const persistResult = async (result: TicketAttemptResult) => {
     try {
       await addHistory({
         ticketId: result.ticketId,
@@ -79,6 +92,17 @@ export default function BattleStationPage() {
     } catch {
       // Silently handle
     }
+  };
+
+  const handleNext = async (result: TicketAttemptResult) => {
+    await persistResult(result);
+    // Advance to next ticket in queue
+    setActiveQueueIdx((i) => i + 1);
+    setTerminalKey((k) => k + 1);
+  };
+
+  const handleFinishSection = async (result: TicketAttemptResult) => {
+    await persistResult(result);
     setScreen("browse");
   };
 
@@ -87,8 +111,12 @@ export default function BattleStationPage() {
     return (
       <div className="h-screen bg-v2-bg-deep flex flex-col">
         <TicketTerminal
+          key={terminalKey}
           ticket={activeTicket}
-          onComplete={handleComplete}
+          isLastInQueue={isLastInQueue}
+          queuePosition={activeQueueIdx + 1}
+          queueTotal={activeQueue.length}
+          onComplete={isLastInQueue ? handleFinishSection : handleNext}
           onQuit={() => setScreen("browse")}
         />
       </div>

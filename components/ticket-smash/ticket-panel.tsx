@@ -28,6 +28,7 @@ interface TicketPanelProps {
   result?: TicketResult;
   currentStep?: number;
   totalSteps?: number;
+  isLastInQueue?: boolean;
 }
 
 // ── Component ──
@@ -45,6 +46,7 @@ export default function TicketPanel({
   result,
   currentStep,
   totalSteps,
+  isLastInQueue = true,
 }: TicketPanelProps) {
   const [answerText, setAnswerText] = useState("");
   const [showWhy, setShowWhy] = useState(false);
@@ -257,9 +259,9 @@ export default function TicketPanel({
               </p>
             </div>
 
-            {/* Next button */}
+            {/* Next / Finish button */}
             <ActionButton variant="primary" onClick={onNextTicket} className="w-full">
-              Next Ticket
+              {isLastInQueue ? "Finish Section" : "Next Ticket"}
             </ActionButton>
           </div>
         )}

@@ -27,13 +27,23 @@ export interface TicketAttemptResult {
 
 interface TicketTerminalProps {
   ticket: TicketScenario;
+  isLastInQueue?: boolean;
+  queuePosition?: number;
+  queueTotal?: number;
   onComplete: (result: TicketAttemptResult) => void;
   onQuit: () => void;
 }
 
 // ── Component ──
 
-export default function TicketTerminal({ ticket, onComplete, onQuit }: TicketTerminalProps) {
+export default function TicketTerminal({
+  ticket,
+  isLastInQueue = true,
+  queuePosition,
+  queueTotal,
+  onComplete,
+  onQuit,
+}: TicketTerminalProps) {
   const [commandsRun, setCommandsRun] = useState<string[]>([]);
   const [commandsMatched, setCommandsMatched] = useState<string[]>([]);
   const [phase, setPhase] = useState<"working" | "answer" | "result">("working");
@@ -204,7 +214,8 @@ export default function TicketTerminal({ ticket, onComplete, onQuit }: TicketTer
       {/* Quit button */}
       <div className="flex items-center justify-between px-4 py-2 shrink-0">
         <span className="text-xs mono text-v2-text-muted">
-          {ticket.id} — {level.label}
+          {level.label}
+          {queuePosition && queueTotal ? ` — ${queuePosition}/${queueTotal}` : ` — ${ticket.id}`}
         </span>
         <ActionButton variant="ghost" size="sm" onClick={onQuit}>
           ✕ Quit
@@ -233,6 +244,7 @@ export default function TicketTerminal({ ticket, onComplete, onQuit }: TicketTer
             result={result ?? undefined}
             currentStep={isMultiStep ? currentStep : undefined}
             totalSteps={isMultiStep ? totalSteps : undefined}
+            isLastInQueue={isLastInQueue}
           />
         </div>
       </div>
