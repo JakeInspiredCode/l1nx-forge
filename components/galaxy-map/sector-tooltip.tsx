@@ -11,13 +11,13 @@ interface SectorTooltipProps {
 
 const SECTOR_GREEK: Record<string, string> = {
   "sector-linux": "Alpha",
-  "sector-hardware": "Beta",
+  "sector-hardware": "Theta",
   "sector-networking": "Gamma",
   "sector-fiber": "Delta",
   "sector-power": "Epsilon",
   "sector-ops": "Zeta",
   "sector-scale": "Eta",
-  "sector-linux-advanced": "Theta",
+  "sector-linux-advanced": "Beta",
 };
 
 export default function SectorTooltip({ sector, progress, mousePos }: SectorTooltipProps) {

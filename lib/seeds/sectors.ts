@@ -86,7 +86,7 @@ export const ALL_SECTORS: Sector[] = [
   },
   {
     id: "sector-linux-advanced",
-    title: "Operation Deep Shell",
+    title: "Advanced Linux",
     description: "Advanced Linux administration — systemd mastery, security hardening, bash scripting, LVM, containers, and cascading failure response.",
     topicId: "linux",
     icon: "🔧",

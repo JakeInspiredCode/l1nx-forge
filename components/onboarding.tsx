@@ -69,7 +69,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 className="block w-full"
               >
                 <div className="p-4 bg-v2-bg-elevated border border-v2-cyan/30 rounded hover:border-v2-cyan transition-colors text-left">
-                  <p className="text-v2-text font-medium">Volunteer for Operation Penguin Core</p>
+                  <p className="text-v2-text font-medium">Volunteer for Penguin Core Campaign</p>
                   <p className="text-v2-text-dim text-sm">Start the Linux campaign — structured daily missions</p>
                 </div>
               </Link>

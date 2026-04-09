@@ -14,13 +14,13 @@ const GLOW_SCALE = { sm: 60, md: 80, lg: 110 };
 
 const SECTOR_GREEK: Record<string, string> = {
   "sector-linux": "Sector Alpha",
-  "sector-hardware": "Sector Beta",
+  "sector-hardware": "Sector Theta",
   "sector-networking": "Sector Gamma",
   "sector-fiber": "Sector Delta",
   "sector-power": "Sector Epsilon",
   "sector-ops": "Sector Zeta",
   "sector-scale": "Sector Eta",
-  "sector-linux-advanced": "Sector Theta",
+  "sector-linux-advanced": "Sector Beta",
 };
 
 // Each sector gets a unique planet system — deterministic from sector id
@@ -133,18 +133,19 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
         />
       ))}
 
-      {/* Central star */}
+      {/* Central star — small and bright */}
       <circle
-        cx={cx} cy={cy} r={r * 0.35}
+        cx={cx} cy={cy} r={r * 0.18}
         fill={`url(#star-core-${sector.id})`}
+        style={{ filter: `drop-shadow(0 0 8px ${sector.color})` }}
+      />
+      {/* Hot white center */}
+      <circle
+        cx={cx} cy={cy} r={r * 0.08}
+        fill="#ffffff"
+        opacity={0.9}
         className="sector-breathe"
         style={{ animationDelay: breatheDelay }}
-      />
-      {/* Star specular highlight */}
-      <ellipse
-        cx={cx} cy={cy - r * 0.1}
-        rx={r * 0.2} ry={r * 0.12}
-        fill="rgba(255, 255, 255, 0.15)"
       />
 
       {/* Orbiting planets */}
@@ -273,11 +274,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
           <stop offset="35%" stopColor={sector.color} stopOpacity={0.12} />
           <stop offset="100%" stopColor={sector.color} stopOpacity={0} />
         </radialGradient>
-        <radialGradient id={`star-core-${sector.id}`} cx="40%" cy="35%" r="60%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity={0.9} />
-          <stop offset="30%" stopColor={sector.color} stopOpacity={0.8} />
-          <stop offset="70%" stopColor={sector.color} stopOpacity={0.4} />
-          <stop offset="100%" stopColor={sector.color} stopOpacity={0.1} />
+        <radialGradient id={`star-core-${sector.id}`} cx="45%" cy="40%" r="55%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={1} />
+          <stop offset="40%" stopColor={sector.color} stopOpacity={0.95} />
+          <stop offset="80%" stopColor={sector.color} stopOpacity={0.6} />
+          <stop offset="100%" stopColor={sector.color} stopOpacity={0.2} />
         </radialGradient>
       </defs>
     </g>
