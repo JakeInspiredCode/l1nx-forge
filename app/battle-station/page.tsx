@@ -190,7 +190,7 @@ export default function BattleStationPage() {
                 }`}
               >
                 <div className="font-semibold">{info.label}</div>
-                <div className="text-[10px] opacity-60 mt-0.5">
+                <div className="text-[10px] opacity-80 mt-0.5">
                   {completed}/{tickets.length}
                 </div>
               </button>

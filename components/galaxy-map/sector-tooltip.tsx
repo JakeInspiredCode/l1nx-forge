@@ -17,6 +17,7 @@ const SECTOR_GREEK: Record<string, string> = {
   "sector-power": "Epsilon",
   "sector-ops": "Zeta",
   "sector-scale": "Eta",
+  "sector-linux-advanced": "Theta",
 };
 
 export default function SectorTooltip({ sector, progress, mousePos }: SectorTooltipProps) {
@@ -76,16 +77,23 @@ export default function SectorTooltip({ sector, progress, mousePos }: SectorTool
           </span>
         </div>
 
-        {/* Jump to System indicator */}
-        <div
-          className="mt-2 pt-2 border-t border-v2-border text-center"
-        >
-          <span
-            className="text-[9px] display-font tracking-[0.15em] uppercase"
-            style={{ color: sector.color, textShadow: `0 0 8px ${sector.color}30` }}
+        {/* Jump to System button */}
+        <div className="mt-3 pt-2 border-t border-v2-border">
+          <div
+            className="w-full py-1.5 px-3 text-center rounded-sm cursor-pointer transition-all duration-200 hover:brightness-125"
+            style={{
+              background: `linear-gradient(135deg, ${sector.color}cc, ${sector.color}88)`,
+              border: `1px solid ${sector.color}60`,
+              boxShadow: `0 0 12px ${sector.color}30, inset 0 1px 0 rgba(255,255,255,0.15)`,
+            }}
           >
-            Jump to System
-          </span>
+            <span
+              className="text-[9px] display-font tracking-[0.18em] uppercase font-bold"
+              style={{ color: "#fff", textShadow: `0 0 6px ${sector.color}` }}
+            >
+              Jump to System
+            </span>
+          </div>
         </div>
       </div>
     </div>

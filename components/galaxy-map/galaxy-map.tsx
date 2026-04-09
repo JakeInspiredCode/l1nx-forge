@@ -169,7 +169,7 @@ export default function GalaxyMap() {
               <rect x="8" y="8" width="6" height="6" rx="1" fill="#06d6d6" />
             </svg>
           </div>
-          <div className="flex-1 metallic-frame rounded-b overflow-hidden">
+          <div className="flex-1 metallic-frame rounded-b overflow-hidden galaxy-map-panel">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-v2-text-dim text-sm telemetry-font animate-pulse">
@@ -180,36 +180,59 @@ export default function GalaxyMap() {
               <svg
                 viewBox="0 0 1000 800"
                 preserveAspectRatio="xMidYMid meet"
-                className="w-full h-full"
+                className="w-full h-full relative z-[1]"
               >
-                {/* Arrow marker definition */}
+                {/* Arrow marker definitions */}
                 <defs>
                   <marker
                     id="arrow-marker"
                     viewBox="0 0 10 10"
                     refX="9"
                     refY="5"
-                    markerWidth="5"
-                    markerHeight="5"
+                    markerWidth="6"
+                    markerHeight="6"
                     orient="auto-start-reverse"
                   >
-                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#06d6d6" opacity="0.5" />
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#06d6d6" opacity="0.6" />
+                  </marker>
+                  <marker
+                    id="arrow-marker-reverse"
+                    viewBox="0 0 10 10"
+                    refX="1"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 10 1 L 2 5 L 10 9 z" fill="#06d6d6" opacity="0.6" />
                   </marker>
                 </defs>
 
                 {/* Hyperspace lanes — directional arrows */}
                 {lanes.map(([a, b], i) => (
-                  <line
-                    key={i}
-                    x1={a.mapPosition.x * 10}
-                    y1={a.mapPosition.y * 8}
-                    x2={b.mapPosition.x * 10}
-                    y2={b.mapPosition.y * 8}
-                    stroke="#06d6d6"
-                    strokeWidth={1.2}
-                    opacity={0.3}
-                    markerEnd="url(#arrow-marker)"
-                  />
+                  <g key={i}>
+                    <line
+                      x1={a.mapPosition.x * 10}
+                      y1={a.mapPosition.y * 8}
+                      x2={b.mapPosition.x * 10}
+                      y2={b.mapPosition.y * 8}
+                      stroke="#06d6d6"
+                      strokeWidth={1}
+                      opacity={0.25}
+                      markerEnd="url(#arrow-marker)"
+                      markerStart="url(#arrow-marker-reverse)"
+                    />
+                    {/* Subtle lane glow */}
+                    <line
+                      x1={a.mapPosition.x * 10}
+                      y1={a.mapPosition.y * 8}
+                      x2={b.mapPosition.x * 10}
+                      y2={b.mapPosition.y * 8}
+                      stroke="#06d6d6"
+                      strokeWidth={4}
+                      opacity={0.04}
+                    />
+                  </g>
                 ))}
 
                 {/* Sector nodes */}
@@ -234,7 +257,7 @@ export default function GalaxyMap() {
         </div>
 
         {/* Stats panel — framed */}
-        <div className="w-[240px] shrink-0 flex flex-col mr-2 mb-1">
+        <div className="w-[280px] shrink-0 flex flex-col mr-2 mb-1">
           <div className="panel-header-bar rounded-t shrink-0">
             <span>Navigation Board</span>
             <button className="text-v2-text-muted hover:text-v2-text text-xs">···</button>
