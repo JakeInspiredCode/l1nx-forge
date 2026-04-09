@@ -84,6 +84,17 @@ export const ALL_SECTORS: Sector[] = [
     mapPosition: { x: 82, y: 40 },
     size: "sm",
   },
+  {
+    id: "sector-linux-advanced",
+    title: "Operation Deep Shell",
+    description: "Advanced Linux administration — systemd mastery, security hardening, bash scripting, LVM, containers, and cascading failure response.",
+    topicId: "linux",
+    icon: "🔧",
+    color: "#a855f7",
+    campaignIds: ["linux-advanced"],
+    mapPosition: { x: 35, y: 20 },
+    size: "md",
+  },
 ];
 
 // Lookup helpers

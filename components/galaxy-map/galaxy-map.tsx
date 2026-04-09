@@ -137,6 +137,7 @@ export default function GalaxyMap() {
       [s("sector-networking"), s("sector-scale")],
       [s("sector-ops"), s("sector-linux")],
       [s("sector-ops"), s("sector-power")],
+      [s("sector-linux"), s("sector-linux-advanced")],
     ];
   }, []);
 

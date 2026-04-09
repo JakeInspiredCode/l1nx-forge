@@ -65,7 +65,7 @@ const DEMO_PROFILE = {
 // ── Demo campaign states — all enrolled ──
 
 const DEMO_CAMPAIGN_IDS = [
-  "linux-core", "hardware-core", "networking-core",
+  "linux-core", "linux-advanced", "hardware-core", "networking-core",
   "fiber-core", "power-core", "ops-core", "scale-core",
 ];
 const DEMO_CAMPAIGN_STATES = DEMO_CAMPAIGN_IDS.map((id) => ({
