@@ -44,18 +44,18 @@ const PLANET_PROFILES: { size: number; celestialType: OrbitalPos["celestialType"
 function computeOrbitalPositions(count: number): OrbitalPos[] {
   const centerX = 500;
   const centerY = 400;
-  const minRadius = 70;
-  const maxRadius = 360;
+  const minRadius = 80;
+  const maxRadius = 340;
 
   const positions: OrbitalPos[] = [];
 
   for (let i = 0; i < count; i++) {
     const profile = PLANET_PROFILES[i % PLANET_PROFILES.length];
-    const orbitRadius = minRadius + profile.orbitMult * (maxRadius - minRadius);
 
-    // Spread planets around the full orbit with golden-angle spacing
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
-    const angle = i * goldenAngle + Math.PI * 0.75; // start at ~5 o'clock
+    // Sequential orbit — missions progress clockwise from ~10 o'clock
+    // Each planet at a slightly different radius for visual variety
+    const angle = (i / count) * Math.PI * 2 - Math.PI * 0.6; // start at ~10 o'clock
+    const orbitRadius = minRadius + profile.orbitMult * (maxRadius - minRadius);
 
     const cx = centerX + Math.cos(angle) * orbitRadius;
     const cy = centerY + Math.sin(angle) * orbitRadius;
@@ -228,11 +228,19 @@ export default function SystemMap() {
         </div>
       </div>
 
-      {/* Metallic title */}
-      <div className="absolute top-8 left-0 right-0 z-10 text-center pointer-events-none">
-        <h1 className="metallic-title text-xl md:text-2xl">
-          {activeCampaign ? `Campaign: ${activeCampaign.title.replace(/^Operation\s+/, '')}` : 'Campaign View'}
-        </h1>
+      {/* Header — matches galaxy-title style */}
+      <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+        <div className="galaxy-header-bar">
+          <div className="header-accent-line" />
+          <div className="flex items-center gap-3">
+            <div className="header-diamond" />
+            <h1 className="galaxy-title">
+              {activeCampaign ? `Campaign: ${activeCampaign.title.replace(/^Operation\s+/, '')}` : 'Campaign View'}
+            </h1>
+            <div className="header-diamond" />
+          </div>
+          <div className="header-accent-line" />
+        </div>
       </div>
 
       {/* Main layout: map + sidebar */}

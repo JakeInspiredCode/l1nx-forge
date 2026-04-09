@@ -70,7 +70,7 @@ export default function MissionNode({
   if (status === "decaying") animClass = "animate-[decayPulse_2s_ease-in-out_infinite]";
   if (isCurrent) animClass = "animate-[territoryPulse_2s_ease-in-out_infinite]";
 
-  const lockedOpacity = 0.25;
+  const lockedOpacity = 0.5;
 
   return (
     <g
@@ -89,7 +89,7 @@ export default function MissionNode({
       {/* Orbit ring */}
       <circle
         cx={500} cy={400} r={orbitRadius}
-        fill="none" stroke={isLocked ? "#2a2e3a" : "#4a5568"}
+        fill="none" stroke={isLocked ? "#3a4258" : "#4a5568"}
         strokeWidth={0.4} opacity={0.2}
         strokeDasharray={isLocked ? "2 6" : "none"}
       />
@@ -99,8 +99,8 @@ export default function MissionNode({
         <>
           <polygon
             points={asteroidPoints(cx, cy, size)}
-            fill={isLocked ? "#1a1e28" : palette.base}
-            stroke={isLocked ? "#2a2e3a" : palette.mid}
+            fill={isLocked ? "#1e2538" : palette.base}
+            stroke={isLocked ? "#3a4258" : palette.mid}
             strokeWidth={0.8}
             opacity={isLocked ? lockedOpacity : 0.9}
             className={animClass}
@@ -120,8 +120,8 @@ export default function MissionNode({
         <>
           <circle
             cx={cx} cy={cy} r={size}
-            fill={isLocked ? "#1a1e28" : `url(#rocky-${mission.id})`}
-            stroke={isLocked ? "#2a2e3a" : palette.mid}
+            fill={isLocked ? "#1e2538" : `url(#rocky-${mission.id})`}
+            stroke={isLocked ? "#3a4258" : palette.mid}
             strokeWidth={0.8}
             opacity={isLocked ? lockedOpacity : 1}
             className={animClass}
@@ -167,8 +167,8 @@ export default function MissionNode({
           {/* Planet body */}
           <circle
             cx={cx} cy={cy} r={size}
-            fill={isLocked ? "#1a1e28" : `url(#globe-${mission.id})`}
-            stroke={isLocked ? "#2a2e3a" : palette.mid}
+            fill={isLocked ? "#1e2538" : `url(#globe-${mission.id})`}
+            stroke={isLocked ? "#3a4258" : palette.mid}
             strokeWidth={1}
             opacity={isLocked ? lockedOpacity : 1}
             className={animClass}
@@ -212,8 +212,8 @@ export default function MissionNode({
           {/* Planet body */}
           <circle
             cx={cx} cy={cy} r={size}
-            fill={isLocked ? "#1a1e28" : `url(#giant-${mission.id})`}
-            stroke={isLocked ? "#2a2e3a" : palette.mid}
+            fill={isLocked ? "#1e2538" : `url(#giant-${mission.id})`}
+            stroke={isLocked ? "#3a4258" : palette.mid}
             strokeWidth={1.2}
             opacity={isLocked ? lockedOpacity : 1}
             className={animClass}
@@ -232,7 +232,7 @@ export default function MissionNode({
             cx={cx} cy={cy}
             rx={size * 1.6} ry={size * 0.35}
             fill="none"
-            stroke={isLocked ? "#2a2e3a" : palette.light}
+            stroke={isLocked ? "#3a4258" : palette.light}
             strokeWidth={isLocked ? 0.5 : 2}
             opacity={isLocked ? 0.1 : 0.25}
           />
@@ -240,7 +240,7 @@ export default function MissionNode({
             cx={cx} cy={cy}
             rx={size * 1.45} ry={size * 0.3}
             fill="none"
-            stroke={isLocked ? "#2a2e3a" : palette.mid}
+            stroke={isLocked ? "#3a4258" : palette.mid}
             strokeWidth={isLocked ? 0.3 : 1}
             opacity={isLocked ? 0.08 : 0.15}
           />
@@ -303,7 +303,7 @@ export default function MissionNode({
         y={cy + size + (hasMoon ? 12 : 10)}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill={isLocked ? "#3a3e4a" : "#c8d6e5"}
+        fill={isLocked ? "#5a6278" : "#c8d6e5"}
         fontSize={7.5}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={600}

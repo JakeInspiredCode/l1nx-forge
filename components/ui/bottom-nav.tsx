@@ -7,76 +7,148 @@ interface BottomNavProps {
 }
 
 const NAV_ITEMS = [
-  {
-    id: "galaxy-map",
-    href: "/",
-    label: "Sector View",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-[18px] h-[18px]">
-        <path d="M12 2l2.09 6.26L21 9.27l-5 4.87L17.18 21 12 17.77 6.82 21 8 14.14l-5-4.87 6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: "missions",
-    href: "/missions",
-    label: "Missions",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-[18px] h-[18px]">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9 14l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: "battle-station",
-    href: "/battle-station",
-    label: "Battle Station",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-[18px] h-[18px]">
-        <path d="M3 12h4l3-9 4 18 3-9h4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: "resources",
-    href: "/arsenal",
-    label: "Resources",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-[18px] h-[18px]">
-        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    id: "profile",
-    href: "/profile",
-    label: "Profile",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-[18px] h-[18px]">
-        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="12" cy="7" r="4" />
-      </svg>
-    ),
-  },
+  { id: "galaxy-map", href: "/", label: "Sector View" },
+  { id: "missions", href: "/missions", label: "Missions" },
+  { id: "battle-station", href: "/battle-station", label: "Battle Station" },
+  { id: "resources", href: "/arsenal", label: "Resources" },
+  { id: "profile", href: "/profile", label: "Profile" },
 ];
 
+// SVG viewBox width and vertical center
+const VB_W = 900;
+const VB_H = 56;
+const LINE_Y = 20;
+
+// Node x positions — tighter grouping, centered
+function nodePositions(count: number): number[] {
+  const pad = 100;
+  const spacing = (VB_W - pad * 2) / (count - 1);
+  return Array.from({ length: count }, (_, i) => pad + i * spacing);
+}
+
+// Build a smooth flowing bezier — gentle organic wave
+function buildStreamPath(xs: number[]): string {
+  const y = LINE_Y;
+  const wave = 2.5; // very subtle wave
+  let d = `M 0,${y}`;
+  // Smooth lead-in
+  d += ` Q ${xs[0] * 0.5},${y - wave * 0.5} ${xs[0]},${y}`;
+  // Flowing curves through nodes
+  for (let i = 0; i < xs.length - 1; i++) {
+    const x0 = xs[i];
+    const x1 = xs[i + 1];
+    const cp1x = x0 + (x1 - x0) * 0.4;
+    const cp2x = x0 + (x1 - x0) * 0.6;
+    const dir = i % 2 === 0 ? -1 : 1;
+    d += ` C ${cp1x},${y + wave * dir} ${cp2x},${y - wave * dir} ${x1},${y}`;
+  }
+  // Smooth lead-out
+  const last = xs[xs.length - 1];
+  d += ` Q ${last + (VB_W - last) * 0.5},${y + wave * 0.5} ${VB_W},${y}`;
+  return d;
+}
+
 export default function BottomNav({ activePage }: BottomNavProps) {
+  const xs = nodePositions(NAV_ITEMS.length);
+  const streamPath = buildStreamPath(xs);
+
   return (
-    <div className="bottom-nav-glass">
-      <div className="flex items-center gap-1 justify-center">
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className={`nav-glass-btn ${activePage === item.id ? "active" : ""}`}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </div>
+    <div className="energy-nav">
+      <svg
+        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full h-full"
+      >
+        <defs>
+          {/* Gradient that fades to transparent at edges */}
+          <linearGradient id="stream-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06d6d6" stopOpacity={0} />
+            <stop offset="12%" stopColor="#06d6d6" stopOpacity={0.4} />
+            <stop offset="50%" stopColor="#06d6d6" stopOpacity={0.5} />
+            <stop offset="88%" stopColor="#06d6d6" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#06d6d6" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="stream-glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#06d6d6" stopOpacity={0} />
+            <stop offset="15%" stopColor="#06d6d6" stopOpacity={0.15} />
+            <stop offset="50%" stopColor="#06d6d6" stopOpacity={0.2} />
+            <stop offset="85%" stopColor="#06d6d6" stopOpacity={0.15} />
+            <stop offset="100%" stopColor="#06d6d6" stopOpacity={0} />
+          </linearGradient>
+          <filter id="stream-blur">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
+        </defs>
+
+        {/* Glow layer — blurred duplicate behind */}
+        <path
+          d={streamPath}
+          fill="none"
+          stroke="url(#stream-glow-grad)"
+          strokeWidth={6}
+          filter="url(#stream-blur)"
+        />
+
+        {/* Main energy line */}
+        <path
+          d={streamPath}
+          fill="none"
+          stroke="url(#stream-grad)"
+          strokeWidth={1.2}
+          strokeLinecap="round"
+        />
+
+        {/* Node dots and labels */}
+        {NAV_ITEMS.map((item, i) => {
+          const isActive = activePage === item.id;
+          const x = xs[i];
+          return (
+            <g key={item.id}>
+              {/* Active node glow */}
+              {isActive && (
+                <circle
+                  cx={x} cy={LINE_Y} r={10}
+                  fill="#06d6d6" opacity={0.08}
+                  className="nav-node-breathe"
+                />
+              )}
+              {/* Node dot */}
+              <circle
+                cx={x} cy={LINE_Y}
+                r={isActive ? 4 : 2.5}
+                fill={isActive ? "#06d6d6" : "#4a5268"}
+                className={isActive ? "nav-node-breathe" : ""}
+                style={isActive ? { filter: "drop-shadow(0 0 8px #06d6d6) drop-shadow(0 0 16px rgba(6,214,214,0.3))" } : undefined}
+              />
+              {/* Label */}
+              <text
+                x={x}
+                y={LINE_Y + 18}
+                textAnchor="middle"
+                dominantBaseline="hanging"
+                fill={isActive ? "#e0e4ec" : "#3a4258"}
+                fontSize={9.5}
+                fontFamily="'JetBrains Mono', monospace"
+                fontWeight={isActive ? 600 : 400}
+                letterSpacing="0.1em"
+                className="pointer-events-none select-none uppercase"
+                style={isActive ? { textShadow: "0 0 8px rgba(6, 214, 214, 0.3)" } : undefined}
+              >
+                {item.label}
+              </text>
+              {/* Invisible click target */}
+              <a href={item.href}>
+                <rect
+                  x={x - 55} y={0}
+                  width={110} height={VB_H}
+                  fill="transparent"
+                  className="cursor-pointer"
+                />
+              </a>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
