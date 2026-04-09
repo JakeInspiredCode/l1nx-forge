@@ -48,11 +48,14 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
 
   return (
     <g
-      className="cursor-pointer"
+      className="sector-node cursor-pointer"
       onMouseEnter={() => onHover(sector)}
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(sector)}
-      style={{ filter: `drop-shadow(0 0 ${isActive ? 12 : 6}px ${sector.color}50)` }}
+      style={{
+        ["--sector-color" as string]: sector.color,
+        filter: `drop-shadow(0 0 ${isActive ? 12 : 6}px ${sector.color}50)`,
+      }}
     >
       {/* Outer nebula glow — large soft radial */}
       <circle

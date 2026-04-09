@@ -644,6 +644,21 @@ code, pre, .mono {
    Phase 4 Reskin — Glassmorphism, living UI, Mass Effect aesthetic
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Sector node hover — pop out and light up */
+.sector-node {
+  transition: filter 0.3s ease, transform 0.3s ease;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.sector-node:hover {
+  filter: drop-shadow(0 0 24px var(--sector-color)) drop-shadow(0 0 48px color-mix(in srgb, var(--sector-color) 40%, transparent)) !important;
+  transform: scale(1.12);
+}
+.sector-node:hover circle,
+.sector-node:hover ellipse {
+  transition: opacity 0.3s ease;
+}
+
 /* Breathing pulse for sector nodes */
 @keyframes sectorBreathe {
   0%, 100% { opacity: 0.15; transform: scale(1); }
