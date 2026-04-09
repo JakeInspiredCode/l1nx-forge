@@ -1,12 +1,12 @@
 import type { Campaign, Mission } from "@/lib/types/campaign";
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Operation Penguin Core — Linux Tiers 1-2 (12 missions)
+// Linux Operations — Linux Tiers 1-2 (12 missions)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const LINUX_CAMPAIGN: Campaign = {
   id: "linux-core",
-  title: "Operation Penguin Core",
+  title: "Linux Operations",
   description:
     "Master the fundamentals of Linux administration — from the shell to troubleshooting. 12 missions covering filesystem, permissions, processes, networking, and more.",
   topicId: "linux",

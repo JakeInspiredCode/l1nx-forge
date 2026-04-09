@@ -8,7 +8,7 @@ import type { TopicId } from "../types";
 
 export interface Campaign {
   id: string;
-  title: string;                // "Operation Penguin Core"
+  title: string;                // "Linux Operations"
   description: string;
   topicId: TopicId;
   tier: number;                 // which tier(s) this campaign covers
