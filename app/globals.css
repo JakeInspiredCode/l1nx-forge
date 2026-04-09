@@ -717,17 +717,17 @@ code, pre, .mono {
   left: 0;
   right: 0;
   z-index: 40;
-  height: 58px;
+  height: 64px;
   background: linear-gradient(
     180deg,
-    rgba(12, 15, 22, 0.96) 0%,
-    rgba(8, 9, 14, 0.98) 100%
+    rgba(10, 12, 20, 0.97) 0%,
+    rgba(6, 7, 12, 0.99) 100%
   );
-  border-top: 1px solid #344058;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(6, 214, 214, 0.06);
+  border-top: 1px solid rgba(6, 214, 214, 0.15);
+  box-shadow: 0 -6px 32px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(6, 214, 214, 0.08);
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 20px;
 }
 
 /* Sci-fi nav button */
@@ -735,38 +735,58 @@ code, pre, .mono {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 7px 18px;
-  border: 1px solid rgba(52, 64, 88, 0.7);
-  background: rgba(12, 15, 22, 0.7);
-  color: #7a8298;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 24px;
+  min-width: 100px;
+  border: 1px solid rgba(52, 64, 88, 0.5);
+  border-radius: 4px;
+  background: rgba(14, 18, 28, 0.8);
+  color: #8eafc8;
   font-family: 'Chakra Petch', sans-serif;
   font-weight: 600;
-  font-size: 9px;
-  letter-spacing: 0.15em;
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s ease;
-  clip-path: polygon(
-    5px 0, calc(100% - 5px) 0,
-    100% 5px, 100% calc(100% - 5px),
-    calc(100% - 5px) 100%, 5px 100%,
-    0 calc(100% - 5px), 0 5px
-  );
+  transition: all 0.25s ease;
+  position: relative;
+}
+.nav-btn-scifi::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: transparent;
+  transition: all 0.25s ease;
 }
 .nav-btn-scifi:hover {
-  background: rgba(6, 214, 214, 0.08);
-  border-color: rgba(6, 214, 214, 0.35);
-  color: #e0e4ec;
+  background: rgba(6, 214, 214, 0.06);
+  border-color: rgba(6, 214, 214, 0.3);
+  color: #d0e8f5;
+}
+.nav-btn-scifi:hover::after {
+  background: rgba(6, 214, 214, 0.3);
+  left: 10%;
+  right: 10%;
 }
 .nav-btn-scifi.active {
-  background: rgba(6, 214, 214, 0.12);
-  border-color: rgba(6, 214, 214, 0.55);
+  background: linear-gradient(180deg, rgba(6, 214, 214, 0.1) 0%, rgba(6, 214, 214, 0.04) 100%);
+  border-color: rgba(6, 214, 214, 0.5);
   color: #06d6d6;
-  box-shadow: 0 0 16px rgba(6, 214, 214, 0.2), inset 0 0 10px rgba(6, 214, 214, 0.06);
+  box-shadow: 0 0 20px rgba(6, 214, 214, 0.15), inset 0 0 12px rgba(6, 214, 214, 0.05);
+}
+.nav-btn-scifi.active::after {
+  background: #06d6d6;
+  box-shadow: 0 0 8px rgba(6, 214, 214, 0.6);
+  left: 15%;
+  right: 15%;
+  height: 2px;
 }
 .nav-btn-scifi .nav-icon {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
 }
 

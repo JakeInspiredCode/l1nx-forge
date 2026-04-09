@@ -9,8 +9,8 @@ interface SectorNodeProps {
   onClick: (sector: Sector) => void;
 }
 
-const SIZE_SCALE = { sm: 28, md: 36, lg: 48 };
-const NEBULA_SCALE = { sm: 65, md: 85, lg: 115 };
+const SIZE_SCALE = { sm: 38, md: 48, lg: 62 };
+const NEBULA_SCALE = { sm: 80, md: 110, lg: 145 };
 
 const SECTOR_GREEK: Record<string, string> = {
   "sector-linux": "Sector Alpha",
@@ -140,26 +140,14 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
         </>
       )}
 
-      {/* Icon */}
-      <text
-        x={cx}
-        y={cy - 2}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize={sector.size === "lg" ? 22 : sector.size === "md" ? 18 : 14}
-        className="pointer-events-none select-none"
-      >
-        {sector.icon}
-      </text>
-
       {/* Title */}
       <text
         x={cx}
-        y={cy + r + 6}
+        y={cy + r + 8}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill={isActive ? sector.color : "#8a90a4"}
-        fontSize={sector.size === "lg" ? 10 : 8}
+        fill={isActive ? sector.color : "#c8d6e5"}
+        fontSize={sector.size === "lg" ? 14 : sector.size === "md" ? 12 : 10}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={700}
         letterSpacing="0.14em"
@@ -171,11 +159,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Greek sub-label */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 19 : 17)}
+        y={cy + r + (sector.size === "lg" ? 26 : 23)}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill="#8a92a8"
-        fontSize={6.5}
+        fill="#8eafc8"
+        fontSize={9}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={600}
         letterSpacing="0.1em"
@@ -187,11 +175,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Mission count */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 30 : 27)}
+        y={cy + r + (sector.size === "lg" ? 40 : 36)}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill="#7a8298"
-        fontSize={6}
+        fill="#8eafc8"
+        fontSize={8}
         fontFamily="'JetBrains Mono', monospace"
         className="pointer-events-none select-none"
       >
