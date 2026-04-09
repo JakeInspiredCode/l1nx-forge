@@ -55,16 +55,22 @@ export default function TicketPanel({
   const needsAnswer = !!ticket.answerPrompt;
 
   // Enter key advances to next ticket from result screen
+  // Delay listener registration so the Enter that submitted the answer doesn't also trigger advance
   useEffect(() => {
     if (phase !== "result") return;
+    let armed = false;
+    const armTimer = setTimeout(() => { armed = true; }, 300);
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
+      if (armed && e.key === "Enter") {
         e.preventDefault();
         onNextTicket();
       }
     };
     window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    return () => {
+      clearTimeout(armTimer);
+      window.removeEventListener("keydown", handleKey);
+    };
   }, [phase, onNextTicket]);
 
   // For multi-step tickets, get the current step's prompt
