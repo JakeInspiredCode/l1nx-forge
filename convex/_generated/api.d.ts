@@ -24,6 +24,7 @@ import type * as forgeReviews from "../forgeReviews.js";
 import type * as forgeSessions from "../forgeSessions.js";
 import type * as forgeSpeedRuns from "../forgeSpeedRuns.js";
 import type * as forgeStories from "../forgeStories.js";
+import type * as forgeTicketHistory from "../forgeTicketHistory.js";
 
 import type {
   ApiFromModules,
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   forgeSessions: typeof forgeSessions;
   forgeSpeedRuns: typeof forgeSpeedRuns;
   forgeStories: typeof forgeStories;
+  forgeTicketHistory: typeof forgeTicketHistory;
 }>;
 
 /**
