@@ -215,6 +215,21 @@ export default defineSchema({
     .index("by_moduleId", ["moduleId"])
     .index("by_completedAt", ["completedAt"]),
 
+  forgeTicketHistory: defineTable({
+    ticketId: v.string(),
+    completedAt: v.string(),
+    difficulty: v.string(),
+    score: v.number(),
+    commandsUsed: v.array(v.string()),
+    answer: v.string(),
+    usedHint: v.boolean(),
+    xpEarned: v.number(),
+    timeMs: v.number(),
+  })
+    .index("by_ticketId", ["ticketId"])
+    .index("by_difficulty", ["difficulty"])
+    .index("by_completedAt", ["completedAt"]),
+
   forgeConversations: defineTable({
     threadId: v.string(),          // UUID — client-generated
     title: v.optional(v.string()), // Auto-generated from first user message, editable

@@ -8,13 +8,17 @@ interface BottomNavProps {
 
 const NAV_ITEMS = [
   {
-    id: "bridge",
-    href: "/",
-    label: "Bridge",
+    id: "battle-station",
+    href: "/battle-station",
+    label: "Battle Station",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-        <path d="M9 22V12h6v10" />
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="3" />
+        <line x1="12" y1="2" x2="12" y2="6" />
+        <line x1="12" y1="18" x2="12" y2="22" />
+        <line x1="2" y1="12" x2="6" y2="12" />
+        <line x1="18" y1="12" x2="22" y2="12" />
       </svg>
     ),
   },

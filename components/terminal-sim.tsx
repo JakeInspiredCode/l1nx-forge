@@ -8,7 +8,12 @@ interface HistoryEntry {
   text: string;
 }
 
-export default function TerminalSim({ height = 240, onCommand }: { height?: number; onCommand?: (cmd: string) => void }) {
+export interface TerminalSimProps {
+  height?: number;
+  onCommand?: (cmd: string, resolvedCmd?: string) => void;
+}
+
+export default function TerminalSim({ height = 240, onCommand }: TerminalSimProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([
     { type: "system", text: `Welcome to ${HOSTNAME}. Type 'help' for available commands.` },
   ]);
@@ -28,7 +33,6 @@ export default function TerminalSim({ height = 240, onCommand }: { height?: numb
 
     setCmdHistory((h) => [trimmed, ...h]);
     setHistIdx(-1);
-    onCommand?.(trimmed);
 
     if (trimmed === "clear") {
       setHistory([{ type: "system", text: "Terminal cleared." }]);
@@ -44,21 +48,36 @@ export default function TerminalSim({ height = 240, onCommand }: { height?: numb
     const match = TERMINAL_COMMANDS[trimmed];
     if (match) {
       newHistory.push({ type: "output", text: match.output });
+      onCommand?.(trimmed);
     } else {
-      const partial = Object.keys(TERMINAL_COMMANDS).find(
-        (k) => trimmed.startsWith(k.split(" ")[0])
+      // Check for close match (same base command, different flags)
+      const baseCmd = trimmed.split(" ")[0];
+      const closeMatch = Object.keys(TERMINAL_COMMANDS).find(
+        (k) => k.split(" ")[0] === baseCmd && k !== trimmed,
       );
-      if (partial) {
+      if (closeMatch) {
+        const closeCmdData = TERMINAL_COMMANDS[closeMatch];
         newHistory.push({
-          type: "error",
-          text: `Command not simulated with those exact flags. Try: ${partial}`,
+          type: "system",
+          text: `≈ Close match — showing output for: ${closeMatch}`,
         });
+        newHistory.push({ type: "output", text: closeCmdData.output });
+        newHistory.push({
+          type: "system",
+          text: `(In a live environment, different flags would change the output)`,
+        });
+        // Fire onCommand with both typed and resolved command
+        onCommand?.(trimmed, closeMatch);
+        setHistory(newHistory);
+        setInput("");
+        return;
       } else {
         newHistory.push({
           type: "error",
-          text: `bash: ${trimmed.split(" ")[0]}: command not found (try 'help')`,
+          text: `bash: ${baseCmd}: command not found (try 'help')`,
         });
       }
+      onCommand?.(trimmed);
     }
 
     setHistory(newHistory);
