@@ -30,6 +30,7 @@ interface TicketTerminalProps {
   isLastInQueue?: boolean;
   queuePosition?: number;
   queueTotal?: number;
+  randomMode?: boolean;
   onComplete: (result: TicketAttemptResult) => void;
   onQuit: () => void;
 }
@@ -41,6 +42,7 @@ export default function TicketTerminal({
   isLastInQueue = true,
   queuePosition,
   queueTotal,
+  randomMode = false,
   onComplete,
   onQuit,
 }: TicketTerminalProps) {
@@ -215,7 +217,7 @@ export default function TicketTerminal({
       <div className="flex items-center justify-between px-4 py-2 shrink-0">
         <span className="text-xs mono text-v2-text-muted">
           {level.label}
-          {queuePosition && queueTotal ? ` — ${queuePosition}/${queueTotal}` : ` — ${ticket.id}`}
+          {randomMode ? " — Random Practice" : queuePosition && queueTotal ? ` — ${queuePosition}/${queueTotal}` : ""}
         </span>
         <ActionButton variant="ghost" size="sm" onClick={onQuit}>
           ✕ Quit

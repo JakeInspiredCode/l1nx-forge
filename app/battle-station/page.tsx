@@ -25,8 +25,10 @@ export default function BattleStationPage() {
 
   // Key to force remount of TicketTerminal when advancing to next ticket
   const [terminalKey, setTerminalKey] = useState(0);
+  const [randomMode, setRandomMode] = useState(false);
+  const [randomTicket, setRandomTicket] = useState<TicketScenario | null>(null);
 
-  const activeTicket = activeQueue[activeQueueIdx] ?? null;
+  const activeTicket = randomMode ? randomTicket : (activeQueue[activeQueueIdx] ?? null);
 
   // Convex hooks
   const ticketHistory = useQuery(api.forgeTicketHistory.getAll, {}) ?? [];
@@ -66,14 +68,21 @@ export default function BattleStationPage() {
     setScreen("playing");
   };
 
-  const startRandomTicket = () => {
-    const incomplete = activeTickets.filter((t) => bestScores[t.id] === undefined);
-    const pool = incomplete.length > 0 ? incomplete : activeTickets;
-    const random = pool[Math.floor(Math.random() * pool.length)];
-    startTicket(random);
+  const pickRandom = (exclude?: string) => {
+    const pool = activeTickets.filter((t) => t.id !== exclude);
+    return pool[Math.floor(Math.random() * pool.length)];
   };
 
-  const isLastInQueue = activeQueueIdx >= activeQueue.length - 1;
+  const startRandomMode = () => {
+    const ticket = pickRandom();
+    if (!ticket) return;
+    setRandomMode(true);
+    setRandomTicket(ticket);
+    setTerminalKey((k) => k + 1);
+    setScreen("playing");
+  };
+
+  const isLastInQueue = !randomMode && activeQueueIdx >= activeQueue.length - 1;
 
   const persistResult = async (result: TicketAttemptResult) => {
     try {
@@ -96,8 +105,13 @@ export default function BattleStationPage() {
 
   const handleNext = async (result: TicketAttemptResult) => {
     await persistResult(result);
-    // Advance to next ticket in queue
-    setActiveQueueIdx((i) => i + 1);
+    if (randomMode) {
+      // Pick another random ticket from the same level (avoid repeating the same one)
+      const next = pickRandom(result.ticketId);
+      setRandomTicket(next);
+    } else {
+      setActiveQueueIdx((i) => i + 1);
+    }
     setTerminalKey((k) => k + 1);
   };
 
@@ -114,10 +128,11 @@ export default function BattleStationPage() {
           key={terminalKey}
           ticket={activeTicket}
           isLastInQueue={isLastInQueue}
-          queuePosition={activeQueueIdx + 1}
-          queueTotal={activeQueue.length}
+          queuePosition={randomMode ? undefined : activeQueueIdx + 1}
+          queueTotal={randomMode ? undefined : activeQueue.length}
+          randomMode={randomMode}
           onComplete={isLastInQueue ? handleFinishSection : handleNext}
-          onQuit={() => setScreen("browse")}
+          onQuit={() => { setRandomMode(false); setScreen("browse"); }}
         />
       </div>
     );
@@ -194,8 +209,8 @@ export default function BattleStationPage() {
               {TICKET_LEVELS[activeDifficulty].description}
             </span>
           </div>
-          <ActionButton variant="primary" size="sm" onClick={startRandomTicket}>
-            Random Ticket
+          <ActionButton variant="primary" size="sm" onClick={startRandomMode}>
+            Random Practice
           </ActionButton>
         </div>
 
