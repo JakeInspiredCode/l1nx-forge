@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
@@ -14,6 +14,72 @@ import SectorTooltip from "./sector-tooltip";
 import SectorOverlay from "./sector-overlay";
 import StatsPanel from "./stats-panel";
 import BottomNav from "@/components/ui/bottom-nav";
+
+/** Animated energy particles flowing along a bezier curve */
+function EnergyStream({
+  x1, y1, x2, y2, color, active,
+}: {
+  x1: number; y1: number; x2: number; y2: number;
+  color: string; active: boolean;
+}) {
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  // Control points offset perpendicular to the line
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const nx = -dy / len;
+  const ny = dx / len;
+  const curve = len * 0.2;
+  const cp1x = x1 + dx * 0.3 + nx * curve;
+  const cp1y = y1 + dy * 0.3 + ny * curve;
+  const cp2x = x1 + dx * 0.7 - nx * curve * 0.5;
+  const cp2y = y1 + dy * 0.7 - ny * curve * 0.5;
+
+  const pathD = `M${x1},${y1} C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+  const pathId = `stream-${x1}-${y1}-${x2}-${y2}`;
+
+  return (
+    <g>
+      {/* Base path — subtle glow line */}
+      <path
+        d={pathD}
+        fill="none"
+        stroke={color}
+        strokeWidth={active ? 1.2 : 0.6}
+        opacity={active ? 0.25 : 0.08}
+        strokeLinecap="round"
+      />
+      {/* Glow layer */}
+      <path
+        d={pathD}
+        fill="none"
+        stroke={color}
+        strokeWidth={active ? 4 : 2}
+        opacity={active ? 0.06 : 0.02}
+        strokeLinecap="round"
+      />
+      {/* Animated particles — 3 particles per stream */}
+      {[0, 1, 2].map((i) => (
+        <circle key={i} r={active ? 2 : 1.2} fill={color} opacity={active ? 0.7 : 0.3}>
+          <animateMotion
+            dur={`${3 + i * 1.5}s`}
+            repeatCount="indefinite"
+            begin={`${i * 1.2}s`}
+            path={pathD}
+          />
+          <animate
+            attributeName="opacity"
+            values={active ? "0;0.7;0.7;0" : "0;0.3;0.3;0"}
+            dur={`${3 + i * 1.5}s`}
+            repeatCount="indefinite"
+            begin={`${i * 1.2}s`}
+          />
+        </circle>
+      ))}
+    </g>
+  );
+}
 
 export default function GalaxyMap() {
   const router = useRouter();
@@ -126,7 +192,7 @@ export default function GalaxyMap() {
     setMousePos({ x: e.clientX, y: e.clientY });
   }, []);
 
-  // Hyperspace lanes — directional arrows showing learning progression
+  // Energy stream connections
   const lanes: [Sector, Sector][] = useMemo(() => {
     const s = (id: string) => ALL_SECTORS.find((sec) => sec.id === id)!;
     return [
@@ -147,32 +213,25 @@ export default function GalaxyMap() {
       <StarfieldCanvas />
       <ScanOverlay />
 
-      {/* Viewport frame */}
-      <div className="viewport-frame fixed inset-0 z-[8]" />
+      {/* Cockpit viewport vignette */}
+      <div className="viewport-vignette fixed inset-0 z-[8] pointer-events-none" />
 
       {/* Galaxy header */}
       <div className="absolute top-0 left-0 right-0 z-10">
         <GalaxyHeader />
       </div>
 
-      {/* Main layout: map + stats */}
-      <div className="absolute inset-0 z-[5] flex pt-16 pb-14">
-        {/* Galaxy map — framed panel */}
-        <div className="flex-1 relative flex flex-col mx-2 mb-1">
-          {/* Panel header bar */}
-          <div className="panel-header-bar rounded-t shrink-0">
+      {/* Main layout: map (65%) + stats (35%) */}
+      <div className="absolute inset-0 z-[5] flex pt-14 pb-16 px-3 gap-3">
+        {/* Galaxy map — glass panel */}
+        <div className="flex-[65] relative flex flex-col min-w-0">
+          <div className="glass-panel-header">
             <span>Sector Map</span>
-            <svg width="14" height="14" viewBox="0 0 14 14" className="opacity-40">
-              <rect x="0" y="0" width="6" height="6" rx="1" fill="#06d6d6" />
-              <rect x="8" y="0" width="6" height="6" rx="1" fill="#06d6d6" />
-              <rect x="0" y="8" width="6" height="6" rx="1" fill="#06d6d6" />
-              <rect x="8" y="8" width="6" height="6" rx="1" fill="#06d6d6" />
-            </svg>
           </div>
-          <div className="flex-1 metallic-frame rounded-b overflow-hidden galaxy-map-panel">
+          <div className="flex-1 glass-panel rounded-b-lg overflow-hidden galaxy-map-panel">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
-                <div className="text-v2-text-dim text-sm telemetry-font animate-pulse">
+                <div className="text-[#8eafc8] text-sm telemetry-font animate-pulse">
                   Scanning galaxy sectors...
                 </div>
               </div>
@@ -182,58 +241,23 @@ export default function GalaxyMap() {
                 preserveAspectRatio="xMidYMid meet"
                 className="w-full h-full relative z-[1]"
               >
-                {/* Arrow marker definitions */}
-                <defs>
-                  <marker
-                    id="arrow-marker"
-                    viewBox="0 0 10 10"
-                    refX="9"
-                    refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
-                    orient="auto-start-reverse"
-                  >
-                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#06d6d6" opacity="0.6" />
-                  </marker>
-                  <marker
-                    id="arrow-marker-reverse"
-                    viewBox="0 0 10 10"
-                    refX="1"
-                    refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
-                    orient="auto-start-reverse"
-                  >
-                    <path d="M 10 1 L 2 5 L 10 9 z" fill="#06d6d6" opacity="0.6" />
-                  </marker>
-                </defs>
-
-                {/* Hyperspace lanes — directional arrows */}
-                {lanes.map(([a, b], i) => (
-                  <g key={i}>
-                    <line
+                {/* Energy streams between sectors */}
+                {lanes.map(([a, b], i) => {
+                  const aProgress = sectorProgressMap[a.id];
+                  const bProgress = sectorProgressMap[b.id];
+                  const bothActive = aProgress?.hasVolunteered && bProgress?.hasVolunteered;
+                  return (
+                    <EnergyStream
+                      key={i}
                       x1={a.mapPosition.x * 10}
                       y1={a.mapPosition.y * 8}
                       x2={b.mapPosition.x * 10}
                       y2={b.mapPosition.y * 8}
-                      stroke="#06d6d6"
-                      strokeWidth={1}
-                      opacity={0.25}
-                      markerEnd="url(#arrow-marker)"
-                      markerStart="url(#arrow-marker-reverse)"
+                      color="#06d6d6"
+                      active={bothActive}
                     />
-                    {/* Subtle lane glow */}
-                    <line
-                      x1={a.mapPosition.x * 10}
-                      y1={a.mapPosition.y * 8}
-                      x2={b.mapPosition.x * 10}
-                      y2={b.mapPosition.y * 8}
-                      stroke="#06d6d6"
-                      strokeWidth={4}
-                      opacity={0.04}
-                    />
-                  </g>
-                ))}
+                  );
+                })}
 
                 {/* Sector nodes */}
                 {ALL_SECTORS.map((sector) => (
@@ -256,13 +280,12 @@ export default function GalaxyMap() {
           </div>
         </div>
 
-        {/* Stats panel — framed */}
-        <div className="w-[280px] shrink-0 flex flex-col mr-2 mb-1">
-          <div className="panel-header-bar rounded-t shrink-0">
+        {/* Stats panel — glass panel */}
+        <div className="flex-[35] max-w-[340px] min-w-[260px] flex flex-col">
+          <div className="glass-panel-header">
             <span>Navigation Board</span>
-            <button className="text-v2-text-muted hover:text-v2-text text-xs">···</button>
           </div>
-          <div className="flex-1 metallic-frame rounded-b bg-v2-bg-surface/60 backdrop-blur-sm overflow-hidden">
+          <div className="flex-1 glass-panel rounded-b-lg overflow-hidden">
             <StatsPanel
               totalXp={profile?.totalPoints ?? 0}
               streak={profile?.streak ?? 0}

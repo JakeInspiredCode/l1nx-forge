@@ -2,19 +2,22 @@
 
 export default function GalaxyHeader() {
   return (
-    <div className="flex flex-col items-center py-3 px-5">
-      {/* Metallic title */}
-      <h1 className="metallic-title text-2xl md:text-3xl">
-        Galaxy Map Sector View
-      </h1>
+    <div className="galaxy-header-bar">
+      {/* Left accent line */}
+      <div className="header-accent-line" />
 
-      {/* Decorative accent line */}
-      <div
-        className="mt-2 h-px w-[60%] max-w-[500px]"
-        style={{
-          background: "linear-gradient(90deg, transparent, rgba(6, 214, 214, 0.4), transparent)",
-        }}
-      />
+      {/* Title cluster */}
+      <div className="flex items-center gap-3">
+        <div className="header-diamond" />
+        <h1 className="galaxy-title">
+          Galaxy Map
+        </h1>
+        <span className="galaxy-subtitle">Sector View</span>
+        <div className="header-diamond" />
+      </div>
+
+      {/* Right accent line */}
+      <div className="header-accent-line" />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 interface StatsPanelProps {
   totalXp: number;
   streak: number;
@@ -11,114 +13,112 @@ interface StatsPanelProps {
   activeCampaignPct?: number;
 }
 
-/** SVG circular gauge widget — larger and more polished */
-function CircularGauge({
+/** Glowing circular gauge with mount animation */
+function GlowGauge({
   value,
   label,
   max,
   suffix,
   color,
-  secondaryColor,
+  delay = 0,
 }: {
   value: number;
   label: string;
   max?: number;
   suffix?: string;
   color: string;
-  secondaryColor?: string;
+  delay?: number;
 }) {
-  const r = 28;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+
+  const r = 30;
   const circumference = 2 * Math.PI * r;
   const pct = max ? Math.min(value / max, 1) : Math.min(value / 10000, 1);
-  const dashOffset = circumference * (1 - pct);
+  const dashOffset = mounted ? circumference * (1 - pct) : circumference;
   const displayValue = max ? `${value}/${max}` : value.toLocaleString();
-  const sc = secondaryColor || color;
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <svg width="72" height="72" viewBox="0 0 72 72">
-        {/* Outer glow ring */}
-        <circle
-          cx="36" cy="36" r={r + 3}
-          fill="none"
-          stroke={color}
-          strokeWidth="0.5"
-          opacity={0.15}
-        />
-        {/* Background track */}
-        <circle
-          cx="36" cy="36" r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="3.5"
-          opacity={0.12}
-        />
-        {/* Value arc */}
-        <circle
-          cx="36" cy="36" r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="3.5"
-          strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-          strokeLinecap="round"
-          transform="rotate(-90 36 36)"
-          className="transition-all duration-700"
-        />
-        {/* Inner subtle fill */}
-        <circle
-          cx="36" cy="36" r={r - 5}
-          fill={`${color}08`}
-        />
-        {/* Center value */}
-        <text
-          x="36" y={suffix ? "33" : "36"}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill={color}
-          fontSize="12"
-          fontFamily="'JetBrains Mono', monospace"
-          fontWeight="700"
-        >
-          {displayValue}
-        </text>
-        {suffix && (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative">
+        <svg width="78" height="78" viewBox="0 0 78 78">
+          {/* Outer glow ring */}
+          <circle
+            cx="39" cy="39" r={r + 5}
+            fill="none" stroke={color} strokeWidth="0.5"
+            opacity={mounted ? 0.15 : 0}
+            className="transition-opacity duration-700"
+          />
+          {/* Background track */}
+          <circle
+            cx="39" cy="39" r={r}
+            fill="none" stroke={color} strokeWidth="3"
+            opacity={0.08}
+          />
+          {/* Value arc — animated on mount */}
+          <circle
+            cx="39" cy="39" r={r}
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            strokeLinecap="round"
+            transform="rotate(-90 39 39)"
+            style={{
+              transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
+              filter: `drop-shadow(0 0 6px ${color}80)`,
+            }}
+          />
+          {/* Glass inner fill */}
+          <circle
+            cx="39" cy="39" r={r - 6}
+            fill={`${color}06`}
+            stroke={color}
+            strokeWidth="0.3"
+            opacity={0.3}
+          />
+          {/* Center value */}
           <text
-            x="36" y="44"
+            x="39" y={suffix ? "36" : "39"}
             textAnchor="middle"
             dominantBaseline="central"
-            fill="#9aa4b8"
-            fontSize="7"
-            fontFamily="'Chakra Petch', sans-serif"
-            fontWeight="600"
-            letterSpacing="0.12em"
+            fill="#ffffff"
+            fontSize="13"
+            fontFamily="'JetBrains Mono', monospace"
+            fontWeight="700"
+            style={{ textShadow: `0 0 12px ${color}` }}
           >
-            {suffix}
+            {displayValue}
           </text>
-        )}
-        {/* Completion check mark */}
-        {max && value >= max && (
-          <text
-            x="56" y="56"
-            textAnchor="middle"
-            dominantBaseline="central"
-            fill={sc}
-            fontSize="10"
-          >
-            ✓
-          </text>
-        )}
-      </svg>
-      <span className="text-[9px] display-font tracking-[0.15em] text-v2-text-muted uppercase">
+          {suffix && (
+            <text
+              x="39" y="48"
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#8eafc8"
+              fontSize="7"
+              fontFamily="'Chakra Petch', sans-serif"
+              fontWeight="600"
+              letterSpacing="0.14em"
+            >
+              {suffix}
+            </text>
+          )}
+        </svg>
+      </div>
+      <span className="text-[10px] display-font tracking-[0.15em] text-[#8eafc8] uppercase">
         {label}
       </span>
     </div>
   );
 }
 
-/** Constellation / star map mini-visualization */
+/** Mini constellation visualization */
 function ConstellationMap() {
-  // Fixed constellation nodes to match the mockup's star-path visualization
   const nodes = [
     { x: 20, y: 15 }, { x: 50, y: 10 }, { x: 80, y: 18 },
     { x: 35, y: 30 }, { x: 65, y: 25 }, { x: 90, y: 32 },
@@ -131,37 +131,28 @@ function ConstellationMap() {
     [9,10],[10,13],[11,14],[12,13],
   ];
   return (
-    <svg viewBox="0 0 110 72" className="w-full h-12 opacity-60">
-      {/* Connection lines */}
+    <svg viewBox="0 0 110 72" className="w-full h-14 opacity-70">
       {links.map(([a, b], i) => (
         <line
           key={i}
           x1={nodes[a].x} y1={nodes[a].y}
           x2={nodes[b].x} y2={nodes[b].y}
-          stroke="#06d6d6"
-          strokeWidth={0.5}
-          opacity={0.3}
+          stroke="#06d6d6" strokeWidth={0.5} opacity={0.2}
         />
       ))}
-      {/* Flowing path highlight */}
       <polyline
         points={`${nodes[0].x},${nodes[0].y} ${nodes[3].x},${nodes[3].y} ${nodes[7].x},${nodes[7].y} ${nodes[10].x},${nodes[10].y} ${nodes[13].x},${nodes[13].y}`}
-        fill="none"
-        stroke="#06d6d6"
-        strokeWidth={1.2}
-        opacity={0.5}
+        fill="none" stroke="#06d6d6" strokeWidth={1} opacity={0.4}
         strokeLinejoin="round"
       />
-      {/* Nodes */}
       {nodes.map((n, i) => (
         <g key={i}>
-          <circle cx={n.x} cy={n.y} r={2.5} fill="#0a0b10" stroke="#06d6d6" strokeWidth={0.6} opacity={0.6} />
-          <circle cx={n.x} cy={n.y} r={1} fill="#06d6d6" opacity={0.4} />
+          <circle cx={n.x} cy={n.y} r={2} fill="#0a0b10" stroke="#06d6d6" strokeWidth={0.5} opacity={0.5} />
+          <circle cx={n.x} cy={n.y} r={0.8} fill="#06d6d6" opacity={0.5} />
         </g>
       ))}
-      {/* Accent dots on path */}
       {[0, 3, 7, 10, 13].map((idx) => (
-        <circle key={idx} cx={nodes[idx].x} cy={nodes[idx].y} r={3} fill="#06d6d6" opacity={0.25} />
+        <circle key={idx} cx={nodes[idx].x} cy={nodes[idx].y} r={3.5} fill="#06d6d6" opacity={0.15} />
       ))}
     </svg>
   );
@@ -180,55 +171,52 @@ export default function StatsPanel({
   activeCampaignPct,
 }: StatsPanelProps) {
   return (
-    <div className="h-full flex flex-col p-3 overflow-auto scroll-container">
-      {/* Circular gauges row */}
-      <div className="flex items-center justify-around mb-3 mt-1">
-        <CircularGauge value={totalXp} label="Total XP" color="#06d6d6" />
-        <CircularGauge value={streak} label="Streak" suffix="DAYS" color="#f59e0b" secondaryColor="#22c55e" max={30} />
-        <CircularGauge
-          value={missionsAccomplished}
-          label="Missions"
-          max={totalMissions}
-          color="#22c55e"
-        />
+    <div className="h-full flex flex-col p-4 overflow-auto scroll-container">
+      {/* Circular gauges row — staggered mount animation */}
+      <div className="flex items-center justify-around mb-4 mt-1">
+        <GlowGauge value={totalXp} label="Total XP" color="#06d6d6" delay={100} />
+        <GlowGauge value={streak} label="Streak" suffix="DAYS" color="#f59e0b" max={30} delay={250} />
+        <GlowGauge value={missionsAccomplished} label="Missions" max={totalMissions} color="#22c55e" delay={400} />
       </div>
 
-      {/* Constellation map visualization */}
-      <div className="mb-3 px-1">
+      {/* Constellation map */}
+      <div className="mb-4 px-1">
         <ConstellationMap />
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-v2-border mb-3" />
+      {/* Divider — glass edge */}
+      <div className="h-px mb-4" style={{ background: "linear-gradient(90deg, transparent, rgba(6, 214, 214, 0.2), transparent)" }} />
 
       {/* Active Missions */}
-      <div className="mb-4">
-        <h3
-          className="text-[9px] display-font tracking-[0.18em] uppercase mb-2"
-          style={{ color: "#06d6d6", textShadow: "0 0 6px rgba(6,214,214,0.2)" }}
-        >
-          Active Missions
-        </h3>
+      <div className="mb-5">
+        <h3 className="stats-section-title">Active Missions</h3>
         {activeCampaignTitle ? (
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded bg-v2-bg-elevated/40 border border-v2-border/50">
-            <span className="text-[10px]">🎯</span>
+          <div
+            className="flex items-center gap-3 px-3 py-2.5 rounded-md"
+            style={{
+              background: "rgba(6, 214, 214, 0.04)",
+              border: "1px solid rgba(6, 214, 214, 0.1)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <div className="w-2 h-2 rounded-full bg-[#06d6d6] shadow-[0_0_8px_rgba(6,214,214,0.5)]" />
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] text-v2-text display-font tracking-wider block truncate">
+              <span className="text-[11px] text-[#e0e4ec] display-font tracking-wider block truncate">
                 {activeCampaignTitle}
               </span>
               {activeCampaignPct !== undefined && (
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex-1 h-1.5 rounded-full bg-v2-border overflow-hidden">
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(6, 214, 214, 0.1)" }}>
                     <div
-                      className="h-full rounded-full transition-all duration-500"
+                      className="h-full rounded-full transition-all duration-700"
                       style={{
                         width: `${activeCampaignPct}%`,
                         background: "linear-gradient(90deg, #06d6d6, #06d6d6cc)",
-                        boxShadow: "0 0 6px rgba(6,214,214,0.3)",
+                        boxShadow: "0 0 8px rgba(6,214,214,0.4)",
                       }}
                     />
                   </div>
-                  <span className="text-[8px] telemetry-font text-v2-text-muted">
+                  <span className="text-[9px] telemetry-font text-[#8eafc8]">
                     {activeCampaignPct}%
                   </span>
                 </div>
@@ -236,33 +224,27 @@ export default function StatsPanel({
             </div>
           </div>
         ) : (
-          <span className="text-[9px] telemetry-font text-v2-text-muted italic">
-            Scoped for Active Missions
+          <span className="text-[10px] telemetry-font text-[#6a7288] italic">
+            No active missions
           </span>
         )}
       </div>
 
       {/* Tech-Glyphs Collected */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3
-            className="text-[9px] display-font tracking-[0.18em] uppercase"
-            style={{ color: "#06d6d6", textShadow: "0 0 6px rgba(6,214,214,0.2)" }}
-          >
-            Tech-Glyphs Collected
-          </h3>
-          <span className="text-[9px] telemetry-font text-v2-text-muted">0/18</span>
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-2.5">
+          <h3 className="stats-section-title mb-0">Tech-Glyphs Collected</h3>
+          <span className="text-[9px] telemetry-font text-[#6a7288]">0/18</span>
         </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {TECH_GLYPH_ICONS.map((glyph, i) => (
             <div
               key={i}
-              className="w-7 h-7 rounded flex items-center justify-center border text-[11px] transition-all duration-200"
+              className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] transition-all duration-200"
               style={{
-                borderColor: "rgba(42, 46, 62, 0.6)",
-                color: "#8a92a8",
-                opacity: 0.35,
-                background: "rgba(15, 17, 24, 0.4)",
+                border: "1px solid rgba(6, 214, 214, 0.08)",
+                color: "#6a7288",
+                background: "rgba(6, 214, 214, 0.02)",
               }}
             >
               {glyph}
@@ -272,27 +254,23 @@ export default function StatsPanel({
       </div>
 
       {/* Fleet Status */}
-      <div className="mt-auto pt-3 border-t border-v2-border">
-        <h3
-          className="text-[9px] display-font tracking-[0.18em] uppercase mb-2"
-          style={{ color: "#06d6d6", textShadow: "0 0 6px rgba(6,214,214,0.2)" }}
-        >
-          Fleet Status
-        </h3>
+      <div className="mt-auto pt-3" style={{ borderTop: "1px solid rgba(6, 214, 214, 0.08)" }}>
+        <h3 className="stats-section-title">Fleet Status</h3>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* Ship icons */}
-            <svg viewBox="0 0 20 10" fill="none" className="w-5 h-3">
-              <path d="M1 5h6l3-3h4l4 3-4 3H10l-3-3" stroke="#06d6d6" strokeWidth="0.8" opacity="0.5" />
-            </svg>
-            <svg viewBox="0 0 20 10" fill="none" className="w-5 h-3">
-              <path d="M2 5l6-3v6l-6-3zM10 5l6-3v6l-6-3z" stroke="#06d6d6" strokeWidth="0.8" opacity="0.4" />
-            </svg>
-            <svg viewBox="0 0 20 12" fill="none" className="w-5 h-3">
-              <path d="M4 6l6-4v8l-6-4zM12 2l4 4-4 4" stroke="#06d6d6" strokeWidth="0.8" opacity="0.35" />
-            </svg>
+          <div className="flex items-center gap-3">
+            {[0.5, 0.35, 0.25].map((opacity, i) => (
+              <div
+                key={i}
+                className="w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: "#06d6d6",
+                  opacity,
+                  boxShadow: `0 0 6px rgba(6, 214, 214, ${opacity})`,
+                }}
+              />
+            ))}
           </div>
-          <span className="text-[9px] telemetry-font text-v2-text-muted">
+          <span className="text-[10px] telemetry-font text-[#8eafc8]">
             {sectorsExplored}/{totalSectors} sectors
           </span>
         </div>
