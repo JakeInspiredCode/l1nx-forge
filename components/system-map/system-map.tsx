@@ -25,37 +25,47 @@ interface OrbitalPos {
   celestialType: "asteroid" | "moon" | "planet" | "station";
 }
 
+// Predefined planet profiles — each mission gets a unique look
+const PLANET_PROFILES: { size: number; celestialType: OrbitalPos["celestialType"]; orbitMult: number }[] = [
+  { size: 8,  celestialType: "asteroid", orbitMult: 0.28 },   // 1: small rocky
+  { size: 11, celestialType: "moon",     orbitMult: 0.38 },   // 2: rocky world
+  { size: 18, celestialType: "planet",   orbitMult: 0.48 },   // 3: terrestrial
+  { size: 14, celestialType: "planet",   orbitMult: 0.56 },   // 4: mars-like
+  { size: 10, celestialType: "asteroid", orbitMult: 0.63 },   // 5: asteroid belt
+  { size: 24, celestialType: "station",  orbitMult: 0.72 },   // 6: gas giant w/ rings
+  { size: 20, celestialType: "planet",   orbitMult: 0.80 },   // 7: neptune-like
+  { size: 12, celestialType: "moon",     orbitMult: 0.86 },   // 8: ice world
+  { size: 16, celestialType: "planet",   orbitMult: 0.91 },   // 9: outer planet
+  { size: 9,  celestialType: "asteroid", orbitMult: 0.95 },   // 10: kuiper object
+  { size: 13, celestialType: "moon",     orbitMult: 0.98 },   // 11: dwarf planet
+  { size: 22, celestialType: "station",  orbitMult: 1.0 },    // 12: outer station
+];
+
 function computeOrbitalPositions(count: number): OrbitalPos[] {
   const centerX = 500;
   const centerY = 400;
-  const minRadius = 80;
-  const maxRadius = 340;
+  const minRadius = 70;
+  const maxRadius = 360;
 
   const positions: OrbitalPos[] = [];
 
   for (let i = 0; i < count; i++) {
-    const t = count === 1 ? 0.5 : i / (count - 1);
-    const orbitRadius = minRadius + t * (maxRadius - minRadius);
+    const profile = PLANET_PROFILES[i % PLANET_PROFILES.length];
+    const orbitRadius = minRadius + profile.orbitMult * (maxRadius - minRadius);
 
-    // Spiral from ~7 o'clock to ~1 o'clock (clockwise arc)
-    const angleStart = Math.PI * 0.6; // 7 o'clock
-    const angleEnd = -Math.PI * 0.4;  // 1 o'clock
-    const angle = angleStart + t * (angleEnd - angleStart);
+    // Spread planets around the full orbit with golden-angle spacing
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
+    const angle = i * goldenAngle + Math.PI * 0.75; // start at ~5 o'clock
 
     const cx = centerX + Math.cos(angle) * orbitRadius;
     const cy = centerY + Math.sin(angle) * orbitRadius;
 
-    const baseSize = 10;
-    const maxSize = 24;
-    const size = baseSize + t * (maxSize - baseSize);
-
-    let celestialType: OrbitalPos["celestialType"];
-    if (t < 0.2) celestialType = "asteroid";
-    else if (t < 0.5) celestialType = "moon";
-    else if (t < 0.8) celestialType = "planet";
-    else celestialType = "station";
-
-    positions.push({ cx, cy, size, celestialType });
+    positions.push({
+      cx,
+      cy,
+      size: profile.size,
+      celestialType: profile.celestialType,
+    });
   }
 
   return positions;
