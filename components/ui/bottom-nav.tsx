@@ -15,13 +15,13 @@ const NAV_ITEMS = [
 ];
 
 // SVG viewBox width and vertical center
-const VB_W = 900;
+const VB_W = 700;
 const VB_H = 56;
 const LINE_Y = 20;
 
-// Node x positions — tighter grouping, centered
+// Node x positions — tight grouping, centered
 function nodePositions(count: number): number[] {
-  const pad = 100;
+  const pad = 60;
   const spacing = (VB_W - pad * 2) / (count - 1);
   return Array.from({ length: count }, (_, i) => pad + i * spacing);
 }
@@ -131,16 +131,24 @@ export default function BottomNav({ activePage }: BottomNavProps) {
                 fontFamily="'JetBrains Mono', monospace"
                 fontWeight={isActive ? 600 : 400}
                 letterSpacing="0.1em"
-                className="pointer-events-none select-none uppercase"
+                className={`pointer-events-none select-none uppercase ${!isActive ? "nav-label-dim" : ""}`}
                 style={isActive ? { textShadow: "0 0 8px rgba(6, 214, 214, 0.3)" } : undefined}
               >
                 {item.label}
               </text>
+              {/* Node dot for hover (hidden, brightens on hover) */}
+              {!isActive && (
+                <circle
+                  cx={x} cy={LINE_Y} r={3.5}
+                  fill="#06d6d6" opacity={0}
+                  className="nav-hover-dot"
+                />
+              )}
               {/* Invisible click target */}
-              <a href={item.href}>
+              <a href={item.href} className={!isActive ? "nav-tab-hover" : ""}>
                 <rect
-                  x={x - 55} y={0}
-                  width={110} height={VB_H}
+                  x={x - 50} y={0}
+                  width={100} height={VB_H}
                   fill="transparent"
                   className="cursor-pointer"
                 />

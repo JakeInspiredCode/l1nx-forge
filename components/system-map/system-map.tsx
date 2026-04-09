@@ -27,18 +27,18 @@ interface OrbitalPos {
 
 // Predefined planet profiles — each mission gets a unique look
 const PLANET_PROFILES: { size: number; celestialType: OrbitalPos["celestialType"]; orbitMult: number }[] = [
-  { size: 8,  celestialType: "asteroid", orbitMult: 0.28 },   // 1: small rocky
-  { size: 11, celestialType: "moon",     orbitMult: 0.38 },   // 2: rocky world
-  { size: 18, celestialType: "planet",   orbitMult: 0.48 },   // 3: terrestrial
-  { size: 14, celestialType: "planet",   orbitMult: 0.56 },   // 4: mars-like
-  { size: 10, celestialType: "asteroid", orbitMult: 0.63 },   // 5: asteroid belt
-  { size: 24, celestialType: "station",  orbitMult: 0.72 },   // 6: gas giant w/ rings
-  { size: 20, celestialType: "planet",   orbitMult: 0.80 },   // 7: neptune-like
-  { size: 12, celestialType: "moon",     orbitMult: 0.86 },   // 8: ice world
-  { size: 16, celestialType: "planet",   orbitMult: 0.91 },   // 9: outer planet
-  { size: 9,  celestialType: "asteroid", orbitMult: 0.95 },   // 10: kuiper object
-  { size: 13, celestialType: "moon",     orbitMult: 0.98 },   // 11: dwarf planet
-  { size: 22, celestialType: "station",  orbitMult: 1.0 },    // 12: outer station
+  { size: 10, celestialType: "moon",    orbitMult: 0.28 },   // 1: small rocky
+  { size: 13, celestialType: "moon",    orbitMult: 0.38 },   // 2: rocky world
+  { size: 18, celestialType: "planet",  orbitMult: 0.48 },   // 3: terrestrial
+  { size: 14, celestialType: "planet",  orbitMult: 0.56 },   // 4: mars-like
+  { size: 11, celestialType: "moon",    orbitMult: 0.63 },   // 5: small planet
+  { size: 24, celestialType: "station", orbitMult: 0.72 },   // 6: gas giant w/ rings
+  { size: 20, celestialType: "planet",  orbitMult: 0.80 },   // 7: neptune-like
+  { size: 12, celestialType: "moon",    orbitMult: 0.86 },   // 8: ice world
+  { size: 16, celestialType: "planet",  orbitMult: 0.91 },   // 9: outer planet
+  { size: 9,  celestialType: "moon",    orbitMult: 0.95 },   // 10: dwarf planet
+  { size: 13, celestialType: "moon",    orbitMult: 0.98 },   // 11: ice dwarf
+  { size: 22, celestialType: "station", orbitMult: 1.0 },    // 12: outer giant
 ];
 
 function computeOrbitalPositions(count: number): OrbitalPos[] {

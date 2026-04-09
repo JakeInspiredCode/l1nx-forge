@@ -831,6 +831,27 @@ code, pre, .mono {
   animation: navNodeBreathe 3s ease-in-out infinite;
 }
 
+/* Nav tab hover — light up on mouseover */
+.nav-tab-hover:hover ~ .nav-hover-dot,
+.nav-tab-hover:hover + .nav-hover-dot {
+  opacity: 0.5 !important;
+}
+/* SVG sibling hover doesn't work well — use g-level hover instead */
+g:has(.nav-tab-hover:hover) .nav-hover-dot {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+g:has(.nav-tab-hover:hover) .nav-label-dim {
+  fill: #8eafc8 !important;
+  transition: fill 0.3s ease;
+}
+.nav-hover-dot {
+  transition: opacity 0.3s ease;
+}
+.nav-label-dim {
+  transition: fill 0.3s ease;
+}
+
 /* Cockpit viewport vignette — edge darkening + corner accents */
 .viewport-vignette {
   background: radial-gradient(
