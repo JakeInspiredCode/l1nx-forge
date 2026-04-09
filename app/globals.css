@@ -94,8 +94,8 @@ code, pre, .mono {
 }
 
 .display-font {
-  font-family: 'Chakra Petch', 'Rajdhani', 'IBM Plex Sans', system-ui, sans-serif;
-  font-weight: 700;
+  font-family: 'IBM Plex Sans', 'Chakra Petch', system-ui, sans-serif;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -743,10 +743,10 @@ code, pre, .mono {
   justify-content: space-between;
 }
 .glass-panel-header span {
-  font-family: 'Chakra Petch', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(6, 214, 214, 0.8);
   text-shadow: 0 0 10px rgba(6, 214, 214, 0.2);
@@ -761,21 +761,21 @@ code, pre, .mono {
   justify-content: center;
 }
 .galaxy-title {
-  font-family: 'Chakra Petch', sans-serif;
-  font-weight: 700;
-  font-size: 20px;
-  letter-spacing: 0.28em;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #e0e4ec;
-  text-shadow: 0 0 20px rgba(6, 214, 214, 0.3), 0 0 40px rgba(6, 214, 214, 0.1);
+  text-shadow: 0 0 20px rgba(6, 214, 214, 0.25), 0 0 40px rgba(6, 214, 214, 0.08);
 }
 .galaxy-subtitle {
-  font-family: 'Chakra Petch', sans-serif;
-  font-weight: 500;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
   font-size: 11px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(6, 214, 214, 0.6);
+  color: rgba(6, 214, 214, 0.5);
   padding-left: 4px;
 }
 .header-accent-line {
@@ -793,10 +793,10 @@ code, pre, .mono {
 
 /* Stats section titles */
 .stats-section-title {
-  font-family: 'Chakra Petch', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 600;
   font-size: 10px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(6, 214, 214, 0.7);
   text-shadow: 0 0 8px rgba(6, 214, 214, 0.15);
@@ -899,11 +899,12 @@ g:has(.nav-tab-hover:hover) .nav-label-dim {
   position: relative;
 }
 .metallic-title {
-  font-family: 'Chakra Petch', 'Rajdhani', sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #e0e4ec;
+  text-shadow: 0 0 20px rgba(6, 214, 214, 0.25);
 }
 .panel-header-bar {
   padding: 8px 14px;

@@ -206,29 +206,7 @@ export default function SystemMap() {
       {/* Cockpit viewport vignette */}
       <div className="viewport-vignette fixed inset-0 z-[8] pointer-events-none" />
 
-      {/* HUD Stats bar at top */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] telemetry-font text-v2-text-muted uppercase">XP:</span>
-          <span className="text-xs telemetry-font text-v2-cyan font-semibold">
-            {(profile?.totalPoints ?? 0).toLocaleString()}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] telemetry-font text-v2-text-muted uppercase">Streak:</span>
-          <span className="text-xs telemetry-font text-v2-amber font-semibold">
-            {profile?.streak ?? 0} d
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] telemetry-font text-v2-text-muted uppercase">Missions:</span>
-          <span className="text-xs telemetry-font text-v2-text font-semibold">
-            {completedCount} / {missions.length}
-          </span>
-        </div>
-      </div>
-
-      {/* Header — matches galaxy-title style */}
+      {/* Header — top bar */}
       <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
         <div className="galaxy-header-bar">
           <div className="header-accent-line" />
