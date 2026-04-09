@@ -193,8 +193,8 @@ export default function SystemMap() {
       <StarfieldCanvas />
       <ScanOverlay />
 
-      {/* Viewport frame */}
-      <div className="viewport-frame fixed inset-0 z-[8]" />
+      {/* Cockpit viewport vignette */}
+      <div className="viewport-vignette fixed inset-0 z-[8] pointer-events-none" />
 
       {/* HUD Stats bar at top */}
       <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-2">

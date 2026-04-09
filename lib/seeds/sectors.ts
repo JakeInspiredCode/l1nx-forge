@@ -26,7 +26,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🖥️",
     color: "#f59e0b",
     campaignIds: ["hardware-core"],
-    mapPosition: { x: 18, y: 24 },
+    mapPosition: { x: 12, y: 35 },
     size: "md",
   },
   {
@@ -92,7 +92,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🔧",
     color: "#a855f7",
     campaignIds: ["linux-advanced"],
-    mapPosition: { x: 35, y: 20 },
+    mapPosition: { x: 42, y: 14 },
     size: "md",
   },
 ];
