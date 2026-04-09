@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatusBadge from "@/components/ui/status-badge";
 import ActionButton from "@/components/ui/action-button";
 import { TicketScenario, TICKET_LEVELS, TicketDifficulty } from "@/lib/ticket-scenarios";
@@ -53,6 +53,19 @@ export default function TicketPanel({
   const level = TICKET_LEVELS[ticket.difficulty];
   const isCommandLevel = level.order <= 2;
   const needsAnswer = !!ticket.answerPrompt;
+
+  // Enter key advances to next ticket from result screen
+  useEffect(() => {
+    if (phase !== "result") return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onNextTicket();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [phase, onNextTicket]);
 
   // For multi-step tickets, get the current step's prompt
   const stepPrompt = ticket.steps && currentStep !== undefined && currentStep < ticket.steps.length
