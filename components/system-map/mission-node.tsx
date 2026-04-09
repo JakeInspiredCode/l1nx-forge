@@ -47,6 +47,9 @@ export default function MissionNode({
       onClick={() => isInteractive && onClick(mission)}
       style={colors.glow !== "none" ? { filter: `drop-shadow(0 0 10px ${colors.glow})` } : undefined}
     >
+      {/* Invisible hit area — easier to click */}
+      <circle cx={cx} cy={cy} r={Math.max(size + 8, 18)} fill="transparent" />
+
       {/* Orbit ring — solid, more visible */}
       <circle
         cx={500}

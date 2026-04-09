@@ -23,6 +23,58 @@ const SECTOR_GREEK: Record<string, string> = {
   "sector-linux-advanced": "Sector Theta",
 };
 
+// Each sector gets a unique planet system — deterministic from sector id
+interface Planet {
+  orbitRadius: number;  // relative to core radius
+  size: number;
+  speed: number;        // seconds per revolution
+  startAngle: number;
+  color: string;
+  hasRing: boolean;
+}
+
+const SECTOR_PLANETS: Record<string, Planet[]> = {
+  "sector-linux": [
+    { orbitRadius: 1.5, size: 4, speed: 8, startAngle: 0, color: "#22d3ee", hasRing: false },
+    { orbitRadius: 2.0, size: 3, speed: 12, startAngle: 120, color: "#06b6d4", hasRing: true },
+    { orbitRadius: 2.6, size: 2.5, speed: 18, startAngle: 240, color: "#67e8f9", hasRing: false },
+  ],
+  "sector-hardware": [
+    { orbitRadius: 1.6, size: 3.5, speed: 10, startAngle: 45, color: "#fbbf24", hasRing: false },
+    { orbitRadius: 2.3, size: 4.5, speed: 16, startAngle: 180, color: "#f59e0b", hasRing: true },
+  ],
+  "sector-networking": [
+    { orbitRadius: 1.4, size: 3, speed: 7, startAngle: 30, color: "#60a5fa", hasRing: false },
+    { orbitRadius: 1.9, size: 2.5, speed: 11, startAngle: 150, color: "#93c5fd", hasRing: false },
+    { orbitRadius: 2.5, size: 3.5, speed: 20, startAngle: 270, color: "#3b82f6", hasRing: true },
+    { orbitRadius: 3.0, size: 2, speed: 25, startAngle: 60, color: "#bfdbfe", hasRing: false },
+  ],
+  "sector-fiber": [
+    { orbitRadius: 1.5, size: 2.5, speed: 6, startAngle: 90, color: "#c084fc", hasRing: false },
+    { orbitRadius: 2.2, size: 3, speed: 14, startAngle: 210, color: "#a855f7", hasRing: false },
+  ],
+  "sector-power": [
+    { orbitRadius: 1.4, size: 3, speed: 5, startAngle: 0, color: "#f87171", hasRing: false },
+    { orbitRadius: 2.0, size: 4, speed: 9, startAngle: 180, color: "#ef4444", hasRing: true },
+    { orbitRadius: 2.7, size: 2, speed: 15, startAngle: 90, color: "#fca5a5", hasRing: false },
+  ],
+  "sector-ops": [
+    { orbitRadius: 1.6, size: 3.5, speed: 9, startAngle: 60, color: "#4ade80", hasRing: false },
+    { orbitRadius: 2.2, size: 2.5, speed: 13, startAngle: 200, color: "#22c55e", hasRing: false },
+  ],
+  "sector-scale": [
+    { orbitRadius: 1.5, size: 2, speed: 7, startAngle: 45, color: "#f472b6", hasRing: false },
+    { orbitRadius: 2.1, size: 3, speed: 11, startAngle: 165, color: "#ec4899", hasRing: true },
+    { orbitRadius: 2.7, size: 2.5, speed: 17, startAngle: 285, color: "#f9a8d4", hasRing: false },
+  ],
+  "sector-linux-advanced": [
+    { orbitRadius: 1.5, size: 3, speed: 6, startAngle: 30, color: "#c084fc", hasRing: false },
+    { orbitRadius: 2.0, size: 4, speed: 10, startAngle: 150, color: "#a855f7", hasRing: true },
+    { orbitRadius: 2.6, size: 2, speed: 16, startAngle: 270, color: "#e9d5ff", hasRing: false },
+    { orbitRadius: 3.1, size: 2.5, speed: 22, startAngle: 80, color: "#7c3aed", hasRing: false },
+  ],
+};
+
 export default function SectorNode({ sector, progress, onHover, onClick }: SectorNodeProps) {
   const r = SIZE_SCALE[sector.size];
   const glowR = GLOW_SCALE[sector.size];
@@ -42,8 +94,9 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
   const dashOffset = circumference * (1 - completionPct);
 
   const greekName = SECTOR_GREEK[sector.id] ?? "";
+  const planets = SECTOR_PLANETS[sector.id] ?? [];
 
-  // Unique animation delay per sector for breathing offset
+  // Unique animation delay per sector
   const breatheDelay = `${(cx * 7 + cy * 13) % 4000}ms`;
 
   return (
@@ -57,91 +110,98 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
         filter: `drop-shadow(0 0 ${isActive ? 12 : 6}px ${sector.color}50)`,
       }}
     >
-      {/* Outer nebula glow — large soft radial */}
+      {/* Outer nebula glow */}
       <circle
-        cx={cx}
-        cy={cy}
-        r={glowR}
+        cx={cx} cy={cy} r={glowR}
         fill={`url(#nebula-${sector.id})`}
         opacity={isActive ? 0.35 : 0.18}
         className="sector-breathe"
         style={{ animationDelay: breatheDelay }}
       />
 
-      {/* Mid glow ring — atmosphere */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r + 12}
-        fill="none"
-        stroke={sector.color}
-        strokeWidth={0.6}
-        opacity={isActive ? 0.2 : 0.08}
-      />
+      {/* Orbit track lines for planets */}
+      {planets.map((planet, i) => (
+        <circle
+          key={`orbit-${i}`}
+          cx={cx} cy={cy}
+          r={r * planet.orbitRadius * 0.55}
+          fill="none"
+          stroke={sector.color}
+          strokeWidth={0.3}
+          opacity={isActive ? 0.12 : 0.05}
+          strokeDasharray="2 4"
+        />
+      ))}
 
-      {/* Outer ring — thin orbit line */}
+      {/* Central star */}
       <circle
-        cx={cx}
-        cy={cy}
-        r={r + 8}
-        fill="none"
-        stroke={sector.color}
-        strokeWidth={0.4}
-        opacity={isActive ? 0.3 : 0.1}
-        strokeDasharray="3 6"
-        className="sector-orbit"
-        style={{ animationDelay: breatheDelay }}
-      />
-
-      {/* Core circle — glass effect */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill={`url(#core-glass-${sector.id})`}
-        stroke={sector.color}
-        strokeWidth={isActive ? 1.8 : 1}
-        opacity={isActive ? 1 : 0.75}
-        className="transition-all duration-500"
-      />
-
-      {/* Inner highlight — top-edge specular */}
-      <ellipse
-        cx={cx}
-        cy={cy - r * 0.35}
-        rx={r * 0.6}
-        ry={r * 0.25}
-        fill="rgba(255, 255, 255, 0.06)"
-      />
-
-      {/* Center energy core */}
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r * 0.25}
-        fill={`url(#energy-core-${sector.id})`}
+        cx={cx} cy={cy} r={r * 0.35}
+        fill={`url(#star-core-${sector.id})`}
         className="sector-breathe"
         style={{ animationDelay: breatheDelay }}
       />
+      {/* Star specular highlight */}
+      <ellipse
+        cx={cx} cy={cy - r * 0.1}
+        rx={r * 0.2} ry={r * 0.12}
+        fill="rgba(255, 255, 255, 0.15)"
+      />
+
+      {/* Orbiting planets */}
+      {planets.map((planet, i) => {
+        const orbitR = r * planet.orbitRadius * 0.55;
+        return (
+          <g key={`planet-${i}`}>
+            {/* Planet body — animated orbit */}
+            <circle
+              cx={cx + orbitR} cy={cy}
+              r={planet.size}
+              fill={planet.color}
+              opacity={isActive ? 0.85 : 0.5}
+            >
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                from={`${planet.startAngle} ${cx} ${cy}`}
+                to={`${planet.startAngle + 360} ${cx} ${cy}`}
+                dur={`${planet.speed}s`}
+                repeatCount="indefinite"
+              />
+            </circle>
+            {/* Ring (Saturn-like) */}
+            {planet.hasRing && (
+              <ellipse
+                cx={cx + orbitR} cy={cy}
+                rx={planet.size * 2} ry={planet.size * 0.5}
+                fill="none"
+                stroke={planet.color}
+                strokeWidth={0.6}
+                opacity={isActive ? 0.4 : 0.2}
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  from={`${planet.startAngle} ${cx} ${cy}`}
+                  to={`${planet.startAngle + 360} ${cx} ${cy}`}
+                  dur={`${planet.speed}s`}
+                  repeatCount="indefinite"
+                />
+              </ellipse>
+            )}
+          </g>
+        );
+      })}
 
       {/* Progress ring (only if volunteered) */}
       {isActive && (
         <>
-          {/* Track */}
           <circle
-            cx={cx}
-            cy={cy}
-            r={ringR}
-            fill="none"
-            stroke={sector.color}
-            strokeWidth={2.5}
-            opacity={0.1}
+            cx={cx} cy={cy} r={ringR}
+            fill="none" stroke={sector.color}
+            strokeWidth={2.5} opacity={0.1}
           />
-          {/* Value arc */}
           <circle
-            cx={cx}
-            cy={cy}
-            r={ringR}
+            cx={cx} cy={cy} r={ringR}
             fill="none"
             stroke={isComplete ? "#22c55e" : sector.color}
             strokeWidth={2.5}
@@ -150,9 +210,7 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
             strokeLinecap="round"
             transform={`rotate(-90 ${cx} ${cy})`}
             className="transition-all duration-700"
-            style={{
-              filter: `drop-shadow(0 0 4px ${isComplete ? "#22c55e" : sector.color})`,
-            }}
+            style={{ filter: `drop-shadow(0 0 4px ${isComplete ? "#22c55e" : sector.color})` }}
           />
         </>
       )}
@@ -215,15 +273,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
           <stop offset="35%" stopColor={sector.color} stopOpacity={0.12} />
           <stop offset="100%" stopColor={sector.color} stopOpacity={0} />
         </radialGradient>
-        <radialGradient id={`core-glass-${sector.id}`} cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor={sector.color} stopOpacity={0.12} />
-          <stop offset="50%" stopColor="rgba(10, 12, 20, 1)" stopOpacity={0.9} />
-          <stop offset="100%" stopColor="rgba(6, 8, 16, 1)" stopOpacity={0.95} />
-        </radialGradient>
-        <radialGradient id={`energy-core-${sector.id}`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={sector.color} stopOpacity={0.7} />
-          <stop offset="60%" stopColor={sector.color} stopOpacity={0.2} />
-          <stop offset="100%" stopColor={sector.color} stopOpacity={0} />
+        <radialGradient id={`star-core-${sector.id}`} cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity={0.9} />
+          <stop offset="30%" stopColor={sector.color} stopOpacity={0.8} />
+          <stop offset="70%" stopColor={sector.color} stopOpacity={0.4} />
+          <stop offset="100%" stopColor={sector.color} stopOpacity={0.1} />
         </radialGradient>
       </defs>
     </g>

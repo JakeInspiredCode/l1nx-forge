@@ -10,7 +10,7 @@ import StarfieldCanvas from "@/components/star-map/starfield-canvas";
 import ScanOverlay from "@/components/ui/scan-overlay";
 import GalaxyHeader from "./galaxy-header";
 import SectorNode from "./sector-node";
-import SectorTooltip from "./sector-tooltip";
+
 import SectorOverlay from "./sector-overlay";
 import StatsPanel from "./stats-panel";
 import BottomNav from "@/components/ui/bottom-nav";
@@ -302,15 +302,6 @@ export default function GalaxyMap() {
 
       {/* Bottom navigation bar */}
       <BottomNav activePage="galaxy-map" />
-
-      {/* Hover tooltip */}
-      {hoveredSector && !selectedSector && (
-        <SectorTooltip
-          sector={hoveredSector}
-          progress={sectorProgressMap[hoveredSector.id]}
-          mousePos={mousePos}
-        />
-      )}
 
       {/* Sector overlay */}
       {selectedSector && (

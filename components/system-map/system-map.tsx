@@ -221,7 +221,7 @@ export default function SystemMap() {
       {/* Metallic title */}
       <div className="absolute top-8 left-0 right-0 z-10 text-center pointer-events-none">
         <h1 className="metallic-title text-xl md:text-2xl">
-          Solar System Mission View
+          Campaign View
         </h1>
       </div>
 
