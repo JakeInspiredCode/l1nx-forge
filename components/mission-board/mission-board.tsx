@@ -41,7 +41,7 @@ export default function MissionBoard() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
+    <div className="h-[calc(100vh-48px)] w-full overflow-hidden relative">
       <ScanOverlay />
       <div className="relative z-10 h-full flex">
         {/* Left panel — active campaign (40%) */}

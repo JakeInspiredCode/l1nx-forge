@@ -90,16 +90,16 @@ export default function Arsenal() {
   });
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
+    <div className="h-[calc(100vh-48px)] w-full overflow-hidden relative">
       <ScanOverlay />
       <div className="relative z-10 h-full flex">
         {/* Left sidebar — category rack */}
-        <div className="w-20 h-full border-r border-v2-border flex flex-col items-center py-6 gap-2">
+        <div className="w-14 sm:w-20 h-full border-r border-v2-border flex flex-col items-center py-4 sm:py-6 gap-1 sm:gap-2 shrink-0">
           {CATEGORIES.map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => setActiveCategory(key)}
-              className={`w-14 h-14 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
+              className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all duration-200 ${
                 activeCategory === key
                   ? "bg-v2-green/15 border border-v2-green/40 text-v2-green"
                   : "border border-transparent text-v2-text-muted hover:text-v2-text hover:bg-v2-bg-elevated"
@@ -115,11 +115,11 @@ export default function Arsenal() {
         </div>
 
         {/* Main area */}
-        <div className="flex-1 h-full p-6 overflow-auto scroll-container">
+        <div className="flex-1 h-full p-3 sm:p-6 overflow-auto scroll-container min-w-0">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
             <h1
-              className="display-font text-xl tracking-[0.15em]"
+              className="display-font text-lg sm:text-xl tracking-[0.15em] shrink-0"
               style={{
                 color: "#22c55e",
                 textShadow: "0 0 12px rgba(34, 197, 94, 0.3)",
@@ -132,7 +132,7 @@ export default function Arsenal() {
               placeholder="Filter..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="bg-v2-bg-elevated border border-v2-border rounded px-3 py-1.5 text-sm text-v2-text placeholder:text-v2-text-muted focus:border-v2-green/50 focus:outline-none w-44"
+              className="bg-v2-bg-elevated border border-v2-border rounded px-3 py-1.5 text-sm text-v2-text placeholder:text-v2-text-muted focus:border-v2-green/50 focus:outline-none w-32 sm:w-44"
             />
           </div>
 

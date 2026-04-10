@@ -84,7 +84,7 @@ export default function StarMap() {
     : 0;
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden">
+    <div className="h-[calc(100vh-48px)] w-full relative overflow-hidden">
       {/* Living starfield background */}
       <StarfieldCanvas />
 

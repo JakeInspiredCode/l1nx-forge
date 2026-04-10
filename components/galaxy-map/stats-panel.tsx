@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import ReadinessRadar from "./readiness-radar";
 
 interface StatsPanelProps {
   totalXp: number;
@@ -11,9 +12,12 @@ interface StatsPanelProps {
   totalMissions: number;
   activeCampaignTitle?: string;
   activeCampaignPct?: number;
+  topicProgress: { topicId: string; masteryPercent: number }[];
 }
 
-/** Glowing circular gauge with mount animation */
+type PanelSize = "full" | "mid" | "compact";
+
+/** Glowing circular gauge — scales with size prop */
 function GlowGauge({
   value,
   label,
@@ -21,6 +25,7 @@ function GlowGauge({
   suffix,
   color,
   delay = 0,
+  size = "full",
 }: {
   value: number;
   label: string;
@@ -28,6 +33,7 @@ function GlowGauge({
   suffix?: string;
   color: string;
   delay?: number;
+  size?: "full" | "mid";
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -41,24 +47,24 @@ function GlowGauge({
   const dashOffset = mounted ? circumference * (1 - pct) : circumference;
   const displayValue = max ? `${value}/${max}` : value.toLocaleString();
 
+  const px = size === "mid" ? "38px" : "52px";
+  const labelSize = size === "mid" ? "text-[7px]" : "text-[8px]";
+
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative">
-        <svg width="78" height="78" viewBox="0 0 78 78">
-          {/* Outer glow ring */}
+    <div className="flex flex-col items-center gap-0.5">
+      <div className="relative" style={{ width: px, height: px }}>
+        <svg width="100%" height="100%" viewBox="0 0 78 78">
           <circle
             cx="39" cy="39" r={r + 5}
             fill="none" stroke={color} strokeWidth="0.5"
             opacity={mounted ? 0.15 : 0}
             className="transition-opacity duration-700"
           />
-          {/* Background track */}
           <circle
             cx="39" cy="39" r={r}
             fill="none" stroke={color} strokeWidth="3"
             opacity={0.08}
           />
-          {/* Value arc — animated on mount */}
           <circle
             cx="39" cy="39" r={r}
             fill="none"
@@ -73,7 +79,6 @@ function GlowGauge({
               filter: `drop-shadow(0 0 6px ${color}80)`,
             }}
           />
-          {/* Glass inner fill */}
           <circle
             cx="39" cy="39" r={r - 6}
             fill={`${color}06`}
@@ -81,7 +86,6 @@ function GlowGauge({
             strokeWidth="0.3"
             opacity={0.3}
           />
-          {/* Center value */}
           <text
             x="39" y={suffix ? "36" : "39"}
             textAnchor="middle"
@@ -110,55 +114,45 @@ function GlowGauge({
           )}
         </svg>
       </div>
-      <span className="text-[10px] display-font tracking-[0.15em] text-[#8eafc8] uppercase">
+      <span className={`${labelSize} display-font tracking-[0.14em] text-[#8eafc8] uppercase`}>
         {label}
       </span>
     </div>
   );
 }
 
-/** Mini constellation visualization */
-function ConstellationMap() {
-  const nodes = [
-    { x: 20, y: 15 }, { x: 50, y: 10 }, { x: 80, y: 18 },
-    { x: 35, y: 30 }, { x: 65, y: 25 }, { x: 90, y: 32 },
-    { x: 15, y: 45 }, { x: 45, y: 40 }, { x: 75, y: 42 },
-    { x: 25, y: 55 }, { x: 55, y: 52 }, { x: 85, y: 50 },
-    { x: 40, y: 65 }, { x: 70, y: 60 }, { x: 95, y: 58 },
-  ];
-  const links = [
-    [0,1],[1,2],[0,3],[1,4],[2,5],[3,7],[4,8],[6,7],[7,10],[8,11],
-    [9,10],[10,13],[11,14],[12,13],
-  ];
+/** Single inline stat: colored dot + value + label */
+function InlineStat({
+  value,
+  label,
+  color,
+}: {
+  value: string;
+  label: string;
+  color: string;
+}) {
   return (
-    <svg viewBox="0 0 110 72" className="w-full h-14 opacity-70">
-      {links.map(([a, b], i) => (
-        <line
-          key={i}
-          x1={nodes[a].x} y1={nodes[a].y}
-          x2={nodes[b].x} y2={nodes[b].y}
-          stroke="#06d6d6" strokeWidth={0.5} opacity={0.2}
-        />
-      ))}
-      <polyline
-        points={`${nodes[0].x},${nodes[0].y} ${nodes[3].x},${nodes[3].y} ${nodes[7].x},${nodes[7].y} ${nodes[10].x},${nodes[10].y} ${nodes[13].x},${nodes[13].y}`}
-        fill="none" stroke="#06d6d6" strokeWidth={1} opacity={0.4}
-        strokeLinejoin="round"
+    <div className="flex items-center gap-1.5 min-w-0">
+      <div
+        className="w-1.5 h-1.5 rounded-full shrink-0"
+        style={{ background: color, boxShadow: `0 0 4px ${color}60` }}
       />
-      {nodes.map((n, i) => (
-        <g key={i}>
-          <circle cx={n.x} cy={n.y} r={2} fill="#0a0b10" stroke="#06d6d6" strokeWidth={0.5} opacity={0.5} />
-          <circle cx={n.x} cy={n.y} r={0.8} fill="#06d6d6" opacity={0.5} />
-        </g>
-      ))}
-      {[0, 3, 7, 10, 13].map((idx) => (
-        <circle key={idx} cx={nodes[idx].x} cy={nodes[idx].y} r={3.5} fill="#06d6d6" opacity={0.15} />
-      ))}
-    </svg>
+      <span
+        className="text-[11px] telemetry-font font-semibold text-v2-text truncate"
+        style={{ textShadow: `0 0 8px ${color}30` }}
+      >
+        {value}
+      </span>
+      <span className="text-[7px] display-font tracking-[0.12em] text-[#6a7288] uppercase shrink-0">
+        {label}
+      </span>
+    </div>
   );
 }
 
-const TECH_GLYPH_ICONS = ["⚙", "ψ", "⊕", "⬢", "§", "✧", "⟁", "◈", "⧫"];
+// Panel height thresholds
+const MID_THRESHOLD = 500;     // below this: shrink gauges
+const COMPACT_THRESHOLD = 360; // below this: collapse to inline text
 
 export default function StatsPanel({
   totalXp,
@@ -169,110 +163,81 @@ export default function StatsPanel({
   totalMissions,
   activeCampaignTitle,
   activeCampaignPct,
+  topicProgress,
 }: StatsPanelProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelSize, setPanelSize] = useState<PanelSize>("full");
+
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const h = entry.contentRect.height;
+      setPanelSize(h < COMPACT_THRESHOLD ? "compact" : h < MID_THRESHOLD ? "mid" : "full");
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="h-full flex flex-col p-4 overflow-auto scroll-container">
-      {/* Circular gauges row — staggered mount animation */}
-      <div className="flex items-center justify-around mb-4 mt-1">
-        <GlowGauge value={totalXp} label="Total XP" color="#06d6d6" delay={100} />
-        <GlowGauge value={streak} label="Streak" suffix="DAYS" color="#f59e0b" max={30} delay={250} />
-        <GlowGauge value={missionsAccomplished} label="Missions" max={totalMissions} color="#22c55e" delay={400} />
-      </div>
+    <div ref={panelRef} className="h-full flex flex-col p-3 overflow-hidden">
+      {/* Stats — 3 tiers: full gauges → small gauges → inline text */}
+      {panelSize === "compact" ? (
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 mb-2">
+          <InlineStat value={totalXp.toLocaleString()} label="XP" color="#06d6d6" />
+          <InlineStat value={`${streak}d`} label="Streak" color="#f59e0b" />
+          <InlineStat value={`${missionsAccomplished}/${totalMissions}`} label="Missions" color="#22c55e" />
+          <InlineStat value={`${sectorsExplored}/${totalSectors}`} label="Sectors" color="#a855f7" />
+        </div>
+      ) : (
+        <div className={`grid grid-cols-2 justify-items-center mb-2 ${panelSize === "mid" ? "gap-1" : "gap-1.5"}`}>
+          <GlowGauge value={totalXp} label="Total XP" color="#06d6d6" delay={100} size={panelSize} />
+          <GlowGauge value={streak} label="Streak" suffix="DAYS" color="#f59e0b" max={30} delay={250} size={panelSize} />
+          <GlowGauge value={missionsAccomplished} label="Missions" max={totalMissions} color="#22c55e" delay={400} size={panelSize} />
+          <GlowGauge value={sectorsExplored} label="Sectors" max={totalSectors} color="#a855f7" delay={550} size={panelSize} />
+        </div>
+      )}
 
-      {/* Constellation map */}
-      <div className="mb-4 px-1">
-        <ConstellationMap />
-      </div>
-
-      {/* Divider — glass edge */}
-      <div className="h-px mb-4" style={{ background: "linear-gradient(90deg, transparent, rgba(6, 214, 214, 0.2), transparent)" }} />
-
-      {/* Active Missions */}
-      <div className="mb-5">
-        <h3 className="stats-section-title">Active Missions</h3>
-        {activeCampaignTitle ? (
-          <div
-            className="flex items-center gap-3 px-3 py-2.5 rounded-md"
-            style={{
-              background: "rgba(6, 214, 214, 0.04)",
-              border: "1px solid rgba(6, 214, 214, 0.1)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <div className="w-2 h-2 rounded-full bg-[#06d6d6] shadow-[0_0_8px_rgba(6,214,214,0.5)]" />
-            <div className="flex-1 min-w-0">
-              <span className="text-[11px] text-[#e0e4ec] display-font tracking-wider block truncate">
-                {activeCampaignTitle}
-              </span>
-              {activeCampaignPct !== undefined && (
-                <div className="flex items-center gap-2 mt-1.5">
-                  <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(6, 214, 214, 0.1)" }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${activeCampaignPct}%`,
-                        background: "linear-gradient(90deg, #06d6d6, #06d6d6cc)",
-                        boxShadow: "0 0 8px rgba(6,214,214,0.4)",
-                      }}
-                    />
-                  </div>
-                  <span className="text-[9px] telemetry-font text-[#8eafc8]">
-                    {activeCampaignPct}%
-                  </span>
+      {/* Active Mission */}
+      {activeCampaignTitle && (
+        <div
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-md mb-2"
+          style={{
+            background: "rgba(6, 214, 214, 0.04)",
+            border: "1px solid rgba(6, 214, 214, 0.1)",
+          }}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-[#06d6d6] shadow-[0_0_6px_rgba(6,214,214,0.5)] shrink-0" />
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] text-[#e0e4ec] display-font tracking-wider block truncate">
+              {activeCampaignTitle}
+            </span>
+            {activeCampaignPct !== undefined && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: "rgba(6, 214, 214, 0.1)" }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${activeCampaignPct}%`,
+                      background: "linear-gradient(90deg, #06d6d6, #06d6d6cc)",
+                      boxShadow: "0 0 6px rgba(6,214,214,0.4)",
+                    }}
+                  />
                 </div>
-              )}
-            </div>
+                <span className="text-[8px] telemetry-font text-[#8eafc8]">
+                  {activeCampaignPct}%
+                </span>
+              </div>
+            )}
           </div>
-        ) : (
-          <span className="text-[10px] telemetry-font text-[#6a7288] italic">
-            No active missions
-          </span>
-        )}
-      </div>
-
-      {/* Tech-Glyphs Collected */}
-      <div className="mb-5">
-        <div className="flex items-center justify-between mb-2.5">
-          <h3 className="stats-section-title mb-0">Tech-Glyphs Collected</h3>
-          <span className="text-[9px] telemetry-font text-[#6a7288]">0/18</span>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {TECH_GLYPH_ICONS.map((glyph, i) => (
-            <div
-              key={i}
-              className="w-7 h-7 rounded-md flex items-center justify-center text-[11px] transition-all duration-200"
-              style={{
-                border: "1px solid rgba(6, 214, 214, 0.08)",
-                color: "#6a7288",
-                background: "rgba(6, 214, 214, 0.02)",
-              }}
-            >
-              {glyph}
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* Fleet Status */}
-      <div className="mt-auto pt-3" style={{ borderTop: "1px solid rgba(6, 214, 214, 0.08)" }}>
-        <h3 className="stats-section-title">Fleet Status</h3>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {[0.5, 0.35, 0.25].map((opacity, i) => (
-              <div
-                key={i}
-                className="w-2 h-2 rounded-full"
-                style={{
-                  backgroundColor: "#06d6d6",
-                  opacity,
-                  boxShadow: `0 0 6px rgba(6, 214, 214, ${opacity})`,
-                }}
-              />
-            ))}
-          </div>
-          <span className="text-[10px] telemetry-font text-[#8eafc8]">
-            {sectorsExplored}/{totalSectors} sectors
-          </span>
+      {/* Divider + Readiness radar — hidden on mobile, takes remaining space on desktop */}
+      <div className="max-md:hidden flex flex-1 min-h-0 flex-col">
+        <div className="h-px mb-2 shrink-0" style={{ background: "linear-gradient(90deg, transparent, rgba(6, 214, 214, 0.2), transparent)" }} />
+        <div className="flex-1 min-h-0">
+          <ReadinessRadar progress={topicProgress} />
         </div>
       </div>
     </div>

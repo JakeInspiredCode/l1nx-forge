@@ -13,7 +13,6 @@ import SectorNode from "./sector-node";
 
 import SectorOverlay from "./sector-overlay";
 import StatsPanel from "./stats-panel";
-import BottomNav from "@/components/ui/bottom-nav";
 
 /** Animated energy particles flowing along a bezier curve */
 function EnergyStream({
@@ -86,6 +85,7 @@ export default function GalaxyMap() {
   const profile = useQuery(api.forgeProfile.get);
   const campaignStates = useQuery(api.forgeCampaigns.getAllCampaignStates);
   const missionStates = useQuery(api.forgeMissions.getAllMissionStates);
+  const topicProgress = useQuery(api.forgeProgress.getAll);
   const enrollCampaign = useMutation(api.forgeCampaigns.enrollCampaign);
 
   const [hoveredSector, setHoveredSector] = useState<Sector | null>(null);
@@ -208,7 +208,7 @@ export default function GalaxyMap() {
   }, []);
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="h-[calc(100vh-48px)] w-full relative overflow-hidden" onMouseMove={handleMouseMove}>
       {/* Starfield background */}
       <StarfieldCanvas />
       <ScanOverlay />
@@ -222,9 +222,9 @@ export default function GalaxyMap() {
       </div>
 
       {/* Main layout: map (65%) + stats (35%) */}
-      <div className="absolute inset-0 z-[5] flex pt-14 pb-16 px-3 gap-3">
+      <div className="absolute inset-0 z-[5] flex flex-col md:flex-row pt-14 pb-3 px-3 gap-3">
         {/* Galaxy map — glass panel */}
-        <div className="flex-[65] relative flex flex-col min-w-0">
+        <div className="flex-1 relative flex flex-col min-w-0 min-h-0">
           <div className="glass-panel-header">
             <span>Sector Map</span>
           </div>
@@ -250,9 +250,9 @@ export default function GalaxyMap() {
                     <EnergyStream
                       key={i}
                       x1={a.mapPosition.x * 10}
-                      y1={a.mapPosition.y * 8}
+                      y1={a.mapPosition.y * 10}
                       x2={b.mapPosition.x * 10}
-                      y2={b.mapPosition.y * 8}
+                      y2={b.mapPosition.y * 10}
                       color="#06d6d6"
                       active={bothActive}
                     />
@@ -263,13 +263,7 @@ export default function GalaxyMap() {
                 {ALL_SECTORS.map((sector) => (
                   <SectorNode
                     key={sector.id}
-                    sector={{
-                      ...sector,
-                      mapPosition: {
-                        x: sector.mapPosition.x,
-                        y: sector.mapPosition.y * 0.8,
-                      },
-                    }}
+                    sector={sector}
                     progress={sectorProgressMap[sector.id]}
                     onHover={handleSectorHover}
                     onClick={handleSectorClick}
@@ -281,7 +275,7 @@ export default function GalaxyMap() {
         </div>
 
         {/* Stats panel — glass panel */}
-        <div className="flex-[35] max-w-[340px] min-w-[260px] flex flex-col">
+        <div className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none">
           <div className="glass-panel-header">
             <span>Navigation Board</span>
           </div>
@@ -295,13 +289,11 @@ export default function GalaxyMap() {
               totalMissions={totalMissions}
               activeCampaignTitle={activeCampaign?.title}
               activeCampaignPct={activeCampaignPct}
+              topicProgress={topicProgress ?? []}
             />
           </div>
         </div>
       </div>
-
-      {/* Bottom navigation bar */}
-      <BottomNav activePage="galaxy-map" />
 
       {/* Sector overlay */}
       {selectedSector && (

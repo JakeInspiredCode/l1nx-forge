@@ -14,7 +14,6 @@ import MissionNode from "./mission-node";
 import CampaignPath from "./campaign-path";
 import MissionOverlay from "./mission-overlay";
 import StatsSidebar from "./stats-sidebar";
-import BottomNav from "@/components/ui/bottom-nav";
 
 // ── Orbital position computation ──
 
@@ -199,7 +198,7 @@ export default function SystemMap() {
   const hasNoCampaign = !isLoading && !activeCampaign;
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="h-[calc(100vh-48px)] w-full relative overflow-hidden" onMouseMove={handleMouseMove}>
       <StarfieldCanvas />
       <ScanOverlay />
 
@@ -222,7 +221,7 @@ export default function SystemMap() {
       </div>
 
       {/* Main layout: map + sidebar */}
-      <div className="absolute inset-0 z-[5] flex pt-16 pb-14">
+      <div className="absolute inset-0 z-[5] flex flex-col md:flex-row pt-14 pb-3">
         {/* Solar system SVG — main area */}
         <div className="flex-1 relative">
           {isLoading ? (
@@ -283,7 +282,7 @@ export default function SystemMap() {
         </div>
 
         {/* Stats sidebar — now on the right, framed */}
-        <div className="w-[240px] shrink-0 flex flex-col mr-2 mb-1">
+        <div className="md:w-[200px] lg:w-[240px] shrink-0 flex flex-col mr-2 mb-1 min-h-0 max-h-[35vh] md:max-h-none">
           <div className="panel-header-bar rounded-t shrink-0">
             <span>Mission Briefing</span>
           </div>
@@ -301,9 +300,6 @@ export default function SystemMap() {
           </div>
         </div>
       </div>
-
-      {/* Bottom navigation bar */}
-      <BottomNav activePage="missions" />
 
       {/* Hover tooltip */}
       {hoveredMission && !selectedMission && (

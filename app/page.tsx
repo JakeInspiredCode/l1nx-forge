@@ -90,7 +90,7 @@ export default function Dashboard() {
 
   if (seeding) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
+      <div className="h-[calc(100vh-48px)] w-full flex items-center justify-center">
         <span className="telemetry-font text-v2-cyan animate-pulse tracking-wider">
           Initializing ship systems...
         </span>
@@ -101,7 +101,7 @@ export default function Dashboard() {
   // Active training session
   if (trainingCards && trainingCards.length > 0) {
     return (
-      <div className="h-screen w-screen overflow-hidden">
+      <div className="h-[calc(100vh-48px)] w-full overflow-hidden">
         <main className="h-full w-full p-6 overflow-auto scroll-container">
           <button
             onClick={() => setTrainingCards(null)}

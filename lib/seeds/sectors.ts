@@ -15,7 +15,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🐧",
     color: "#06d6d6",
     campaignIds: ["linux-core"],
-    mapPosition: { x: 42, y: 40 },
+    mapPosition: { x: 42, y: 44 },
     size: "lg",
   },
   {
@@ -26,7 +26,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🖥️",
     color: "#f59e0b",
     campaignIds: ["hardware-core"],
-    mapPosition: { x: 12, y: 35 },
+    mapPosition: { x: 8, y: 32 },
     size: "md",
   },
   {
@@ -37,7 +37,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🌐",
     color: "#3b82f6",
     campaignIds: ["networking-core"],
-    mapPosition: { x: 72, y: 22 },
+    mapPosition: { x: 72, y: 18 },
     size: "md",
   },
   {
@@ -48,7 +48,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "💡",
     color: "#a855f7",
     campaignIds: ["fiber-core"],
-    mapPosition: { x: 78, y: 58 },
+    mapPosition: { x: 82, y: 56 },
     size: "sm",
   },
   {
@@ -59,7 +59,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "⚡",
     color: "#ef4444",
     campaignIds: ["power-core"],
-    mapPosition: { x: 22, y: 68 },
+    mapPosition: { x: 14, y: 60 },
     size: "sm",
   },
   {
@@ -70,7 +70,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "📋",
     color: "#22c55e",
     campaignIds: ["ops-core"],
-    mapPosition: { x: 55, y: 72 },
+    mapPosition: { x: 50, y: 64 },
     size: "md",
   },
   {
@@ -81,7 +81,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🏗️",
     color: "#ec4899",
     campaignIds: ["scale-core"],
-    mapPosition: { x: 82, y: 40 },
+    mapPosition: { x: 88, y: 38 },
     size: "sm",
   },
   {
@@ -92,7 +92,7 @@ export const ALL_SECTORS: Sector[] = [
     icon: "🔧",
     color: "#a855f7",
     campaignIds: ["linux-advanced"],
-    mapPosition: { x: 42, y: 14 },
+    mapPosition: { x: 38, y: 10 },
     size: "md",
   },
 ];

@@ -219,11 +219,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Title */}
       <text
         x={cx}
-        y={cy + r + 14}
+        y={cy + r + 16}
         textAnchor="middle"
         dominantBaseline="hanging"
         fill={isActive ? sector.color : "#e0e4ec"}
-        fontSize={sector.size === "lg" ? 13 : sector.size === "md" ? 11 : 9.5}
+        fontSize={sector.size === "lg" ? 16 : sector.size === "md" ? 14 : 12}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={700}
         letterSpacing="0.12em"
@@ -238,11 +238,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Greek sub-label */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 30 : 27)}
+        y={cy + r + (sector.size === "lg" ? 36 : 33)}
         textAnchor="middle"
         dominantBaseline="hanging"
         fill="#8eafc8"
-        fontSize={8}
+        fontSize={10}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={600}
         letterSpacing="0.1em"
@@ -255,11 +255,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Mission count */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 42 : 39)}
+        y={cy + r + (sector.size === "lg" ? 50 : 47)}
         textAnchor="middle"
         dominantBaseline="hanging"
         fill="#8eafc8"
-        fontSize={7.5}
+        fontSize={10}
         fontFamily="'JetBrains Mono', monospace"
         className="pointer-events-none select-none"
         style={{ textShadow: "0 0 4px rgba(0,0,0,0.6)" }}

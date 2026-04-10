@@ -3,8 +3,7 @@ import "./globals.css";
 import ConvexClientProvider from "@/components/convex-provider";
 import Mascot from "@/components/mascot/mascot";
 import BadgeBanner from "@/components/badge-banner";
-import HexMenu from "@/components/hex-menu";
-import RoomProvider from "@/components/room-provider";
+import Nav from "@/components/nav";
 
 export const metadata: Metadata = {
   title: "L1NX",
@@ -21,12 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen">
         <ConvexClientProvider>
-          <RoomProvider>
-            {children}
-            <HexMenu />
-            <Mascot />
-            <BadgeBanner />
-          </RoomProvider>
+          <Nav />
+          {children}
+          <Mascot />
+          <BadgeBanner />
         </ConvexClientProvider>
       </body>
     </html>

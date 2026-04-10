@@ -37,11 +37,11 @@ export default function CommsPage() {
   const [activeChannel, setActiveChannel] = useState<string | null>(null);
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
+    <div className="h-[calc(100vh-48px)] w-full overflow-hidden relative">
       <ScanOverlay />
-      <div className="relative z-10 h-full flex">
+      <div className="relative z-10 h-full flex flex-col sm:flex-row">
         {/* Left panel — channel list */}
-        <div className="w-64 h-full border-r border-v2-border p-5">
+        <div className="sm:w-52 md:w-64 shrink-0 border-b sm:border-b-0 sm:border-r border-v2-border p-4 sm:p-5 sm:h-full">
           <h1
             className="display-font text-xl tracking-[0.15em] mb-6"
             style={{
@@ -51,12 +51,12 @@ export default function CommsPage() {
           >
             Comms
           </h1>
-          <div className="space-y-2">
+          <div className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-visible">
             {CHANNELS.map((ch) => (
               <button
                 key={ch.id}
                 onClick={() => router.push(ch.route)}
-                className={`w-full text-left px-3 py-3 rounded-lg border transition-all duration-200 group ${
+                className={`w-full shrink-0 sm:shrink text-left px-3 py-3 rounded-lg border transition-all duration-200 group ${
                   activeChannel === ch.id
                     ? "bg-v2-purple/10 border-v2-purple/30"
                     : "border-transparent hover:bg-v2-bg-elevated hover:border-v2-border"
@@ -79,7 +79,7 @@ export default function CommsPage() {
         </div>
 
         {/* Right panel — channel info */}
-        <div className="flex-1 h-full flex items-center justify-center">
+        <div className="flex-1 min-h-0 flex items-center justify-center">
           <div className="text-center space-y-4">
             <div className="text-6xl opacity-20">◎</div>
             <p className="text-v2-text-dim text-sm">

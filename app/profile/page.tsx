@@ -25,11 +25,11 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="h-screen w-screen overflow-hidden relative">
+    <div className="h-[calc(100vh-48px)] w-full overflow-hidden relative">
       <ScanOverlay />
-      <div className="relative z-10 h-full flex">
+      <div className="relative z-10 h-full flex flex-col sm:flex-row">
         {/* Left panel — identity */}
-        <div className="w-72 h-full border-r border-v2-border p-6 flex flex-col items-center">
+        <div className="sm:w-56 md:w-64 lg:w-72 shrink-0 border-b sm:border-b-0 sm:border-r border-v2-border p-4 sm:p-6 flex flex-row sm:flex-col items-center gap-4 sm:gap-0 sm:h-full overflow-auto">
           <h1
             className="display-font text-xl tracking-[0.15em] mb-8 self-start"
             style={{
@@ -42,7 +42,7 @@ export default function ProfilePage() {
 
           {/* Avatar placeholder */}
           <div
-            className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
+            className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center sm:mb-4 shrink-0"
             style={{
               background: "rgba(224, 228, 236, 0.06)",
               border: "2px solid rgba(224, 228, 236, 0.15)",
@@ -51,7 +51,7 @@ export default function ProfilePage() {
             <span className="text-4xl opacity-50">▲</span>
           </div>
 
-          <div className="text-center mb-6">
+          <div className="text-center sm:mb-6">
             <div className="display-font text-sm tracking-wider text-v2-silver">
               Operator
             </div>
@@ -61,7 +61,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-2 gap-4 w-full">
+          <div className="hidden sm:grid grid-cols-2 gap-3 w-full">
             <GlowStat value={profile?.totalPoints ?? 0} label="XP" size="sm" />
             <GlowStat value={profile?.badges?.length ?? 0} label="Badges" size="sm" />
             <GlowStat value={profile?.streak ?? 0} label="Streak" size="sm" />
@@ -74,14 +74,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Right panel — tabbed */}
-        <div className="flex-1 h-full flex flex-col">
+        <div className="flex-1 min-h-0 flex flex-col">
           {/* Tab bar */}
-          <div className="flex border-b border-v2-border px-6">
+          <div className="flex border-b border-v2-border px-3 sm:px-6">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-xs tracking-wider uppercase transition-all duration-200 border-b-2 ${
+                className={`px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs tracking-wider uppercase transition-all duration-200 border-b-2 ${
                   activeTab === tab.id
                     ? "border-v2-silver text-v2-silver"
                     : "border-transparent text-v2-text-muted hover:text-v2-text"
@@ -94,7 +94,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-auto scroll-container p-6">
+          <div className="flex-1 overflow-auto scroll-container p-3 sm:p-6">
             {activeTab === "stats" && (
               <div className="max-w-lg space-y-6">
                 <HexPanel>
