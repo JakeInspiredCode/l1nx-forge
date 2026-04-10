@@ -297,8 +297,8 @@ export default function Mascot() {
         )}
       </div>
 
-      {/* ── Mascot avatar + speech bubble ── */}
-      <div className="fixed bottom-6 right-6 z-[60]">
+      {/* ── Mascot avatar + speech bubble (hidden — kept for future use) ── */}
+      <div className="fixed bottom-6 right-6 z-[60] hidden">
         <SpeechBubble
           message={currentMessage?.text ?? null}
           duration={currentMessage?.duration ?? 4000}

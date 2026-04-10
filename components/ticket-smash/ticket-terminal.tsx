@@ -213,26 +213,30 @@ export default function TicketTerminal({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Quit button */}
-      <div className="flex items-center justify-between px-4 py-2 shrink-0">
-        <span className="text-xs mono text-v2-text-muted">
+      {/* Top bar — exit + info */}
+      <div className="flex items-center justify-between px-3 py-1 shrink-0">
+        <button
+          onClick={onQuit}
+          className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] mono text-v2-text-muted hover:text-v2-danger hover:bg-v2-danger/10 transition-colors"
+        >
+          ← Exit
+        </button>
+        <span className="text-[10px] mono text-v2-text-muted truncate">
           {level.label}
-          {randomMode ? " — Random Practice" : queuePosition && queueTotal ? ` — ${queuePosition}/${queueTotal}` : ""}
+          {randomMode ? " — Random" : queuePosition && queueTotal ? ` — ${queuePosition}/${queueTotal}` : ""}
         </span>
-        <ActionButton variant="ghost" size="sm" onClick={onQuit}>
-          ✕ Quit
-        </ActionButton>
       </div>
 
-      {/* Main layout: terminal + panel */}
-      <div className="flex gap-3 flex-1 min-h-0 px-4 pb-4">
-        {/* Terminal — left 60% */}
-        <div className="flex-[3] min-w-0">
-          <TerminalSim height={480} onCommand={handleCommand} />
+      {/* Main layout: always side-by-side, terminal left + panel right */}
+      {/* pl-12 gives clearance for the Next.js "N" logo in the bottom-left */}
+      <div className="flex gap-2 flex-1 min-h-0 pl-12 pr-3 pb-3">
+        {/* Terminal — left, flex-[3] ≈ 60% */}
+        <div className="flex-[3] min-w-0 min-h-0">
+          <TerminalSim fillHeight onCommand={handleCommand} />
         </div>
 
-        {/* Panel — right 40% */}
-        <div className="flex-[2] min-w-0" style={{ minHeight: 520 }}>
+        {/* Panel — right, flex-[2] ≈ 40% */}
+        <div className="flex-[2] min-w-0 min-h-0">
           <TicketPanel
             ticket={ticket}
             commandsRun={commandsRun}

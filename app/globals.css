@@ -806,7 +806,7 @@ code, pre, .mono {
 /* Energy stream nav bar */
 .energy-nav {
   position: fixed;
-  bottom: 0;
+  bottom: 12px;
   left: 0;
   right: 0;
   z-index: 40;
