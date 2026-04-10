@@ -3,14 +3,94 @@
 import { useState } from "react";
 import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
-import HexPanel from "@/components/ui/hex-panel";
-import GlowStat from "@/components/ui/glow-stat";
 import TelemetryBar from "@/components/ui/telemetry-bar";
 import ScanOverlay from "@/components/ui/scan-overlay";
+import StarfieldCanvas from "@/components/star-map/starfield-canvas";
 import { TOPICS } from "@/lib/types";
 import { useSoundEngine } from "@/lib/sound-engine";
 
 type Tab = "stats" | "badges" | "settings";
+
+const accentColor = "#e0e4ec";
+const accentGlow = "rgba(224, 228, 236, 0.2)";
+
+// ── SVG icons for tabs ──
+function TabIcon({ tab, active }: { tab: string; active: boolean }) {
+  const color = active ? accentColor : "#6a7288";
+  const common = { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: color, strokeWidth: 1.4, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  switch (tab) {
+    case "stats":
+      return <svg {...common}><polyline points="2 12 5 6 9 9 14 2" /><line x1="2" y1="14" x2="14" y2="14" /></svg>;
+    case "badges":
+      return <svg {...common}><polygon points="8 1 10 5 14 5.5 11 8.5 12 13 8 10.5 4 13 5 8.5 2 5.5 6 5" /></svg>;
+    case "settings":
+      return <svg {...common}><circle cx="8" cy="8" r="2.5" /><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M3 13l1.5-1.5M11.5 4.5L13 3" /></svg>;
+    default:
+      return null;
+  }
+}
+
+// ── Stat gauge (matching Galaxy Map GlowGauge pattern) ──
+function ProfileGauge({ value, label, suffix, color, max }: { value: number | string; label: string; suffix?: string; color: string; max?: number }) {
+  const numVal = typeof value === "string" ? parseInt(value) || 0 : value;
+  const r = 26;
+  const circumference = 2 * Math.PI * r;
+  const pct = max ? Math.min(numVal / max, 1) : Math.min(numVal / 10000, 1);
+  const dashOffset = circumference * (1 - pct);
+  const displayValue = typeof value === "string" ? value : max ? `${value}/${max}` : value.toLocaleString();
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative" style={{ width: 48, height: 48 }}>
+        <svg width="100%" height="100%" viewBox="0 0 68 68">
+          <circle cx="34" cy="34" r={r} fill="none" stroke={color} strokeWidth="2.5" opacity={0.08} />
+          <circle
+            cx="34" cy="34" r={r}
+            fill="none" stroke={color} strokeWidth="2.5"
+            strokeDasharray={circumference} strokeDashoffset={dashOffset}
+            strokeLinecap="round" transform="rotate(-90 34 34)"
+            style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)", filter: `drop-shadow(0 0 4px ${color}60)` }}
+          />
+          <text
+            x="34" y={suffix ? "31" : "34"}
+            textAnchor="middle" dominantBaseline="central"
+            fill="#ffffff" fontSize="11"
+            fontFamily="'JetBrains Mono', monospace" fontWeight="700"
+            style={{ textShadow: `0 0 8px ${color}` }}
+          >
+            {displayValue}
+          </text>
+          {suffix && (
+            <text x="34" y="42" textAnchor="middle" dominantBaseline="central" fill="#8eafc8" fontSize="6" fontFamily="'Chakra Petch', sans-serif" fontWeight="600" letterSpacing="0.12em">
+              {suffix}
+            </text>
+          )}
+        </svg>
+      </div>
+      <span className="text-[7px] display-font tracking-[0.14em] text-[#8eafc8] uppercase">{label}</span>
+    </div>
+  );
+}
+
+// ── Badge icon (SVG, no emoji) ──
+function BadgeIcon({ earned }: { earned: boolean }) {
+  const color = earned ? accentColor : "#333845";
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      {/* Hexagon */}
+      <polygon
+        points="16 2 28 9 28 23 16 30 4 23 4 9"
+        fill={earned ? `${accentColor}10` : "transparent"}
+        stroke={color}
+        strokeWidth={1.2}
+      />
+      {/* Inner mark */}
+      {earned && (
+        <polyline points="11 16 14.5 19.5 21 12" stroke={accentColor} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      )}
+    </svg>
+  );
+}
 
 export default function ProfilePage() {
   const profile = useQuery(api.forgeProfile.get);
@@ -25,83 +105,108 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="h-[calc(100vh-48px)] w-full overflow-hidden relative">
+    <div className="h-[calc(100vh-48px)] w-full relative overflow-hidden">
+      <StarfieldCanvas />
       <ScanOverlay />
-      <div className="relative z-10 h-full flex flex-col sm:flex-row">
-        {/* Left panel — identity */}
-        <div className="sm:w-56 md:w-64 lg:w-72 shrink-0 border-b sm:border-b-0 sm:border-r border-v2-border p-4 sm:p-6 flex flex-row sm:flex-col items-center gap-4 sm:gap-0 sm:h-full overflow-auto">
-          <h1
-            className="display-font text-xl tracking-[0.15em] mb-8 self-start"
-            style={{
-              color: "#e0e4ec",
-              textShadow: "0 0 12px rgba(224, 228, 236, 0.15)",
-            }}
-          >
-            Profile
-          </h1>
+      <div className="viewport-vignette fixed inset-0 z-[8] pointer-events-none" />
 
-          {/* Avatar placeholder */}
-          <div
-            className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center sm:mb-4 shrink-0"
-            style={{
-              background: "rgba(224, 228, 236, 0.06)",
-              border: "2px solid rgba(224, 228, 236, 0.15)",
-            }}
-          >
-            <span className="text-4xl opacity-50">▲</span>
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+        <div className="galaxy-header-bar">
+          <div className="header-accent-line" />
+          <div className="flex items-center gap-3">
+            <div className="header-diamond" style={{ background: `${accentColor}40`, boxShadow: `0 0 8px ${accentGlow}` }} />
+            <h1 className="galaxy-title" style={{ textShadow: `0 0 20px ${accentGlow}, 0 0 40px rgba(224,228,236,0.08)` }}>
+              Operator Profile
+            </h1>
+            <div className="header-diamond" style={{ background: `${accentColor}40`, boxShadow: `0 0 8px ${accentGlow}` }} />
           </div>
+          <div className="header-accent-line" />
+        </div>
+      </div>
 
-          <div className="text-center sm:mb-6">
-            <div className="display-font text-sm tracking-wider text-v2-silver">
+      {/* Main layout */}
+      <div className="absolute inset-0 z-[5] flex flex-col sm:flex-row pt-11 pb-1 px-1 gap-2">
+        {/* Left panel — identity card */}
+        <div className="sm:w-56 md:w-64 lg:w-72 shrink-0 flex flex-col">
+          <div className="glass-panel-header">
+            <span>Identity</span>
+          </div>
+          <div className="flex-1 glass-panel rounded-b-lg flex flex-col items-center p-4 sm:p-5 overflow-auto">
+            {/* Avatar */}
+            <div
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mb-3 shrink-0"
+              style={{
+                background: `${accentColor}06`,
+                border: `1.5px solid ${accentColor}20`,
+                boxShadow: `0 0 20px ${accentColor}08`,
+              }}
+            >
+              {/* Stylized operator sigil */}
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke={accentColor} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity={0.5}>
+                <polygon points="14 2 26 8 26 20 14 26 2 20 2 8" />
+                <polygon points="14 7 21 11 21 19 14 23 7 19 7 11" />
+                <circle cx="14" cy="14" r="2" fill={accentColor} stroke="none" opacity={0.6} />
+              </svg>
+            </div>
+
+            <div
+              className="text-[10px] display-font tracking-[0.2em] uppercase mb-1"
+              style={{ color: accentColor }}
+            >
               Operator
             </div>
-            <div className="text-xs text-v2-text-muted mt-1 telemetry-font">
+            <div className="text-[9px] telemetry-font text-[#8eafc8] mb-4">
               {profile?.streak ?? 0}d streak
             </div>
-          </div>
 
-          {/* Quick stats */}
-          <div className="hidden sm:grid grid-cols-2 gap-3 w-full">
-            <GlowStat value={profile?.totalPoints ?? 0} label="XP" size="sm" />
-            <GlowStat value={profile?.badges?.length ?? 0} label="Badges" size="sm" />
-            <GlowStat value={profile?.streak ?? 0} label="Streak" size="sm" />
-            <GlowStat
-              value={`${Math.round(profile?.totalSessionMinutes ?? 0)}m`}
-              label="Study"
-              size="sm"
-            />
+            {/* Divider */}
+            <div className="w-full h-px mb-4 shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}20, transparent)` }} />
+
+            {/* Stats gauges */}
+            <div className="grid grid-cols-2 gap-2 w-full justify-items-center">
+              <ProfileGauge value={profile?.totalPoints ?? 0} label="Total XP" color={accentColor} />
+              <ProfileGauge value={profile?.streak ?? 0} label="Streak" suffix="DAYS" color="#f59e0b" max={30} />
+              <ProfileGauge value={profile?.badges?.length ?? 0} label="Badges" color="#a855f7" max={20} />
+              <ProfileGauge value={`${Math.round(profile?.totalSessionMinutes ?? 0)}`} label="Minutes" suffix="STUDY" color="#06d6d6" />
+            </div>
           </div>
         </div>
 
-        {/* Right panel — tabbed */}
-        <div className="flex-1 min-h-0 flex flex-col">
-          {/* Tab bar */}
-          <div className="flex border-b border-v2-border px-3 sm:px-6">
+        {/* Right panel — tabbed content */}
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
+          <div className="glass-panel-header flex items-center gap-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3 sm:px-4 py-2.5 sm:py-3 text-[11px] sm:text-xs tracking-wider uppercase transition-all duration-200 border-b-2 ${
-                  activeTab === tab.id
-                    ? "border-v2-silver text-v2-silver"
-                    : "border-transparent text-v2-text-muted hover:text-v2-text"
-                }`}
-                style={{ fontFamily: "'Chakra Petch', sans-serif" }}
+                className="flex items-center gap-1.5 px-3 sm:px-4 py-0 transition-all duration-200"
+                style={{
+                  color: activeTab === tab.id ? accentColor : "#6a7288",
+                  borderBottom: activeTab === tab.id ? `1px solid ${accentColor}60` : "1px solid transparent",
+                  fontFamily: "'Chakra Petch', sans-serif",
+                  fontSize: 10,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                }}
               >
+                <TabIcon tab={tab.id} active={activeTab === tab.id} />
                 {tab.label}
               </button>
             ))}
           </div>
-
-          {/* Tab content */}
-          <div className="flex-1 overflow-auto scroll-container p-3 sm:p-6">
+          <div className="flex-1 glass-panel rounded-b-lg overflow-auto scroll-container p-3 sm:p-5">
+            {/* ── Stats Tab ── */}
             {activeTab === "stats" && (
-              <div className="max-w-lg space-y-6">
-                <HexPanel>
-                  <h2 className="text-[10px] telemetry-font tracking-widest uppercase text-v2-text-muted mb-4">
+              <div className="max-w-xl space-y-4">
+                <div>
+                  <h2
+                    className="text-[9px] tracking-widest uppercase mb-3"
+                    style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.7 }}
+                  >
                     Topic Mastery
                   </h2>
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {TOPICS.map((topic) => {
                       const progress = allProgress?.find((p) => p.topicId === topic.id);
                       return (
@@ -117,60 +222,94 @@ export default function ProfilePage() {
                       );
                     })}
                   </div>
-                </HexPanel>
+                </div>
               </div>
             )}
 
+            {/* ── Badges Tab ── */}
             {activeTab === "badges" && (
-              <div className="max-w-lg">
-                <HexPanel>
-                  <h2 className="text-[10px] telemetry-font tracking-widest uppercase text-v2-text-muted mb-4">
-                    Badges ({profile?.badges?.length ?? 0})
+              <div className="max-w-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <h2
+                    className="text-[9px] tracking-widest uppercase"
+                    style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.7 }}
+                  >
+                    Earned Badges
                   </h2>
-                  {profile?.badges && profile.badges.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-3">
-                      {profile.badges.map((badge) => (
-                        <div
-                          key={badge}
-                          className="flex flex-col items-center gap-1.5 p-3 rounded-lg"
-                          style={{
-                            background: "rgba(224, 228, 236, 0.04)",
-                            border: "1px solid rgba(224, 228, 236, 0.1)",
-                          }}
-                        >
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-v2-silver/10">
-                            <span className="text-lg">⬡</span>
-                          </div>
-                          <span className="text-[10px] text-v2-text-dim text-center">
-                            {badge}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-v2-text-dim">
+                  <span className="text-[9px] telemetry-font text-[#6a7288]">
+                    {profile?.badges?.length ?? 0} earned
+                  </span>
+                </div>
+                {profile?.badges && profile.badges.length > 0 ? (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {profile.badges.map((badge) => (
+                      <div
+                        key={badge}
+                        className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg"
+                        style={{
+                          background: `${accentColor}04`,
+                          border: `1px solid ${accentColor}12`,
+                        }}
+                      >
+                        <BadgeIcon earned />
+                        <span className="text-[9px] text-[#8eafc8] text-center display-font tracking-wider uppercase">
+                          {badge.replace(/-/g, " ")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div
+                    className="py-8 text-center rounded-lg"
+                    style={{ background: `${accentColor}03`, border: `1px solid ${accentColor}08` }}
+                  >
+                    <BadgeIcon earned={false} />
+                    <p className="text-[11px] text-[#8eafc8] mt-2">
                       Complete activities to earn badges.
                     </p>
-                  )}
-                </HexPanel>
+                  </div>
+                )}
               </div>
             )}
 
+            {/* ── Settings Tab ── */}
             {activeTab === "settings" && (
-              <div className="max-w-lg space-y-4">
-                <HexPanel>
-                  <h2 className="text-[10px] telemetry-font tracking-widest uppercase text-v2-text-muted mb-4">
-                    Sound
+              <div className="max-w-xl space-y-4">
+                <div>
+                  <h2
+                    className="text-[9px] tracking-widest uppercase mb-3"
+                    style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.7 }}
+                  >
+                    Audio
                   </h2>
                   <button
                     onClick={() => sound.toggle()}
-                    className="px-4 py-2 text-xs rounded border border-v2-border text-v2-text
-                      hover:border-v2-silver/30 transition-all"
-                    style={{ fontFamily: "'Chakra Petch', sans-serif" }}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200"
+                    style={{
+                      background: `${accentColor}04`,
+                      border: `1px solid ${sound.isEnabled() ? `${accentColor}30` : `${accentColor}10`}`,
+                    }}
                   >
-                    Sound: {sound.isEnabled() ? "ON" : "OFF"}
+                    {/* Speaker icon */}
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke={sound.isEnabled() ? accentColor : "#6a7288"} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="2 6 2 10 5 10 9 13 9 3 5 6" />
+                      {sound.isEnabled() ? (
+                        <>
+                          <path d="M11 5.5a3.5 3.5 0 010 5" />
+                          <path d="M12.5 3.5a6 6 0 010 9" />
+                        </>
+                      ) : (
+                        <line x1="12" y1="6" x2="15" y2="10" />
+                      )}
+                    </svg>
+                    <span
+                      className="text-[10px] display-font tracking-wider uppercase"
+                      style={{ color: sound.isEnabled() ? accentColor : "#6a7288" }}
+                    >
+                      Sound: {sound.isEnabled() ? "ON" : "OFF"}
+                    </span>
                   </button>
-                </HexPanel>
+                </div>
               </div>
             )}
           </div>

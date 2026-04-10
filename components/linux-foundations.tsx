@@ -1159,11 +1159,83 @@ function PathResolver({ onComplete }) {
   );
 }
 
+// ─── INTERACTIVE: OCTAL VALUE FLIP CARDS ────────────────────────────────────
+function OctalFlipCards() {
+  const [revealed, setRevealed] = useState<Record<number, boolean>>({});
+  const allRevealed = revealed[0] && revealed[1] && revealed[2];
+
+  const cards = [
+    { perm: "Read", letter: "r", value: "4" },
+    { perm: "Write", letter: "w", value: "2" },
+    { perm: "Execute", letter: "x", value: "1" },
+  ];
+
+  return (
+    <div style={{ margin: "12px 0 20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        {cards.map((card, i) => {
+          const isRevealed = !!revealed[i];
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setRevealed((prev) => ({ ...prev, [i]: true }))}
+              style={{
+                padding: "14px 16px", borderRadius: 8, textAlign: "center",
+                cursor: isRevealed ? "default" : "pointer",
+                background: isRevealed ? "rgba(80,200,255,0.06)" : "rgba(80,200,255,0.02)",
+                border: isRevealed ? "1px solid rgba(80,200,255,0.25)" : "1px solid rgba(80,200,255,0.12)",
+                transition: "all 0.3s ease",
+                transform: isRevealed ? "none" : "none",
+              }}
+            >
+              <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 14, marginBottom: 6 }}>
+                {card.perm} ({card.letter})
+              </div>
+              {isRevealed ? (
+                <div style={{
+                  color: "#E8ECF0", fontSize: 28, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                  animation: "fadeInUp 0.3s ease-out",
+                }}>
+                  {card.value}
+                </div>
+              ) : (
+                <div style={{
+                  color: "#50C8FF", fontSize: 14, opacity: 0.5,
+                  fontFamily: "'Chakra Petch', sans-serif", letterSpacing: "0.5px",
+                }}>
+                  tap to reveal
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {allRevealed && (
+        <div style={{
+          marginTop: 10, padding: "8px 14px", borderRadius: 6,
+          background: "rgba(122,232,122,0.06)", border: "1px solid rgba(122,232,122,0.15)",
+          color: "#7AE87A", fontSize: 13, fontWeight: 600, textAlign: "center",
+          animation: "fadeInUp 0.3s ease-out",
+        }}>
+          r + w + x = 4 + 2 + 1 = 7 (full access)
+        </div>
+      )}
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // ─── INTERACTIVE: PERMISSION BUILDER ────────────────────────────────────────
 function PermissionBuilder({ onComplete }) {
-  const [mode, setMode] = useState("decode"); // decode | encode
+  const [mode, setMode] = useState("decode"); // decode | encode | octal
   const [bits, setBits] = useState([true, true, true, true, false, true, true, false, false]);
-  const [challenge, setChallenge] = useState(null);
+  const [challenge, setChallenge] = useState<{ desc: string; answer: string } | null>(null);
   const [userInput, setUserInput] = useState("");
   const [checked, setChecked] = useState(false);
 
@@ -1173,30 +1245,64 @@ function PermissionBuilder({ onComplete }) {
     { desc: "Owner can read and execute. Nobody else has any access.", answer: "r-x------" },
   ];
 
+  const octalProblems = [
+    { desc: "rwxr-xr-x", answer: "755" },
+    { desc: "rw-r--r--", answer: "644" },
+    { desc: "rwx------", answer: "700" },
+    { desc: "rw-------", answer: "600" },
+    { desc: "rwxr-x---", answer: "750" },
+    { desc: "r--r--r--", answer: "444" },
+    { desc: "rwxrwxr-x", answer: "775" },
+    { desc: "rw-rw----", answer: "660" },
+  ];
+
   useEffect(() => {
     if (mode === "encode") {
       setChallenge(encodeProblems[Math.floor(Math.random() * encodeProblems.length)]);
       setUserInput("");
       setChecked(false);
+    } else if (mode === "octal") {
+      setChallenge(octalProblems[Math.floor(Math.random() * octalProblems.length)]);
+      setUserInput("");
+      setChecked(false);
     }
   }, [mode]);
 
-  const permStr = bits.map((b, i) => b ? "rwx"[i % 3] : "-").join("");
   const labels = ["Owner", "Group", "Others"];
-  const permNames = ["Read", "Write", "Execute"];
+  const groupColors = ["#FF6B6B", "#FFA832", "#7AE87A"];
 
-  const describe = (start) => {
-    const perms = [];
+  // Compute octal digit for a group of 3 bits
+  const octalDigit = (start: number) =>
+    (bits[start] ? 4 : 0) + (bits[start + 1] ? 2 : 0) + (bits[start + 2] ? 1 : 0);
+  const octalStr = `${octalDigit(0)}${octalDigit(3)}${octalDigit(6)}`;
+
+  const describe = (start: number) => {
+    const perms: string[] = [];
     if (bits[start]) perms.push("read");
     if (bits[start + 1]) perms.push("write");
     if (bits[start + 2]) perms.push("execute");
     return perms.length > 0 ? perms.join(", ") : "no access";
   };
 
-  const checkEncode = () => {
+  const checkAnswer = () => {
     setChecked(true);
     if (onComplete) onComplete();
   };
+
+  const nextOctalChallenge = () => {
+    setChallenge(octalProblems[Math.floor(Math.random() * octalProblems.length)]);
+    setUserInput("");
+    setChecked(false);
+  };
+
+  const modeLabels: Record<string, string> = {
+    decode: "Decode",
+    encode: "String",
+    octal: "Octal",
+  };
+
+  const inputLength = mode === "octal" ? 3 : 9;
+  const placeholder = mode === "octal" ? "755" : "rwx------";
 
   return (
     <div style={{
@@ -1207,14 +1313,14 @@ function PermissionBuilder({ onComplete }) {
         <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
           ▸ PERMISSION LAB
         </div>
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          {["decode", "encode"].map((m) => (
+        <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
+          {(["decode", "encode", "octal"] as const).map((m) => (
             <button key={m} onClick={() => setMode(m)} style={{
-              padding: "4px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer",
+              padding: "4px 14px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
               background: mode === m ? "rgba(80,200,255,0.15)" : "rgba(255,255,255,0.04)",
               border: mode === m ? "1px solid rgba(80,200,255,0.4)" : "1px solid rgba(255,255,255,0.08)",
               color: mode === m ? "#50C8FF" : "#778899",
-            }}>{m === "decode" ? "String → English" : "English → String"}</button>
+            }}>{modeLabels[m]}</button>
           ))}
           <button onClick={() => { setBits([true, true, true, true, false, true, true, false, false]); setUserInput(""); setChecked(false); }} style={{
             padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
@@ -1223,50 +1329,74 @@ function PermissionBuilder({ onComplete }) {
         </div>
       </div>
 
+      {/* ── DECODE MODE: toggle bits, see English + live octal ── */}
       {mode === "decode" && (
         <>
-          <p style={{ color: "#889", fontSize: 14, margin: "0 0 12px 0" }}>Toggle permission bits and see the plain-English meaning update in real time.</p>
+          <p style={{ color: "#889", fontSize: 14, margin: "0 0 12px 0" }}>Toggle permission bits and see the meaning and octal value update in real time.</p>
           <div style={{
             background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: 16,
             fontFamily: "'JetBrains Mono', monospace", fontSize: 22, textAlign: "center",
             border: "1px solid rgba(80,200,255,0.1)", marginBottom: 14,
           }}>
-            {bits.map((b, i) => (
-              <span
-                key={i}
-                onClick={() => { const n = [...bits]; n[i] = !n[i]; setBits(n); }}
-                style={{
-                  color: b ? (i < 3 ? "#FF6B6B" : i < 6 ? "#FFA832" : "#7AE87A") : "#334",
-                  cursor: "pointer", padding: "2px 1px",
-                  borderBottom: `2px solid ${b ? (i < 3 ? "#FF6B6B" : i < 6 ? "#FFA832" : "#7AE87A") : "transparent"}`,
+            {/* rwx string display */}
+            <div>
+              {bits.map((b, i) => (
+                <span
+                  key={i}
+                  onClick={() => { const n = [...bits]; n[i] = !n[i]; setBits(n); }}
+                  style={{
+                    color: b ? groupColors[Math.floor(i / 3)] : "#334",
+                    cursor: "pointer", padding: "2px 1px",
+                    borderBottom: `2px solid ${b ? groupColors[Math.floor(i / 3)] : "transparent"}`,
+                    transition: "all 0.15s",
+                  }}
+                >{"rwx"[i % 3] === "r" && b ? "r" : "rwx"[i % 3] === "w" && b ? "w" : "rwx"[i % 3] === "x" && b ? "x" : "-"}</span>
+              ))}
+            </div>
+            {/* Live octal readout */}
+            <div style={{ marginTop: 8, fontSize: 14, color: "#889" }}>
+              <span style={{ color: "#556", marginRight: 6 }}>chmod</span>
+              {[0, 1, 2].map((gi) => (
+                <span key={gi} style={{
+                  color: groupColors[gi], fontWeight: 700, fontSize: 18,
                   transition: "all 0.15s",
-                }}
-              >{"rwx"[i % 3] === "r" && b ? "r" : "rwx"[i % 3] === "w" && b ? "w" : "rwx"[i % 3] === "x" && b ? "x" : "-"}</span>
-            ))}
+                }}>
+                  {octalDigit(gi * 3)}
+                </span>
+              ))}
+            </div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
             {labels.map((label, li) => (
               <div key={label} style={{
                 padding: 12, borderRadius: 6, background: "rgba(0,0,0,0.2)",
-                border: `1px solid ${li === 0 ? "rgba(255,107,107,0.2)" : li === 1 ? "rgba(255,168,50,0.2)" : "rgba(122,232,122,0.2)"}`,
+                border: `1px solid ${groupColors[li]}33`,
               }}>
-                <div style={{ color: li === 0 ? "#FF6B6B" : li === 1 ? "#FFA832" : "#7AE87A", fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{label}</div>
-                <div style={{ color: "#C8CCD0", fontSize: 14 }}>Can {describe(li * 3)}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ color: groupColors[li], fontWeight: 700, fontSize: 13 }}>{label}</span>
+                  <span style={{ color: groupColors[li], fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 700, opacity: 0.7 }}>{octalDigit(li * 3)}</span>
+                </div>
+                <div style={{ color: "#C8CCD0", fontSize: 13 }}>
+                  {bits[li * 3] ? "4" : "0"} + {bits[li * 3 + 1] ? "2" : "0"} + {bits[li * 3 + 2] ? "1" : "0"} = {octalDigit(li * 3)}
+                </div>
+                <div style={{ color: "#889", fontSize: 12, marginTop: 2 }}>Can {describe(li * 3)}</div>
               </div>
             ))}
           </div>
         </>
       )}
 
+      {/* ── ENCODE MODE: English → rwx string ── */}
       {mode === "encode" && challenge && (
         <>
+          <p style={{ color: "#889", fontSize: 14, margin: "0 0 6px 0" }}>Write the 9-character permission string for this description:</p>
           <p style={{ color: "#E8ECF0", fontSize: 15, margin: "0 0 14px 0", lineHeight: 1.6 }}>{challenge.desc}</p>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <input
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder="rwx------"
-              maxLength={9}
+              placeholder={placeholder}
+              maxLength={inputLength}
               disabled={checked}
               style={{
                 padding: "10px 14px", background: "rgba(0,0,0,0.3)",
@@ -1274,19 +1404,97 @@ function PermissionBuilder({ onComplete }) {
                 borderRadius: 6, color: "#E8E8F0", fontSize: 18, width: 140,
                 fontFamily: "'JetBrains Mono', monospace", letterSpacing: 2, textAlign: "center",
               }}
-              onKeyDown={(e) => e.key === "Enter" && !checked && checkEncode()}
+              onKeyDown={(e) => e.key === "Enter" && !checked && userInput.length === inputLength && checkAnswer()}
             />
             {!checked && (
-              <button onClick={checkEncode} disabled={userInput.length !== 9} style={{
-                padding: "10px 20px", background: userInput.length === 9 ? "#50C8FF" : "rgba(80,200,255,0.15)",
-                border: "none", borderRadius: 6, color: userInput.length === 9 ? "#1A1A2E" : "#556",
-                fontWeight: 700, fontSize: 14, cursor: userInput.length === 9 ? "pointer" : "not-allowed",
+              <button onClick={checkAnswer} disabled={userInput.length !== inputLength} style={{
+                padding: "10px 20px", background: userInput.length === inputLength ? "#50C8FF" : "rgba(80,200,255,0.15)",
+                border: "none", borderRadius: 6, color: userInput.length === inputLength ? "#1A1A2E" : "#556",
+                fontWeight: 700, fontSize: 14, cursor: userInput.length === inputLength ? "pointer" : "not-allowed",
               }}>Check</button>
             )}
           </div>
           {checked && (
             <div style={{ marginTop: 10, color: userInput === challenge.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 14 }}>
               {userInput === challenge.answer ? "✓ Perfect!" : `✗ Correct answer: ${challenge.answer}`}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── OCTAL MODE: rwx string → 3-digit octal ── */}
+      {mode === "octal" && challenge && (
+        <>
+          <p style={{ color: "#889", fontSize: 14, margin: "0 0 6px 0" }}>Convert this permission string to its 3-digit octal number:</p>
+          <div style={{
+            background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: "12px 20px", marginBottom: 14,
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 24, textAlign: "center",
+            border: "1px solid rgba(80,200,255,0.1)",
+          }}>
+            {challenge.desc.split("").map((ch, i) => (
+              <span key={i} style={{
+                color: ch === "-" ? "#334" : groupColors[Math.floor(i / 3)],
+                padding: "0 1px",
+              }}>{ch}</span>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ color: "#556", fontFamily: "'JetBrains Mono', monospace", fontSize: 16 }}>chmod</span>
+              <input
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value.replace(/[^0-7]/g, ""))}
+                placeholder="755"
+                maxLength={3}
+                disabled={checked}
+                style={{
+                  padding: "10px 14px", background: "rgba(0,0,0,0.3)",
+                  border: `1px solid ${checked ? (userInput === challenge.answer ? "rgba(122,232,122,0.4)" : "rgba(255,107,107,0.4)") : "rgba(80,200,255,0.2)"}`,
+                  borderRadius: 6, color: "#E8E8F0", fontSize: 22, width: 80,
+                  fontFamily: "'JetBrains Mono', monospace", letterSpacing: 4, textAlign: "center",
+                }}
+                onKeyDown={(e) => e.key === "Enter" && !checked && userInput.length === 3 && checkAnswer()}
+              />
+            </div>
+            {!checked && (
+              <button onClick={checkAnswer} disabled={userInput.length !== 3} style={{
+                padding: "10px 20px", background: userInput.length === 3 ? "#50C8FF" : "rgba(80,200,255,0.15)",
+                border: "none", borderRadius: 6, color: userInput.length === 3 ? "#1A1A2E" : "#556",
+                fontWeight: 700, fontSize: 14, cursor: userInput.length === 3 ? "pointer" : "not-allowed",
+              }}>Check</button>
+            )}
+            {checked && (
+              <button onClick={nextOctalChallenge} style={{
+                padding: "10px 20px", background: "rgba(80,200,255,0.1)",
+                border: "1px solid rgba(80,200,255,0.3)", borderRadius: 6, color: "#50C8FF",
+                fontWeight: 700, fontSize: 14, cursor: "pointer",
+              }}>Next →</button>
+            )}
+          </div>
+          {checked && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ color: userInput === challenge.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 14 }}>
+                {userInput === challenge.answer ? "✓ Perfect!" : `✗ Correct answer: ${challenge.answer}`}
+              </div>
+              {/* Show the breakdown */}
+              <div style={{
+                marginTop: 8, padding: "10px 14px", borderRadius: 6,
+                background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#C8CCD0",
+              }}>
+                {[0, 1, 2].map((gi) => {
+                  const g = challenge.desc.slice(gi * 3, gi * 3 + 3);
+                  const r = g[0] === "r" ? 4 : 0;
+                  const w = g[1] === "w" ? 2 : 0;
+                  const x = g[2] === "x" ? 1 : 0;
+                  return (
+                    <div key={gi}>
+                      <span style={{ color: groupColors[gi], fontWeight: 700 }}>{labels[gi]}:</span>{" "}
+                      {g} = {r} + {w} + {x} = <strong style={{ color: "#E8ECF0" }}>{r + w + x}</strong>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </>
@@ -2680,6 +2888,49 @@ function Section6({ markComplete }) {
       <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
         These permissions are displayed as a string like <Code>rwxr-xr--</Code>, which reads as three groups of three characters — owner, group, others.
       </p>
+
+      <SectionHeading>Octal (Numeric) Notation</SectionHeading>
+      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+        While <Code>rwxr-xr--</Code> is how Linux <em>displays</em> permissions, the <Code>chmod</Code> command often uses a shorthand: a three-digit number called <strong style={{ color: "#E8ECF0" }}>octal notation</strong>. Each permission bit has a numeric value:
+      </p>
+      <OctalFlipCards />
+      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+        For each group (owner, group, others), you <strong style={{ color: "#E8ECF0" }}>sum the values</strong> of the granted permissions. The result is a single digit from 0 to 7. Three digits — one per group — give you the full permission.
+      </p>
+
+      <div style={{
+        background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: "16px 20px", margin: "14px 0 20px",
+        border: "1px solid rgba(80,200,255,0.1)", fontFamily: "'JetBrains Mono', monospace",
+      }}>
+        <div style={{ color: "#889", fontSize: 12, marginBottom: 10, fontFamily: "'Chakra Petch', sans-serif", letterSpacing: "0.5px" }}>EXAMPLE: CONVERTING rwxr-xr-- TO OCTAL</div>
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
+          <span style={{ color: "#FF6B6B", fontWeight: 700 }}>Owner:</span>
+          <span style={{ color: "#C8CCD0" }}>rwx = 4 + 2 + 1 = <strong style={{ color: "#E8ECF0" }}>7</strong></span>
+          <span style={{ color: "#FFA832", fontWeight: 700 }}>Group:</span>
+          <span style={{ color: "#C8CCD0" }}>r-x = 4 + 0 + 1 = <strong style={{ color: "#E8ECF0" }}>5</strong></span>
+          <span style={{ color: "#7AE87A", fontWeight: 700 }}>Others:</span>
+          <span style={{ color: "#C8CCD0" }}>r-- = 4 + 0 + 0 = <strong style={{ color: "#E8ECF0" }}>4</strong></span>
+        </div>
+        <div style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10 }}>
+          <span style={{ color: "#889", fontSize: 13 }}>Result: </span>
+          <span style={{ color: "#50C8FF", fontSize: 20, fontWeight: 700 }}>754</span>
+          <span style={{ color: "#889", fontSize: 13 }}> — so <Code>chmod 754 file</Code> sets these exact permissions.</span>
+        </div>
+      </div>
+
+      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+        Common patterns you will see everywhere:
+      </p>
+      <InfoTable
+        headers={["Octal", "String", "Meaning"]}
+        rows={[
+          [<Code>755</Code>, <Code>rwxr-xr-x</Code>, "Owner: full. Everyone else: read + execute. Default for scripts and directories."],
+          [<Code>644</Code>, <Code>rw-r--r--</Code>, "Owner: read + write. Everyone else: read only. Default for most files."],
+          [<Code>700</Code>, <Code>rwx------</Code>, "Owner only. Private scripts, SSH keys."],
+          [<Code>600</Code>, <Code>rw-------</Code>, "Owner read + write only. Private config files."],
+          [<Code>444</Code>, <Code>r--r--r--</Code>, "Read-only for everyone. Protected reference files."],
+        ]}
+      />
 
       <PermissionBuilder onComplete={() => markComplete("s6-perm")} />
 

@@ -104,31 +104,51 @@ export default function MissionOverlay({
           style={{ transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)` }}
         >
           <div
-            className="holo-panel p-6 animate-[holoMaterialize_0.3s_ease-out]"
+            className="holo-panel p-6 animate-[holoMaterialize_0.3s_ease-out] relative"
             style={{
               borderColor: `${campaignColor}30`,
               boxShadow: `0 0 40px ${campaignColor}15, inset 0 0 30px ${campaignColor}05`,
             }}
           >
+            {/* Top accent line */}
+            <div
+              className="absolute top-0 left-4 right-4 h-px"
+              style={{ background: `linear-gradient(90deg, transparent, ${campaignColor}60, transparent)` }}
+            />
+
             {/* Close */}
             <button
               onClick={onDismiss}
-              className="absolute top-3 right-3 text-v2-text-muted hover:text-v2-text text-xs"
+              className="absolute top-3 right-3 text-[#8eafc8] hover:text-v2-text text-xs transition-colors"
             >
-              ✕
+              &#10005;
             </button>
 
-            {/* Header */}
-            <div className="mb-1">
-              <span className="text-[9px] telemetry-font text-v2-text-muted uppercase tracking-wider">
-                Mission {missionNumber} of {totalMissions}
-              </span>
-              <h2
-                className="display-font text-sm tracking-[0.12em] uppercase mt-1"
-                style={{ color: campaignColor, textShadow: `0 0 12px ${campaignColor}40` }}
+            {/* Header with mission badge */}
+            <div className="mb-1 flex items-start gap-3">
+              {/* Mission number badge */}
+              <div
+                className="shrink-0 w-8 h-8 rounded flex items-center justify-center telemetry-font text-xs font-bold mt-0.5"
+                style={{
+                  background: `${campaignColor}12`,
+                  border: `1px solid ${campaignColor}30`,
+                  color: campaignColor,
+                  textShadow: `0 0 8px ${campaignColor}40`,
+                }}
               >
-                {mission.title}
-              </h2>
+                {missionNumber}
+              </div>
+              <div>
+                <span className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider">
+                  Mission {missionNumber} of {totalMissions}
+                </span>
+                <h2
+                  className="display-font text-sm tracking-[0.12em] uppercase mt-1"
+                  style={{ color: campaignColor, textShadow: `0 0 12px ${campaignColor}40` }}
+                >
+                  {mission.title}
+                </h2>
+              </div>
             </div>
 
             {/* Status badge */}
@@ -138,13 +158,19 @@ export default function MissionOverlay({
               {isLocked && <StatusBadge label="Locked" variant="muted" />}
             </div>
 
-            <p className="text-xs text-v2-text-dim leading-relaxed mb-4">
+            <p className="text-xs text-[#c8d6e5] leading-relaxed mb-4">
               {mission.description}
             </p>
 
+            {/* Section divider */}
+            <div
+              className="h-px mb-4"
+              style={{ background: `linear-gradient(90deg, transparent, ${campaignColor}25, transparent)` }}
+            />
+
             {/* Loadout with inline toggles */}
             <div className="mb-4">
-              <h3 className="text-[9px] telemetry-font text-v2-text-muted uppercase tracking-wider mb-2">
+              <h3 className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider mb-2">
                 Mission Loadout
               </h3>
               <div className="space-y-1">
@@ -195,18 +221,18 @@ export default function MissionOverlay({
             </div>
 
             {/* Knowledge Check */}
-            <div className="mb-4 px-2 py-2 bg-v2-bg-elevated/50 rounded">
-              <h3 className="text-[9px] telemetry-font text-v2-text-muted uppercase tracking-wider mb-1">
+            <div className="mb-4 px-2.5 py-2.5 rounded" style={{ background: `${campaignColor}08`, border: `1px solid ${campaignColor}12` }}>
+              <h3 className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider mb-1">
                 Knowledge Check
               </h3>
-              <p className="text-[11px] text-v2-text-dim">{mission.knowledgeCheck.description}</p>
-              <span className="text-[9px] telemetry-font text-v2-text-muted">
+              <p className="text-[11px] text-[#c8d6e5]">{mission.knowledgeCheck.description}</p>
+              <span className="text-[9px] telemetry-font text-[#8eafc8]">
                 Pass: {Math.round(mission.knowledgeCheck.passThreshold * 100)}%
               </span>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-3 border-t border-v2-border">
+            <div className="flex gap-3 pt-3" style={{ borderTop: `1px solid ${campaignColor}15` }}>
               {isLocked ? (
                 <div className="flex-1 text-center py-2">
                   <span className="text-[11px] text-v2-text-muted">

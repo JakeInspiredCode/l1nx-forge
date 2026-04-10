@@ -6,9 +6,18 @@ interface CentralStarProps {
   icon: string;
   title: string;
   color: string;
+  completedMissions: number;
+  totalMissions: number;
 }
 
-export default function CentralStar({ cx, cy, icon, title, color }: CentralStarProps) {
+export default function CentralStar({ cx, cy, icon, title, color, completedMissions, totalMissions }: CentralStarProps) {
+  // Progress ring calculation
+  const progressR = 55;
+  const circumference = 2 * Math.PI * progressR;
+  const pct = totalMissions > 0 ? completedMissions / totalMissions : 0;
+  const dashOffset = circumference * (1 - pct);
+  const isComplete = totalMissions > 0 && completedMissions === totalMissions;
+
   return (
     <g>
       {/* Outermost corona — warm glow */}
@@ -43,15 +52,34 @@ export default function CentralStar({ cx, cy, icon, title, color }: CentralStarP
       {/* Inner glow */}
       <circle cx={cx} cy={cy} r={38} fill={`url(#star-inner)`} />
 
-      {/* Pulsing ring decoration */}
+      {/* Campaign progress ring */}
+      <circle
+        cx={cx} cy={cy} r={progressR}
+        fill="none" stroke={color}
+        strokeWidth={2.5} opacity={0.1}
+      />
+      <circle
+        cx={cx} cy={cy} r={progressR}
+        fill="none"
+        stroke={isComplete ? "#22c55e" : color}
+        strokeWidth={2.5}
+        strokeDasharray={circumference}
+        strokeDashoffset={dashOffset}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${cx} ${cy})`}
+        className="transition-all duration-700"
+        style={{ filter: `drop-shadow(0 0 6px ${isComplete ? "#22c55e" : color}80)` }}
+      />
+
+      {/* Decorative pulsing ring */}
       <circle
         cx={cx}
         cy={cy}
-        r={50}
+        r={65}
         fill="none"
         stroke={color}
-        strokeWidth={0.8}
-        opacity={0.2}
+        strokeWidth={0.5}
+        opacity={0.15}
         className="animate-[availablePulse_3s_ease-in-out_infinite]"
       />
 
@@ -91,6 +119,21 @@ export default function CentralStar({ cx, cy, icon, title, color }: CentralStarP
         style={{ textShadow: `0 0 10px ${color}40` }}
       >
         {title}
+      </text>
+
+      {/* Mission count sub-label */}
+      <text
+        x={cx}
+        y={cy + 58}
+        textAnchor="middle"
+        dominantBaseline="hanging"
+        fill="#8eafc8"
+        fontSize={9}
+        fontFamily="'JetBrains Mono', monospace"
+        className="pointer-events-none select-none"
+        style={{ textShadow: "0 0 4px rgba(0,0,0,0.6)" }}
+      >
+        {completedMissions}/{totalMissions} missions
       </text>
 
       {/* Gradient definitions */}

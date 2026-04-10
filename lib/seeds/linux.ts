@@ -46,7 +46,7 @@ const linux: ForgeCard[] = [
   card("linux-008", "linux", "easy", 1, 1, "Absolute vs relative path", "Absolute starts from `/`, relative from current dir"),
 
   // Permissions
-  card("linux-017", "linux", "easy", 1, 1, "`rwxr-xr--`", "Owner: rwx, Group: r-x, Others: r--"),
+  card("linux-017", "linux", "easy", 1, 1, "Decode `rwxr-xr--`", "Owner: rwx (7), Group: r-x (5), Others: r-- (4) → octal **754**"),
   card("linux-018", "linux", "easy", 1, 1, "`rwxr-xr-x` in octal", "`755`"),
   card("linux-018a", "linux", "easy", 1, 1, "`rw-r--r--` in octal", "`644`"),
   card("linux-018b", "linux", "easy", 1, 1, "`rwx------` in octal", "`700`"),

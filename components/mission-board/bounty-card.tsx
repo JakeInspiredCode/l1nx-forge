@@ -1,50 +1,88 @@
 "use client";
 
 import type { BountyTemplate } from "@/lib/types/campaign";
-import HexPanel from "@/components/ui/hex-panel";
-import StatusBadge from "@/components/ui/status-badge";
 
 interface BountyCardProps {
   bounty: BountyTemplate;
+  campaignColor?: string;
   onClick: (bountyId: string) => void;
 }
 
-const typeIcons: Record<string, string> = {
-  "quick-draw": "⚡",
-  "incident-drill": "🚨",
-  diagnosis: "🔍",
-  flashcards: "🃏",
-  terminal: "💻",
+// Minimal SVG icons — thematic, no emoji
+const TypeIcon = ({ type, color }: { type: string; color: string }) => {
+  const stroke = color;
+  const common = { width: 14, height: 14, viewBox: "0 0 16 16", fill: "none", stroke, strokeWidth: 1.4, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+
+  switch (type) {
+    case "quick-draw":
+      // Lightning bolt
+      return <svg {...common}><polyline points="9 1 4 9 8 9 7 15 12 7 8 7 9 1" /></svg>;
+    case "incident-drill":
+      // Warning triangle
+      return <svg {...common}><path d="M8 1.5 L14.5 13 H1.5 Z" /><line x1="8" y1="6" x2="8" y2="9" /><circle cx="8" cy="11" r="0.5" fill={stroke} stroke="none" /></svg>;
+    case "diagnosis":
+      // Crosshair/target
+      return <svg {...common}><circle cx="8" cy="8" r="5" /><line x1="8" y1="1" x2="8" y2="4" /><line x1="8" y1="12" x2="8" y2="15" /><line x1="1" y1="8" x2="4" y2="8" /><line x1="12" y1="8" x2="15" y2="8" /></svg>;
+    case "flashcards":
+      // Stacked cards
+      return <svg {...common}><rect x="3" y="1" width="10" height="12" rx="1" /><rect x="5" y="3" width="10" height="12" rx="1" /></svg>;
+    case "terminal":
+      // Terminal prompt
+      return <svg {...common}><rect x="1" y="2" width="14" height="12" rx="1.5" /><polyline points="4 7 6.5 9 4 11" /><line x1="8" y1="11" x2="12" y2="11" /></svg>;
+    default:
+      return <svg {...common}><circle cx="8" cy="8" r="3" /></svg>;
+  }
 };
 
-const tierVariant = (tier: number) =>
-  tier === 1 ? "cyan" : tier === 2 ? "blue" : tier === 3 ? "purple" : "muted";
+export default function BountyCard({ bounty, campaignColor, onClick }: BountyCardProps) {
+  const color = campaignColor ?? "#06d6d6";
 
-export default function BountyCard({ bounty, onClick }: BountyCardProps) {
   return (
-    <HexPanel
-      size="sm"
+    <button
+      type="button"
       onClick={() => onClick(bounty.id)}
-      className="hover:border-v2-cyan/40 transition-colors cursor-pointer"
+      className="w-full text-left group transition-all duration-200"
     >
-      <div className="flex items-start gap-3">
-        <span className="text-lg flex-shrink-0">
-          {typeIcons[bounty.activityType] ?? "•"}
-        </span>
+      <div
+        className="flex items-center gap-2 px-2 py-1.5 rounded"
+        style={{
+          background: `${color}06`,
+          border: `1px solid ${color}12`,
+        }}
+      >
+        {/* Icon */}
+        <div
+          className="shrink-0 w-6 h-6 rounded flex items-center justify-center"
+          style={{ background: `${color}10` }}
+        >
+          <TypeIcon type={bounty.activityType} color={`${color}cc`} />
+        </div>
+
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-v2-text truncate">
+          <div className="text-[10px] text-[#e0e4ec] display-font tracking-wider truncate group-hover:text-white transition-colors">
             {bounty.title}
-          </h3>
-          <p className="text-xs text-v2-text-dim line-clamp-1">
-            {bounty.description}
-          </p>
-          <div className="flex items-center gap-2 mt-1.5">
-            <StatusBadge label={`T${bounty.tier}`} variant={tierVariant(bounty.tier) as any} />
-            <StatusBadge label={`~${bounty.estimatedMinutes}m`} variant="muted" />
-            <span className="text-xs mono text-v2-cyan">+{bounty.xpReward} XP</span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[8px] telemetry-font text-[#6a7288]">
+              {bounty.estimatedMinutes}m
+            </span>
+            <span className="text-[8px] text-[#444b5c]">|</span>
+            <span className="text-[8px] telemetry-font" style={{ color: `${color}99` }}>
+              +{bounty.xpReward} XP
+            </span>
           </div>
         </div>
+
+        {/* Arrow */}
+        <svg
+          width="10" height="10" viewBox="0 0 10 10"
+          className="shrink-0 opacity-0 group-hover:opacity-60 transition-opacity"
+          fill="none" stroke={color} strokeWidth="1.2"
+        >
+          <polyline points="3,2 7,5 3,8" />
+        </svg>
       </div>
-    </HexPanel>
+    </button>
   );
 }

@@ -5,17 +5,20 @@ import { MISSION_NODE_COLORS } from "@/lib/design/forge-v2-tokens";
 
 interface MissionNodeProps {
   mission: Mission;
+  missionIndex: number;
+  totalMissions: number;
   status: MissionStatus;
   cx: number;
   cy: number;
   size: number;
   celestialType: "asteroid" | "moon" | "planet" | "station";
+  campaignColor: string;
   isCurrent: boolean;
   onHover: (mission: Mission | null) => void;
   onClick: (mission: Mission) => void;
 }
 
-// Deterministic hash from mission id → consistent per-planet look
+// Deterministic hash from mission id — consistent per-planet look
 function hashId(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) | 0;
@@ -40,11 +43,14 @@ const SURFACE_PALETTES = [
 
 export default function MissionNode({
   mission,
+  missionIndex,
+  totalMissions,
   status,
   cx,
   cy,
   size,
   celestialType,
+  campaignColor,
   isCurrent,
   onHover,
   onClick,
@@ -56,7 +62,7 @@ export default function MissionNode({
 
   const h = hashId(mission.id);
   const palette = SURFACE_PALETTES[h % SURFACE_PALETTES.length];
-  const orbitRadius = Math.sqrt((cx - 500) ** 2 + (cy - 400) ** 2);
+  const orbitRadius = Math.sqrt((cx - 500) ** 2 + (cy - 380) ** 2);
 
   // Some planets get moons
   const hasMoon = !isLocked && (celestialType === "planet" || celestialType === "station") && h % 3 === 0;
@@ -72,6 +78,12 @@ export default function MissionNode({
 
   const lockedOpacity = 0.5;
 
+  // Orbit ring styling — campaign color, not grey
+  const orbitColor = isLocked ? "#3a4258" : campaignColor;
+  const orbitOpacity = isCurrent ? 0.25 : isLocked ? 0.08 : 0.12;
+  const orbitDash = isLocked ? "2 6" : isCurrent ? "none" : "2 4";
+  const orbitWidth = isCurrent ? 0.8 : 0.4;
+
   return (
     <g
       className={`${isInteractive ? "cursor-pointer sector-node" : "cursor-default"} transition-transform duration-200`}
@@ -86,12 +98,12 @@ export default function MissionNode({
       {/* Invisible hit area */}
       <circle cx={cx} cy={cy} r={Math.max(size + 10, 20)} fill="transparent" />
 
-      {/* Orbit ring */}
+      {/* Orbit ring — campaign-colored */}
       <circle
-        cx={500} cy={400} r={orbitRadius}
-        fill="none" stroke={isLocked ? "#3a4258" : "#4a5568"}
-        strokeWidth={0.4} opacity={0.2}
-        strokeDasharray={isLocked ? "2 6" : "none"}
+        cx={500} cy={380} r={orbitRadius}
+        fill="none" stroke={orbitColor}
+        strokeWidth={orbitWidth} opacity={orbitOpacity}
+        strokeDasharray={orbitDash}
       />
 
       {/* ─── ASTEROID ─── */}
@@ -300,18 +312,33 @@ export default function MissionNode({
       {/* Mission title */}
       <text
         x={cx}
-        y={cy + size + (hasMoon ? 12 : 10)}
+        y={cy + size + (hasMoon ? 13 : 11)}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill={isLocked ? "#5a6278" : "#c8d6e5"}
-        fontSize={7.5}
+        fill={isLocked ? "#8eafc8" : "#e0e4ec"}
+        fontSize={12}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={600}
-        letterSpacing="0.06em"
+        letterSpacing="0.08em"
         className="pointer-events-none select-none"
-        style={{ textShadow: isLocked ? "none" : "0 0 4px rgba(0,0,0,0.8)" }}
+        style={{ textShadow: isLocked ? "none" : "0 0 6px rgba(0,0,0,0.8)" }}
       >
-        {mission.title.length > 20 ? mission.title.slice(0, 18) + "…" : mission.title}
+        {mission.title.length > 22 ? mission.title.slice(0, 20) + "…" : mission.title}
+      </text>
+
+      {/* Mission number sub-label */}
+      <text
+        x={cx}
+        y={cy + size + (hasMoon ? 28 : 26)}
+        textAnchor="middle"
+        dominantBaseline="hanging"
+        fill="#8eafc8"
+        fontSize={9}
+        fontFamily="'JetBrains Mono', monospace"
+        className="pointer-events-none select-none"
+        style={{ textShadow: "0 0 4px rgba(0,0,0,0.6)" }}
+      >
+        {missionIndex + 1}/{totalMissions}
       </text>
 
       {/* Accomplished indicator */}

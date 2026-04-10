@@ -42,7 +42,7 @@ const PLANET_PROFILES: { size: number; celestialType: OrbitalPos["celestialType"
 
 function computeOrbitalPositions(count: number): OrbitalPos[] {
   const centerX = 500;
-  const centerY = 400;
+  const centerY = 380;
   const minRadius = 80;
   const maxRadius = 340;
 
@@ -147,6 +147,15 @@ export default function SystemMap() {
   const currentMissionIndex = enrolledState?.currentMissionIndex ?? 0;
   const completedCount = enrolledState?.completedMissions.length ?? 0;
 
+  // Campaign-specific XP — sum xpEarned from missions in this campaign
+  const campaignXp = useMemo(() => {
+    if (!missionStates) return 0;
+    const missionIds = new Set(missions.map((m) => m.id));
+    return missionStates
+      .filter((ms) => missionIds.has(ms.missionId) && typeof ms.xpEarned === "number")
+      .reduce((sum, ms) => sum + (ms.xpEarned as number), 0);
+  }, [missionStates, missions]);
+
   // Decaying missions
   const decayingMissionIds = missionStates
     ?.filter((m) => m.status === "decaying" && missions.some((cm) => cm.id === m.missionId))
@@ -156,7 +165,7 @@ export default function SystemMap() {
   const pathNodes = missions.map((m, i) => ({
     missionId: m.id,
     cx: orbitalPositions[i]?.cx ?? 500,
-    cy: orbitalPositions[i]?.cy ?? 400,
+    cy: orbitalPositions[i]?.cy ?? 380,
   }));
 
   // Selected mission number
@@ -221,81 +230,142 @@ export default function SystemMap() {
       </div>
 
       {/* Main layout: map + sidebar */}
-      <div className="absolute inset-0 z-[5] flex flex-col md:flex-row pt-14 pb-3">
-        {/* Solar system SVG — main area */}
-        <div className="flex-1 relative">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-v2-text-dim text-sm telemetry-font animate-pulse">
-                Scanning star system...
+      <div className="absolute inset-0 z-[5] flex flex-col md:flex-row pt-11 pb-1 px-1 gap-2">
+        {/* Solar system SVG — glass panel framed */}
+        <div className="flex-1 relative flex flex-col min-w-0 min-h-0">
+          <div className="glass-panel-header">
+            <span>{activeCampaign ? `System Map — ${activeCampaign.title.replace(/^Operation\s+/, '')}` : 'System Map'}</span>
+          </div>
+          <div className="flex-1 glass-panel rounded-b-lg overflow-hidden relative">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-[#8eafc8] text-sm telemetry-font animate-pulse">
+                  Scanning star system...
+                </div>
               </div>
-            </div>
-          ) : hasNoCampaign ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-v2-text-muted text-sm telemetry-font">
-                No system selected
+            ) : hasNoCampaign ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-[#8eafc8] text-sm telemetry-font">
+                  No system selected
+                </div>
               </div>
-            </div>
-          ) : (
-            <svg
-              viewBox="0 0 1000 800"
-              preserveAspectRatio="xMidYMid meet"
-              className="w-full h-full"
-            >
-              {/* Campaign path (behind nodes) */}
-              <CampaignPath
-                nodes={pathNodes}
-                currentMissionIndex={currentMissionIndex}
-                pathColor={campaignColor}
-              />
+            ) : (
+              <svg
+                viewBox="110 80 690 680"
+                preserveAspectRatio="xMidYMid meet"
+                className="w-full h-full relative z-[1]"
+              >
+                {/* Ambient nebula glow behind the solar system */}
+                <circle
+                  cx={500} cy={380} r={360}
+                  fill={`url(#system-nebula)`}
+                  opacity={0.3}
+                  className="sector-breathe"
+                  style={{ animationDelay: "500ms" }}
+                />
+                <circle
+                  cx={500} cy={380} r={220}
+                  fill={`url(#system-nebula-inner)`}
+                  opacity={0.2}
+                  className="sector-breathe"
+                  style={{ animationDelay: "1200ms" }}
+                />
 
-              {/* Central star */}
-              <CentralStar
-                cx={500}
-                cy={400}
-                icon={activeCampaign?.icon ?? "⭐"}
-                title={activeCampaign?.title ?? ""}
-                color={campaignColor}
-              />
+                {/* Campaign path (behind nodes) */}
+                <CampaignPath
+                  nodes={pathNodes}
+                  currentMissionIndex={currentMissionIndex}
+                  pathColor={campaignColor}
+                />
 
-              {/* Mission nodes */}
-              {missions.map((mission, i) => {
-                const pos = orbitalPositions[i];
-                if (!pos) return null;
-                return (
-                  <MissionNode
-                    key={mission.id}
-                    mission={mission}
-                    status={effectiveStatuses[mission.id] ?? "locked"}
-                    cx={pos.cx}
-                    cy={pos.cy}
-                    size={pos.size}
-                    celestialType={pos.celestialType}
-                    isCurrent={i === currentMissionIndex}
-                    onHover={handleMissionHover}
-                    onClick={handleMissionClick}
-                  />
-                );
-              })}
-            </svg>
-          )}
+                {/* Central star */}
+                <CentralStar
+                  cx={500}
+                  cy={380}
+                  icon={activeCampaign?.icon ?? "⭐"}
+                  title={activeCampaign?.title ?? ""}
+                  color={campaignColor}
+                  completedMissions={completedCount}
+                  totalMissions={missions.length}
+                />
+
+                {/* Mission nodes */}
+                {missions.map((mission, i) => {
+                  const pos = orbitalPositions[i];
+                  if (!pos) return null;
+                  return (
+                    <MissionNode
+                      key={mission.id}
+                      mission={mission}
+                      missionIndex={i}
+                      totalMissions={missions.length}
+                      status={effectiveStatuses[mission.id] ?? "locked"}
+                      cx={pos.cx}
+                      cy={pos.cy}
+                      size={pos.size}
+                      celestialType={pos.celestialType}
+                      campaignColor={campaignColor}
+                      isCurrent={i === currentMissionIndex}
+                      onHover={handleMissionHover}
+                      onClick={handleMissionClick}
+                    />
+                  );
+                })}
+
+                {/* HUD corner accents */}
+                <g opacity={0.15} stroke={campaignColor} strokeWidth={1.2} fill="none">
+                  {/* Top-left */}
+                  <polyline points="130,110 130,90 150,90" />
+                  <line x1="130" y1="90" x2="138" y2="98" opacity={0.4} />
+                  {/* Top-right */}
+                  <polyline points="780,90 800,90 800,110" />
+                  <line x1="800" y1="90" x2="792" y2="98" opacity={0.4} />
+                  {/* Bottom-left */}
+                  <polyline points="130,740 130,760 150,760" />
+                  <line x1="130" y1="760" x2="138" y2="752" opacity={0.4} />
+                  {/* Bottom-right */}
+                  <polyline points="780,760 800,760 800,740" />
+                  <line x1="800" y1="760" x2="792" y2="752" opacity={0.4} />
+                </g>
+
+                {/* Nebula gradient definitions */}
+                <defs>
+                  <radialGradient id="system-nebula" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor={campaignColor} stopOpacity={0.15} />
+                    <stop offset="35%" stopColor={campaignColor} stopOpacity={0.06} />
+                    <stop offset="70%" stopColor={campaignColor} stopOpacity={0.02} />
+                    <stop offset="100%" stopColor={campaignColor} stopOpacity={0} />
+                  </radialGradient>
+                  <radialGradient id="system-nebula-inner" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor={campaignColor} stopOpacity={0.25} />
+                    <stop offset="50%" stopColor={campaignColor} stopOpacity={0.08} />
+                    <stop offset="100%" stopColor={campaignColor} stopOpacity={0} />
+                  </radialGradient>
+                </defs>
+              </svg>
+            )}
+          </div>
         </div>
 
-        {/* Stats sidebar — now on the right, framed */}
-        <div className="md:w-[200px] lg:w-[240px] shrink-0 flex flex-col mr-2 mb-1 min-h-0 max-h-[35vh] md:max-h-none">
-          <div className="panel-header-bar rounded-t shrink-0">
+        {/* Stats sidebar — glass panel, wider */}
+        <div className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none">
+          <div className="glass-panel-header">
             <span>Mission Briefing</span>
           </div>
-          <div className="flex-1 metallic-frame rounded-b bg-v2-bg-surface/60 backdrop-blur-sm overflow-hidden">
+          <div className="flex-1 glass-panel rounded-b-lg overflow-hidden">
             <StatsSidebar
               campaign={activeCampaign}
+              missions={missions}
+              missionStatuses={effectiveStatuses}
               completedCount={completedCount}
               totalMissions={missions.length}
               currentMissionIndex={currentMissionIndex}
+              campaignXp={campaignXp}
               totalXp={profile?.totalPoints ?? 0}
               streak={profile?.streak ?? 0}
               decayingMissionIds={decayingMissionIds}
               hasNoCampaign={hasNoCampaign}
+              campaignColor={campaignColor}
             />
           </div>
         </div>
@@ -305,6 +375,8 @@ export default function SystemMap() {
       {hoveredMission && !selectedMission && (
         <MissionTooltip
           mission={hoveredMission}
+          missionIndex={missions.findIndex((m) => m.id === hoveredMission.id)}
+          totalMissions={missions.length}
           status={effectiveStatuses[hoveredMission.id] ?? "locked"}
           mousePos={mousePos}
           campaignColor={campaignColor}
@@ -332,11 +404,15 @@ export default function SystemMap() {
 
 function MissionTooltip({
   mission,
+  missionIndex,
+  totalMissions,
   status,
   mousePos,
   campaignColor,
 }: {
   mission: Mission;
+  missionIndex: number;
+  totalMissions: number;
   status: MissionStatus;
   mousePos: { x: number; y: number };
   campaignColor: string;
@@ -349,23 +425,52 @@ function MissionTooltip({
     decaying: "Needs Review",
   };
 
+  const statusColor: Record<MissionStatus, string> = {
+    locked: "#6a7288",
+    available: "#06d6d6",
+    "in-progress": "#06d6d6",
+    accomplished: "#22c55e",
+    decaying: "#f59e0b",
+  };
+
   return (
     <div
       className="fixed z-[70] pointer-events-none"
       style={{ left: mousePos.x + 16, top: mousePos.y - 8 }}
     >
       <div
-        className="hex-panel px-3 py-2 min-w-[160px]"
-        style={{ borderColor: `${campaignColor}40`, boxShadow: `0 0 12px ${campaignColor}10` }}
+        className="glass-panel px-3 py-2.5 min-w-[180px] rounded-lg"
+        style={{
+          borderColor: `${campaignColor}30`,
+          boxShadow: `0 0 20px ${campaignColor}15, inset 0 0 15px ${campaignColor}05`,
+        }}
       >
+        {/* Top accent line */}
         <div
-          className="display-font text-[10px] tracking-wider uppercase mb-0.5"
+          className="absolute top-0 left-3 right-3 h-px"
+          style={{ background: `linear-gradient(90deg, transparent, ${campaignColor}60, transparent)` }}
+        />
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className="text-[8px] telemetry-font tracking-wider uppercase"
+            style={{ color: statusColor[status] }}
+          >
+            {statusLabel[status]}
+          </span>
+          <span className="text-[7px] telemetry-font text-[#6a7288]">
+            Mission {missionIndex + 1}/{totalMissions}
+          </span>
+        </div>
+        <div
+          className="display-font text-[11px] tracking-wider uppercase mb-1"
           style={{ color: campaignColor }}
         >
           {mission.title}
         </div>
-        <div className="text-[9px] telemetry-font text-v2-text-muted">
-          {statusLabel[status]} · {mission.estimatedMinutes}m
+        <div className="flex items-center gap-2 text-[9px] telemetry-font text-[#8eafc8]">
+          <span>{mission.estimatedMinutes} min</span>
+          <span className="text-[#444b5c]">|</span>
+          <span>{mission.defaultLoadout.length} steps</span>
         </div>
       </div>
     </div>
