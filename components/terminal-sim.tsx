@@ -11,9 +11,11 @@ interface HistoryEntry {
 export interface TerminalSimProps {
   height?: number;
   onCommand?: (cmd: string, resolvedCmd?: string) => void;
+  /** When true the terminal fills its parent height instead of using a fixed pixel value */
+  fillHeight?: boolean;
 }
 
-export default function TerminalSim({ height = 240, onCommand }: TerminalSimProps) {
+export default function TerminalSim({ height = 240, onCommand, fillHeight }: TerminalSimProps) {
   const [history, setHistory] = useState<HistoryEntry[]>([
     { type: "system", text: `Welcome to ${HOSTNAME}. Type 'help' for available commands.` },
   ]);
@@ -110,23 +112,26 @@ export default function TerminalSim({ height = 240, onCommand }: TerminalSimProp
 
   return (
     <div
-      className="rounded-lg border border-forge-border overflow-hidden"
+      className={`rounded-lg border border-forge-border overflow-hidden flex flex-col ${fillHeight ? "h-full" : ""}`}
       onClick={() => inputRef.current?.focus()}
     >
       {/* Title bar */}
-      <div className="bg-forge-surface-2 px-4 py-2 flex items-center gap-2 border-b border-forge-border">
-        <span className="w-2.5 h-2.5 rounded-full bg-forge-danger" />
-        <span className="w-2.5 h-2.5 rounded-full bg-forge-warning" />
-        <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
-        <span className="ml-2 mono text-xs text-forge-text-muted">
+      <div className="bg-forge-surface-2 px-3 py-1.5 flex items-center gap-1.5 border-b border-forge-border shrink-0">
+        <span className="w-2 h-2 rounded-full bg-forge-danger" />
+        <span className="w-2 h-2 rounded-full bg-forge-warning" />
+        <span className="w-2 h-2 rounded-full bg-green-400" />
+        <span className="ml-1.5 mono text-[10px] text-forge-text-muted truncate">
           ops@{HOSTNAME}:~
         </span>
       </div>
 
-      {/* Output area */}
-      <div className="bg-forge-bg p-3 overflow-y-auto mono text-xs leading-relaxed" style={{ height }}>
+      {/* Scrollable area: output + input together so prompt sits right under output */}
+      <div
+        className="bg-forge-bg p-2 overflow-y-auto mono text-[11px] leading-snug flex-1 min-h-0"
+        style={fillHeight ? undefined : { height }}
+      >
         {history.map((h, i) => (
-          <div key={i} className="mb-1 whitespace-pre-wrap break-all">
+          <div key={i} className="mb-0.5 whitespace-pre-wrap break-all">
             {h.type === "input" && (
               <span>
                 <span className="text-green-400">{PROMPT_USER}</span>
@@ -147,21 +152,21 @@ export default function TerminalSim({ height = 240, onCommand }: TerminalSimProp
             )}
           </div>
         ))}
-        <div ref={endRef} />
-      </div>
 
-      {/* Input area */}
-      <div className="px-4 py-2 border-t border-forge-border flex items-center gap-2 bg-forge-bg">
-        <span className="text-green-400 mono text-xs shrink-0">$</span>
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder="type a command..."
-          autoFocus
-          className="flex-1 bg-transparent border-none outline-none text-forge-text mono text-xs placeholder:text-forge-text-muted"
-        />
+        {/* Input line — inline with output, pushed down as output grows */}
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-green-400 shrink-0">$</span>
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder="type a command..."
+            autoFocus
+            className="flex-1 bg-transparent border-none outline-none text-forge-text placeholder:text-forge-text-muted"
+          />
+        </div>
+        <div ref={endRef} />
       </div>
     </div>
   );

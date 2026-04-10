@@ -54,14 +54,13 @@ export default function TicketPanel({
   const isCommandLevel = level.order <= 2;
   const needsAnswer = !!ticket.answerPrompt;
 
-  // Enter key advances to next ticket from result screen
-  // Delay listener registration so the Enter that submitted the answer doesn't also trigger advance
+  // Shift+Enter advances to next ticket from result screen
   useEffect(() => {
     if (phase !== "result") return;
     let armed = false;
     const armTimer = setTimeout(() => { armed = true; }, 300);
     const handleKey = (e: KeyboardEvent) => {
-      if (armed && e.key === "Enter") {
+      if (armed && e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
         onNextTicket();
       }
@@ -82,47 +81,47 @@ export default function TicketPanel({
 
   return (
     <div className="h-full flex flex-col rounded-lg border border-v2-border bg-v2-bg-surface overflow-hidden">
-      {/* Header */}
-      <div className="p-3 border-b border-v2-border shrink-0">
-        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+      {/* Header — compact */}
+      <div className="px-2.5 py-1.5 border-b border-v2-border shrink-0">
+        <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
           <StatusBadge label={level.label} variant={level.variant as any} />
           <StatusBadge label={ticket.category} variant="muted" />
           {totalSteps && currentStep !== undefined && (
-            <span className="text-[10px] mono text-v2-text-muted">
+            <span className="text-[9px] mono text-v2-text-muted">
               Step {currentStep + 1}/{totalSteps}
             </span>
           )}
         </div>
-        <h3 className="text-sm font-semibold text-v2-text">{ticket.title}</h3>
+        <h3 className="text-xs font-semibold text-v2-text leading-tight truncate">{ticket.title}</h3>
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
         {phase === "working" && (
           <>
             {/* Ticket body */}
-            <div className="text-xs text-v2-text-dim leading-relaxed whitespace-pre-wrap">
+            <div className="text-[11px] text-v2-text-dim leading-snug whitespace-pre-wrap">
               {stepPrompt ? stepPrompt.prompt : ticket.ticket}
             </div>
 
             {/* Why this matters */}
             <button
               onClick={() => setShowWhy(!showWhy)}
-              className="text-[10px] text-v2-cyan hover:text-v2-cyan/80 transition-colors flex items-center gap-1"
+              className="text-[9px] text-v2-cyan hover:text-v2-cyan/80 transition-colors flex items-center gap-1"
             >
               <span className={`transition-transform ${showWhy ? "rotate-90" : ""}`}>▸</span>
               Why this matters
             </button>
             {showWhy && (
-              <div className="text-[11px] text-v2-text-muted leading-relaxed p-2 rounded bg-v2-bg-elevated/50 border-l-2 border-v2-cyan/20">
+              <div className="text-[10px] text-v2-text-muted leading-snug p-1.5 rounded bg-v2-bg-elevated/50 border-l-2 border-v2-cyan/20">
                 {ticket.why}
               </div>
             )}
 
             {/* Command tracking for L0-L2 */}
             {isCommandLevel && (
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-v2-text-muted">Expected command</span>
+              <div className="space-y-0.5">
+                <span className="text-[9px] uppercase tracking-wider text-v2-text-muted">Expected command</span>
                 {ticket.expectedCommands.map((cmd) => {
                   const done = commandsMatched.some(
                     (m) => m.toLowerCase() === cmd.toLowerCase(),
@@ -130,14 +129,14 @@ export default function TicketPanel({
                   return (
                     <div
                       key={cmd}
-                      className={`flex items-center gap-2 p-1.5 rounded text-xs ${
+                      className={`flex items-center gap-1.5 p-1 rounded text-[11px] ${
                         done ? "bg-v2-cyan/5" : ""
                       }`}
                     >
                       <span className={done ? "text-v2-cyan" : "text-v2-text-muted"}>
                         {done ? "✓" : "○"}
                       </span>
-                      <code className={`text-[11px] ${done ? "text-v2-cyan/60 line-through" : "text-v2-cyan"}`}>
+                      <code className={`text-[10px] ${done ? "text-v2-cyan/60 line-through" : "text-v2-cyan"}`}>
                         {cmd}
                       </code>
                     </div>
@@ -148,7 +147,7 @@ export default function TicketPanel({
 
             {/* Command tracker for L4-L5 */}
             {!isCommandLevel && level.order >= 4 && (
-              <div className="text-[10px] text-v2-text-muted">
+              <div className="text-[9px] text-v2-text-muted">
                 Commands used: {commandsRun.length}
               </div>
             )}
@@ -171,12 +170,12 @@ export default function TicketPanel({
                 {!showHint ? (
                   <button
                     onClick={onRequestHint}
-                    className="text-[10px] text-v2-text-muted hover:text-v2-warning transition-colors"
+                    className="text-[9px] text-v2-text-muted hover:text-v2-warning transition-colors"
                   >
-                    Need a hint? (costs 50% XP)
+                    Hint? (−50% XP)
                   </button>
                 ) : (
-                  <div className="text-[11px] text-v2-warning/80 leading-relaxed p-2 rounded bg-v2-warning/5 border-l-2 border-v2-warning/30">
+                  <div className="text-[10px] text-v2-warning/80 leading-snug p-1.5 rounded bg-v2-warning/5 border-l-2 border-v2-warning/30">
                     {ticket.hint}
                   </div>
                 )}
@@ -186,8 +185,8 @@ export default function TicketPanel({
         )}
 
         {phase === "answer" && (
-          <div className="space-y-3">
-            <div className="text-xs text-v2-text-dim leading-relaxed">
+          <div className="space-y-2">
+            <div className="text-[11px] text-v2-text-dim leading-snug">
               {answerPrompt}
             </div>
             <input
@@ -202,9 +201,9 @@ export default function TicketPanel({
               }}
               placeholder="Type your answer..."
               autoFocus
-              className="w-full bg-v2-bg-elevated border border-v2-border rounded px-3 py-2 text-sm text-v2-text placeholder:text-v2-text-muted focus:border-v2-cyan/50 focus:outline-none"
+              className="w-full bg-v2-bg-elevated border border-v2-border rounded px-2.5 py-1.5 text-[11px] text-v2-text placeholder:text-v2-text-muted focus:border-v2-cyan/50 focus:outline-none"
             />
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <ActionButton
                 variant="primary"
                 size="sm"
@@ -230,11 +229,11 @@ export default function TicketPanel({
         )}
 
         {phase === "result" && result && (
-          <div className="space-y-3">
-            {/* Score */}
-            <div className="text-center py-2">
+          <div className="space-y-2">
+            {/* Score + XP inline */}
+            <div className="text-center py-1">
               <div
-                className={`text-3xl font-bold mono ${
+                className={`text-2xl font-bold mono ${
                   result.score >= 80
                     ? "text-v2-green"
                     : result.score >= 50
@@ -244,23 +243,19 @@ export default function TicketPanel({
               >
                 {result.score}%
               </div>
-              <div className="text-xs text-v2-text-muted mt-1">{result.feedback}</div>
-            </div>
-
-            {/* XP earned */}
-            <div className="flex items-center justify-center gap-2 py-1">
-              <span className="text-xs text-v2-cyan font-semibold">+{result.xpEarned} XP</span>
+              <div className="text-[10px] text-v2-text-muted">{result.feedback}</div>
+              <span className="text-[10px] text-v2-cyan font-semibold">+{result.xpEarned} XP</span>
             </div>
 
             {/* Key terms breakdown for L4-L5 */}
             {result.totalTerms > 0 && (
-              <div className="space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-v2-text-muted">
+              <div className="space-y-0.5">
+                <span className="text-[9px] uppercase tracking-wider text-v2-text-muted">
                   Key terms ({result.matchedTerms.length}/{result.totalTerms})
                 </span>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-0.5">
                   {result.matchedTerms.map((term) => (
-                    <span key={term} className="text-[10px] px-1.5 py-0.5 rounded bg-v2-green/10 text-v2-green border border-v2-green/20">
+                    <span key={term} className="text-[9px] px-1 py-0.5 rounded bg-v2-green/10 text-v2-green border border-v2-green/20">
                       ✓ {term}
                     </span>
                   ))}
@@ -269,18 +264,21 @@ export default function TicketPanel({
             )}
 
             {/* Explanation */}
-            <div className="p-2 rounded bg-v2-bg-elevated/50 border-l-2 border-v2-cyan/20">
-              <span className="text-[10px] uppercase tracking-wider text-v2-text-muted block mb-1">
+            <div className="p-1.5 rounded bg-v2-bg-elevated/50 border-l-2 border-v2-cyan/20">
+              <span className="text-[9px] uppercase tracking-wider text-v2-text-muted block mb-0.5">
                 Explanation
               </span>
-              <p className="text-[11px] text-v2-text-dim leading-relaxed">
+              <p className="text-[10px] text-v2-text-dim leading-snug">
                 {ticket.explanation}
               </p>
             </div>
 
             {/* Next / Finish button */}
             <ActionButton variant="primary" onClick={onNextTicket} className="w-full">
-              {isLastInQueue ? "Finish Section" : "Next Ticket"}
+              <span className="flex items-center justify-center gap-2">
+                {isLastInQueue ? "Finish" : "Next"}
+                <span className="text-[8px] opacity-40 font-normal">Shift+Enter</span>
+              </span>
             </ActionButton>
           </div>
         )}
