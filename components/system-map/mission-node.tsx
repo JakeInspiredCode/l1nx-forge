@@ -338,7 +338,7 @@ export default function MissionNode({
         className="pointer-events-none select-none"
         style={{ textShadow: "0 0 4px rgba(0,0,0,0.6)" }}
       >
-        {missionIndex + 1}/{totalMissions}
+        {missionIndex + 1}
       </text>
 
       {/* Accomplished indicator */}

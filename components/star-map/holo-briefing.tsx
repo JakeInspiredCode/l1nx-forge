@@ -113,7 +113,7 @@ export default function HoloBriefing({
 
             {/* Campaign tag */}
             <div className="text-[10px] telemetry-font tracking-widest uppercase text-v2-text-muted">
-              {campaignTitle} — Mission {missionNumber} of {totalMissions}
+              {campaignTitle} — Mission {missionNumber}
             </div>
 
             {/* Mission title */}

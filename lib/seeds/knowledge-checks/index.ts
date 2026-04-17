@@ -11,6 +11,10 @@ import { MISSION_09_QUESTIONS } from "./mission-09";
 import { MISSION_10_QUESTIONS } from "./mission-10";
 import { MISSION_11_QUESTIONS } from "./mission-11";
 import { MISSION_12_QUESTIONS } from "./mission-12";
+import { HW_M01_QUESTIONS } from "./hw-m01";
+import { HW_M02_QUESTIONS } from "./hw-m02";
+import { HW_M03_QUESTIONS } from "./hw-m03";
+import { HW_M04_QUESTIONS } from "./hw-m04";
 
 const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "linux-m01": MISSION_01_QUESTIONS,
@@ -25,6 +29,10 @@ const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "linux-m10": MISSION_10_QUESTIONS,
   "linux-m11": MISSION_11_QUESTIONS,
   "linux-m12": MISSION_12_QUESTIONS,
+  "hw-m01": HW_M01_QUESTIONS,
+  "hw-m02": HW_M02_QUESTIONS,
+  "hw-m03": HW_M03_QUESTIONS,
+  "hw-m04": HW_M04_QUESTIONS,
 };
 
 export function getMCQuestions(missionId: string): MCQuestion[] | null {

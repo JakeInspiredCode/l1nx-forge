@@ -140,7 +140,7 @@ export default function MissionOverlay({
               </div>
               <div>
                 <span className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider">
-                  Mission {missionNumber} of {totalMissions}
+                  Mission {missionNumber}
                 </span>
                 <h2
                   className="display-font text-sm tracking-[0.12em] uppercase mt-1"

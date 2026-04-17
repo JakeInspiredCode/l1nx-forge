@@ -376,7 +376,7 @@ export default function BattleStationPage() {
             className="display-font text-sm 2xl:text-xl tracking-[0.08em]"
             style={{ color: "#e0e4ec" }}
           >
-            DOWNTIME SMASH
+            BATTLESTATION: DOWNTIME SMASH
           </div>
           <div className="text-[9px] 2xl:text-[11px] mt-0.5" style={{ color: "#6a7a94" }}>
             Resolve threats before they take down the fleet

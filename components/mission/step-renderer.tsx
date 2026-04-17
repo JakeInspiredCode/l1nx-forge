@@ -18,6 +18,7 @@ const QuickDrawGame = dynamic(() => import("@/components/forge/quick-draw/quick-
 const DiagnosisGame = dynamic(() => import("@/components/forge/diagnosis/diagnosis-game"), { ssr: false });
 const DrillWalkthrough = dynamic(() => import("@/components/drill-walkthrough"), { ssr: false });
 const LinuxFoundations = dynamic(() => import("@/components/linux-foundations"), { ssr: false });
+const ChapterRenderer = dynamic(() => import("@/components/chapter/chapter-renderer"), { ssr: false });
 const BootLearn = dynamic(() => import("@/components/forge/boot-process/boot-learn"), { ssr: false });
 const BootTriage = dynamic(() => import("@/components/forge/boot-process/boot-triage"), { ssr: false });
 const FilesystemGame = dynamic(() => import("@/components/forge/explorer/filesystem-game"), { ssr: false });
@@ -164,6 +165,17 @@ function ReadingStep({ step, onStepComplete }: StepRendererProps) {
   );
 }
 
+// ── Chapter Section Step (data-driven chapters) ──
+function ChapterSectionStep({ step, onStepComplete }: StepRendererProps) {
+  return (
+    <ChapterRenderer
+      sectionId={step.contentRef.id}
+      missionMode
+      onMissionComplete={onStepComplete}
+    />
+  );
+}
+
 // ── Boot Process Step ──
 function BootStep({ step, onStepComplete }: StepRendererProps) {
   if (step.contentRef.id === "triage") {
@@ -220,6 +232,8 @@ export default function StepRenderer({ step, onStepComplete }: StepRendererProps
   switch (step.contentRef.kind) {
     case "foundation-section":
       return <ReadingStep step={step} onStepComplete={onStepComplete} />;
+    case "chapter-section":
+      return <ChapterSectionStep step={step} onStepComplete={onStepComplete} />;
     case "card-set":
       return <CardSetStep step={step} onStepComplete={onStepComplete} />;
     case "quick-draw-module":

@@ -458,7 +458,7 @@ function MissionTooltip({
             {statusLabel[status]}
           </span>
           <span className="text-[7px] telemetry-font text-[#6a7288]">
-            Mission {missionIndex + 1}/{totalMissions}
+            Mission {missionIndex + 1}
           </span>
         </div>
         <div

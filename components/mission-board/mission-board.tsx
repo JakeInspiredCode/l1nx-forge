@@ -75,7 +75,7 @@ export default function MissionBoard() {
                   <TelemetryBar
                     value={(enrolledState.completedMissions.length / activeCampaign.missions.length) * 100}
                     segments={activeCampaign.missions.length}
-                    label={`Mission ${enrolledState.currentMissionIndex + 1} of ${activeCampaign.missions.length}`}
+                    label={`Mission ${enrolledState.currentMissionIndex + 1}`}
                     color="warning"
                   />
                   <ActionButton

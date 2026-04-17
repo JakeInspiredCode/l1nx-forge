@@ -456,7 +456,7 @@ export default function StatsSidebar({
                     />
                   </div>
                   <span className="text-[8px] telemetry-font text-[#8eafc8]">
-                    Mission {currentMissionIndex + 1}/{totalMissions}
+                    Mission {currentMissionIndex + 1}
                   </span>
                 </div>
               </div>

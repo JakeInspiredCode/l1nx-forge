@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Galaxy Map", icon: "✦", color: "var(--color-v2-cyan)" },
   { href: "/missions", label: "Missions", icon: "◆", color: "var(--color-v2-amber)" },
   { href: "/arsenal", label: "Arsenal", icon: "⬡", color: "var(--color-v2-green)" },
+  { href: "/battle-station", label: "Battlestation", icon: "⚡", color: "var(--color-v2-danger)" },
   { href: "/comms", label: "Comms", icon: "◎", color: "var(--color-v2-purple)" },
   { href: "/profile", label: "Profile", icon: "▲", color: "var(--color-v2-silver)" },
 ];

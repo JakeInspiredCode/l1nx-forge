@@ -47,6 +47,7 @@ export type MissionStepType =
 
 export type ContentRefKind =
   | "foundation-section"
+  | "chapter-section"
   | "card-set"
   | "quick-draw-module"
   | "diagnosis-scenario"
