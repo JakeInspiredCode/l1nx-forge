@@ -107,6 +107,9 @@ export const networking: ForgeCard[] = [
   c("netf-010","networking","intermediate",2,2,"How does ECMP prevent packet reordering?","Each flow hashes to one consistent path",2050),
   c("netf-011","networking","intermediate",2,2,"Check driver-level NIC errors?","`dmesg | grep eth0`",2060),
   c("netf-012","networking","intermediate",2,2,"Check switch port counters?","Via switch CLI (`show interface counters`)",2070),
+  c("net-104","networking","intermediate",2,2,"TCP 3-way handshake","Client: SYN → Server: SYN-ACK → Client: ACK. Connection then enters ESTABLISHED. Observable with `tcpdump -n 'tcp[tcpflags] & (tcp-syn|tcp-ack) != 0'`.",2080),
+  c("net-105","networking","intermediate",2,2,"Hash polarization (ECMP)","When all flows hash the same way at multiple layers, one spine gets slammed while others idle. Fix: vary the hash seed or hash-input keys between tiers.",2090),
+  c("net-106","networking","intermediate",2,2,"Anycast","One IP, many servers, BGP-advertised from each. The network routes each client to the topologically nearest instance. Used for DNS, CDN edges, and DC-wide LB VIPs.",2100),
 ];
 
 // ═══════════════════════════════════════
@@ -207,6 +210,10 @@ export const opsProcesses: ForgeCard[] = [
   c("ops-015","ops-processes","easy",1,1,"Shift handoff","Outgoing shift tells incoming: open tickets, active incidents, pending work, anything unusual. Use a standard handoff template. Never leave gaps.",190),
   // Tier 2
   c("ops-101","ops-processes","intermediate",2,2,"First 30 min on unfamiliar on-call?","Get access (dashboards, VPN, SSH) → read runbook index → check active incidents → review alert thresholds → shadow outgoing on-call → verify you can reach IPMI/switches → test one action.",2010),
+  c("ops-102","ops-processes","intermediate",2,2,"CAB — Change Advisory Board","Cross-team group that reviews non-standard changes before approval. Weighs risk, timing, blast radius, rollback plan. Standard changes are pre-approved; emergency changes are reviewed after the fact.",2020),
+  c("ops-103","ops-processes","intermediate",2,2,"Four Golden Signals","Latency (how long), Traffic (how much), Errors (how many failed), Saturation (how full). From Google SRE — the minimum viable dashboard for any service.",2030),
+  c("ops-104","ops-processes","intermediate",2,2,"Error budget and burn rate","SLO of 99.9% = 0.1% error budget = ~43 min/month of allowed downtime. Burn rate = how fast you're spending it. 10× burn eats a month in ~3h — page immediately.",2040),
+  c("ops-105","ops-processes","intermediate",2,2,"Alert fatigue","Every false/non-actionable page desensitizes the on-call. Fix: every alert must be actionable, urgent, and route to a runbook. Delete or downgrade alerts that don't meet that bar.",2050),
 ];
 
 // ═══════════════════════════════════════

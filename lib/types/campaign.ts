@@ -172,6 +172,7 @@ export interface Sector {
   campaignIds: string[];          // campaigns in this sector
   mapPosition: { x: number; y: number }; // 0-100 percentage coords
   size: "sm" | "md" | "lg";      // visual size on galaxy map
+  comingSoon?: boolean;           // show a "COMING SOON" badge; still full-color
 }
 
 export interface SectorProgress {

@@ -216,14 +216,47 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
         </>
       )}
 
-      {/* Title */}
+      {/* Coming-Soon badge (above the star) */}
+      {sector.comingSoon && (
+        <g className="pointer-events-none select-none">
+          <rect
+            x={cx - 48}
+            y={cy - r - 22}
+            width={96}
+            height={18}
+            rx={9}
+            ry={9}
+            fill="#0b1220"
+            stroke={sector.color}
+            strokeWidth={1.2}
+            opacity={0.95}
+            style={{ filter: `drop-shadow(0 0 6px ${sector.color}80)` }}
+          />
+          <text
+            x={cx}
+            y={cy - r - 13}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill={sector.color}
+            fontSize={10}
+            fontFamily="'Chakra Petch', sans-serif"
+            fontWeight={700}
+            letterSpacing="0.18em"
+            className="uppercase"
+          >
+            Coming Soon
+          </text>
+        </g>
+      )}
+
+      {/* Title — unified size across all sectors */}
       <text
         x={cx}
         y={cy + r + 16}
         textAnchor="middle"
         dominantBaseline="hanging"
         fill={isActive ? sector.color : "#e0e4ec"}
-        fontSize={sector.size === "lg" ? 16 : sector.size === "md" ? 14 : 12}
+        fontSize={16}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={700}
         letterSpacing="0.12em"
@@ -238,11 +271,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Greek sub-label */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 36 : 33)}
+        y={cy + r + 38}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill="#8eafc8"
-        fontSize={10}
+        fill="#b8d4e8"
+        fontSize={12}
         fontFamily="'Chakra Petch', sans-serif"
         fontWeight={600}
         letterSpacing="0.1em"
@@ -255,11 +288,11 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
       {/* Mission count */}
       <text
         x={cx}
-        y={cy + r + (sector.size === "lg" ? 50 : 47)}
+        y={cy + r + 56}
         textAnchor="middle"
         dominantBaseline="hanging"
-        fill="#8eafc8"
-        fontSize={10}
+        fill="#b8d4e8"
+        fontSize={12}
         fontFamily="'JetBrains Mono', monospace"
         className="pointer-events-none select-none"
         style={{ textShadow: "0 0 4px rgba(0,0,0,0.6)" }}

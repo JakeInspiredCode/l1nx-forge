@@ -50,6 +50,7 @@ export const ALL_SECTORS: Sector[] = [
     campaignIds: ["fiber-core"],
     mapPosition: { x: 82, y: 56 },
     size: "sm",
+    comingSoon: true,
   },
   {
     id: "sector-power",
@@ -61,6 +62,7 @@ export const ALL_SECTORS: Sector[] = [
     campaignIds: ["power-core"],
     mapPosition: { x: 14, y: 60 },
     size: "sm",
+    comingSoon: true,
   },
   {
     id: "sector-ops",
@@ -83,6 +85,7 @@ export const ALL_SECTORS: Sector[] = [
     campaignIds: ["scale-core"],
     mapPosition: { x: 88, y: 38 },
     size: "sm",
+    comingSoon: true,
   },
   {
     id: "sector-linux-advanced",

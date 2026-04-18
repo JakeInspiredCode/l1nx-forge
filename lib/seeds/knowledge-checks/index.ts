@@ -15,6 +15,14 @@ import { HW_M01_QUESTIONS } from "./hw-m01";
 import { HW_M02_QUESTIONS } from "./hw-m02";
 import { HW_M03_QUESTIONS } from "./hw-m03";
 import { HW_M04_QUESTIONS } from "./hw-m04";
+import { NET_M01_QUESTIONS } from "./net-m01";
+import { NET_M02_QUESTIONS } from "./net-m02";
+import { NET_M03_QUESTIONS } from "./net-m03";
+import { NET_M04_QUESTIONS } from "./net-m04";
+import { OPS_M01_QUESTIONS } from "./ops-m01";
+import { OPS_M02_QUESTIONS } from "./ops-m02";
+import { OPS_M03_QUESTIONS } from "./ops-m03";
+import { OPS_M04_QUESTIONS } from "./ops-m04";
 
 const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "linux-m01": MISSION_01_QUESTIONS,
@@ -33,6 +41,14 @@ const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "hw-m02": HW_M02_QUESTIONS,
   "hw-m03": HW_M03_QUESTIONS,
   "hw-m04": HW_M04_QUESTIONS,
+  "net-m01": NET_M01_QUESTIONS,
+  "net-m02": NET_M02_QUESTIONS,
+  "net-m03": NET_M03_QUESTIONS,
+  "net-m04": NET_M04_QUESTIONS,
+  "ops-m01": OPS_M01_QUESTIONS,
+  "ops-m02": OPS_M02_QUESTIONS,
+  "ops-m03": OPS_M03_QUESTIONS,
+  "ops-m04": OPS_M04_QUESTIONS,
 };
 
 export function getMCQuestions(missionId: string): MCQuestion[] | null {
