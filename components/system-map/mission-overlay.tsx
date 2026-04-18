@@ -13,6 +13,7 @@ interface MissionOverlayProps {
   missionNumber: number;
   totalMissions: number;
   campaignColor: string;
+  enrolled: boolean;
   onDeploy: (missionId: string, loadout: MissionStep[]) => void;
   onSkipToCheck: (missionId: string) => void;
   onDismiss: () => void;
@@ -24,6 +25,7 @@ export default function MissionOverlay({
   missionNumber,
   totalMissions,
   campaignColor,
+  enrolled,
   onDeploy,
   onSkipToCheck,
   onDismiss,
@@ -89,6 +91,7 @@ export default function MissionOverlay({
   }, [mission.id, onSkipToCheck, sound]);
 
   const isLocked = status === "locked";
+  const isDeployable = !isLocked || enrolled;
   const isAccomplished = status === "accomplished";
 
   return (
@@ -233,10 +236,10 @@ export default function MissionOverlay({
 
             {/* Actions */}
             <div className="flex gap-3 pt-3" style={{ borderTop: `1px solid ${campaignColor}15` }}>
-              {isLocked ? (
+              {!isDeployable ? (
                 <div className="flex-1 text-center py-2">
                   <span className="text-[11px] text-v2-text-muted">
-                    Complete the previous mission to unlock
+                    Enroll in the campaign to deploy
                   </span>
                 </div>
               ) : isAccomplished ? (

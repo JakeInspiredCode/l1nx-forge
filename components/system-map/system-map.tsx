@@ -306,6 +306,7 @@ export default function SystemMap() {
                       celestialType={pos.celestialType}
                       campaignColor={campaignColor}
                       isCurrent={i === currentMissionIndex}
+                      enrolled={enrolledState?.enrolled ?? false}
                       onHover={handleMissionHover}
                       onClick={handleMissionClick}
                     />
@@ -391,6 +392,7 @@ export default function SystemMap() {
           missionNumber={selectedMissionNumber}
           totalMissions={missions.length}
           campaignColor={campaignColor}
+          enrolled={enrolledState?.enrolled ?? false}
           onDeploy={handleDeploy}
           onSkipToCheck={handleSkipToCheck}
           onDismiss={handleDismissOverlay}

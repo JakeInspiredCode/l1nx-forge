@@ -14,6 +14,7 @@ interface MissionNodeProps {
   celestialType: "asteroid" | "moon" | "planet" | "station";
   campaignColor: string;
   isCurrent: boolean;
+  enrolled: boolean;
   onHover: (mission: Mission | null) => void;
   onClick: (mission: Mission) => void;
 }
@@ -52,13 +53,14 @@ export default function MissionNode({
   celestialType,
   campaignColor,
   isCurrent,
+  enrolled,
   onHover,
   onClick,
 }: MissionNodeProps) {
   const colors = MISSION_NODE_COLORS[status];
-  const isInteractive = status !== "locked";
-  const isAccomplished = status === "accomplished";
   const isLocked = status === "locked";
+  const isInteractive = !isLocked || enrolled;
+  const isAccomplished = status === "accomplished";
 
   const h = hashId(mission.id);
   const palette = SURFACE_PALETTES[h % SURFACE_PALETTES.length];
