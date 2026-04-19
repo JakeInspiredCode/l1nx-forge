@@ -125,7 +125,6 @@ export const BADGE_DEFS = [
   { id: "first-speed", name: "Speed Starter", condition: "Complete a speed run", icon: "zap" },
   { id: "first-correct", name: "Nailed It", condition: "Rate a card 'Easy'", icon: "check" },
   { id: "first-topic", name: "Topic Explorer", condition: "Study a card from any topic", icon: "compass" },
-  { id: "curious-mind", name: "Curious Mind", condition: "Use the AI coach", icon: "brain" },
 
   // ── Volume milestones (low) ──
   { id: "cards-10", name: "Getting Started", condition: "Review 10 cards", icon: "seedling" },

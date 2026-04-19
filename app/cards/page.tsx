@@ -11,7 +11,14 @@ type StatusFilter = "all" | "new" | "learning" | "mastered" | "overdue";
 
 export default function CardsPage() {
   const rawCards = useCards();
-  const cards = useMemo(() => rawCards.map((c, i) => ({ ...mapConvexCard(c), _key: (c as Record<string, unknown>)._id as string ?? `${c.cardId}-${i}` })), [rawCards]);
+  const cards = useMemo(
+    () =>
+      rawCards.map((c, i) => ({
+        ...mapConvexCard(c),
+        _key: c._id ?? `${c.cardId}-${i}`,
+      })),
+    [rawCards],
+  );
 
   const [showEditor, setShowEditor] = useState(false);
   const [importMsg, setImportMsg] = useState<string | null>(null);

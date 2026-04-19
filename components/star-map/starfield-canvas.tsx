@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { memo, useEffect, useRef, useCallback } from "react";
 
 interface Star {
   x: number;
@@ -126,7 +126,7 @@ function resetParticle(w: number, h: number): Particle {
   };
 }
 
-export default function StarfieldCanvas() {
+function StarfieldCanvasImpl() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const starsRef = useRef<Star[]>([]);
   const nebulaeRef = useRef<Nebula[]>([]);
@@ -322,3 +322,9 @@ export default function StarfieldCanvas() {
     />
   );
 }
+
+// Starfield has no props and owns its own animation loop via refs.
+// Memoizing prevents parent re-renders from remounting the canvas, which
+// would otherwise re-allocate ~665 particle objects per re-render.
+const StarfieldCanvas = memo(StarfieldCanvasImpl);
+export default StarfieldCanvas;

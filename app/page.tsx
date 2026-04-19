@@ -4,14 +4,13 @@ import { useEffect, useState, useMemo } from "react";
 import CardQueue from "@/components/card-queue";
 import { TOPICS, ForgeCard, mapConvexCard } from "@/lib/types";
 import {
-  useCards, useIsSeeded, useSeedCards, useReseedCards,
+  useCards, useReseedCards,
   useAllProgress, useProfile, useDueCards,
   useRecomputeProgress,
 } from "@/lib/convex-hooks";
 import { getAllSeedCards } from "@/lib/seeds";
 import Onboarding, { isOnboardingDone } from "@/components/onboarding";
 import GalaxyMap from "@/components/galaxy-map/galaxy-map";
-import { DEMO_MODE } from "@/components/convex-provider";
 
 export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -25,8 +24,6 @@ export default function Dashboard() {
   }, []);
 
   const rawCards = useCards();
-  const isSeeded = useIsSeeded();
-  const seedCards = useSeedCards();
   const reseedCards = useReseedCards();
   const progress = useAllProgress();
   const profile = useProfile();
@@ -34,37 +31,13 @@ export default function Dashboard() {
   const [seeding, setSeeding] = useState(false);
   const [trainingCards, setTrainingCards] = useState<ForgeCard[] | null>(null);
 
-  // Seed on first load if DB is empty
-  useEffect(() => {
-    if (DEMO_MODE || isSeeded || seeding) return;
-    const doSeed = async () => {
-      setSeeding(true);
-      const allCards = getAllSeedCards();
-      for (let i = 0; i < allCards.length; i += 50) {
-        const batch = allCards.slice(i, i + 50).map((c) => ({
-          cardId: c.id, topicId: c.topicId, type: c.type,
-          front: c.front, back: c.back, difficulty: c.difficulty,
-          tier: c.tier, steps: c.steps, sortOrder: c.sortOrder,
-          easeFactor: c.easeFactor,
-          interval: c.interval, repetitions: c.repetitions,
-          dueDate: c.dueDate, lastReview: c.lastReview ?? undefined,
-        }));
-        await seedCards({ cards: batch });
-      }
-      for (const t of TOPICS) {
-        await recomputeProgress({ topicId: t.id });
-      }
-      setSeeding(false);
-    };
-    doSeed();
-  }, [isSeeded, seeding, seedCards, recomputeProgress]);
-
-  // Reseed
+  // Card-content reseed: bump RESEED_VERSION when card text/structure changes to
+  // push updates out without blowing away per-card review progress.
   const RESEED_VERSION = 4;
   useEffect(() => {
-    if (DEMO_MODE || !isSeeded || seeding) return;
+    if (seeding) return;
     const key = `l1nx-reseed-v${RESEED_VERSION}`;
-    if (typeof window !== "undefined" && localStorage.getItem(key)) return;
+    if (typeof window === "undefined" || localStorage.getItem(key)) return;
     const doReseed = async () => {
       setSeeding(true);
       const allCards = getAllSeedCards();
@@ -82,11 +55,11 @@ export default function Dashboard() {
       for (const t of TOPICS) {
         await recomputeProgress({ topicId: t.id });
       }
-      if (typeof window !== "undefined") localStorage.setItem(key, "done");
+      localStorage.setItem(key, "done");
       setSeeding(false);
     };
     doReseed();
-  }, [isSeeded, seeding, reseedCards, recomputeProgress]);
+  }, [seeding, reseedCards, recomputeProgress]);
 
   if (seeding) {
     return (

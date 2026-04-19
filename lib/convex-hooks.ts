@@ -1,153 +1,196 @@
-// ═══════════════════════════════════════
-// Convex-backed storage hooks
-// Replaces localStorage-based lib/storage.ts
-// ═══════════════════════════════════════
-
 "use client";
+
+// Typed façade over the shim-dispatched queries and mutations. Hook names and
+// semantics match the original Convex-era contracts so call sites stay
+// unchanged; only the return types and the underlying runtime differ.
 
 import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "../convex/_generated/api";
-import { ForgeCard, TopicId, Tier, TopicProgress, ForgeProfile, TOPICS } from "./types";
+import type { TopicId, Tier } from "./types";
+import type {
+  Doc,
+  CardFields,
+  ReviewFields,
+  SessionFields,
+  ProgressFields,
+  ProfileFields,
+  StoryFields,
+  SpeedRunFields,
+  DrillFields,
+} from "./data/schema";
+
+type CardDoc = Doc<CardFields>;
+type ReviewDoc = Doc<ReviewFields>;
+type SessionDoc = Doc<SessionFields>;
+type ProgressDoc = Doc<ProgressFields>;
+type ProfileDoc = Doc<ProfileFields>;
+type StoryDoc = Doc<StoryFields>;
+type SpeedRunDoc = Doc<SpeedRunFields>;
+type DrillDoc = Doc<DrillFields>;
 
 // ── Cards ──
 
-export function useCards() {
-  return useQuery(api.forgeCards.getAll) ?? [];
+export function useCards(): CardDoc[] {
+  return (useQuery(api.forgeCards.getAll) as CardDoc[] | undefined) ?? [];
 }
 
-export function useCardsByTopic(topicId: TopicId) {
-  return useQuery(api.forgeCards.getByTopic, { topicId }) ?? [];
+export function useCardsByTopic(topicId: TopicId): CardDoc[] {
+  return (useQuery(api.forgeCards.getByTopic, { topicId }) as CardDoc[] | undefined) ?? [];
 }
 
-export function useDueCards(topicId?: TopicId) {
-  return useQuery(api.forgeCards.getDue, { topicId }) ?? [];
+export function useDueCards(topicId?: TopicId): CardDoc[] {
+  return (useQuery(api.forgeCards.getDue, { topicId }) as CardDoc[] | undefined) ?? [];
 }
 
-export function useNewCards(topicId?: TopicId, maxTier?: Tier) {
-  return useQuery(api.forgeCards.getNew, {
-    topicId,
-    maxTier: maxTier ? Number(maxTier) : undefined,
-  }) ?? [];
+export function useNewCards(topicId?: TopicId, maxTier?: Tier): CardDoc[] {
+  return (
+    useQuery(api.forgeCards.getNew, {
+      topicId,
+      maxTier: maxTier ? Number(maxTier) : undefined,
+    }) as CardDoc[] | undefined
+  ) ?? [];
 }
 
-export function useIsSeeded() {
-  return useQuery(api.forgeCards.isSeeded) ?? false;
+export function useIsSeeded(): boolean {
+  return (useQuery(api.forgeCards.isSeeded) as boolean | undefined) ?? false;
 }
 
-export function useSeedCards() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSeedCards(): (args: { cards: any[] }) => Promise<unknown> {
   return useMutation(api.forgeCards.seedCards);
 }
 
-export function useReseedCards() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useReseedCards(): (args: { cards: any[] }) => Promise<unknown> {
   return useMutation(api.forgeCards.reseedCards);
 }
 
-export function useUpdateCard() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useUpdateCard(): (args: any) => Promise<unknown> {
   return useMutation(api.forgeCards.updateCard);
 }
 
 // ── Reviews ──
 
-export function useReviews(limit?: number) {
-  return useQuery(api.forgeReviews.getAll, { limit }) ?? [];
+export function useReviews(limit?: number): ReviewDoc[] {
+  return (useQuery(api.forgeReviews.getAll, { limit }) as ReviewDoc[] | undefined) ?? [];
 }
 
-export function useRecentReviews(limit?: number) {
-  return useQuery(api.forgeReviews.getRecent, { limit }) ?? [];
+export function useRecentReviews(limit?: number): ReviewDoc[] {
+  return (useQuery(api.forgeReviews.getRecent, { limit }) as ReviewDoc[] | undefined) ?? [];
 }
 
-export function useAddReview() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useAddReview(): (args: any) => Promise<unknown> {
   return useMutation(api.forgeReviews.add);
 }
 
 // ── Sessions ──
 
-export function useSessions(limit?: number) {
-  return useQuery(api.forgeSessions.getAll, { limit }) ?? [];
+export function useSessions(limit?: number): SessionDoc[] {
+  return (useQuery(api.forgeSessions.getAll, { limit }) as SessionDoc[] | undefined) ?? [];
 }
 
-export function useRecentSessions(limit?: number) {
-  return useQuery(api.forgeSessions.getRecent, { limit }) ?? [];
+export function useRecentSessions(limit?: number): SessionDoc[] {
+  return (useQuery(api.forgeSessions.getRecent, { limit }) as SessionDoc[] | undefined) ?? [];
 }
 
-export function useAddSession() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useAddSession(): (args: any) => Promise<unknown> {
   return useMutation(api.forgeSessions.add);
 }
 
 // ── Progress ──
 
-export function useAllProgress() {
-  return useQuery(api.forgeProgress.getAll) ?? [];
+export function useAllProgress(): ProgressDoc[] {
+  return (useQuery(api.forgeProgress.getAll) as ProgressDoc[] | undefined) ?? [];
 }
 
-export function useTopicProgress(topicId: TopicId) {
-  return useQuery(api.forgeProgress.getByTopic, { topicId });
+export function useTopicProgress(topicId: TopicId): ProgressDoc | null {
+  return (
+    (useQuery(api.forgeProgress.getByTopic, { topicId }) as ProgressDoc | null | undefined) ?? null
+  );
 }
 
-export function useRecomputeProgress() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useRecomputeProgress(): (args: { topicId: string }) => Promise<any> {
   return useMutation(api.forgeProgressRecompute.recompute);
 }
 
 // ── Profile ──
 
-export function useProfile() {
-  return useQuery(api.forgeProfile.get) ?? null;
+export function useProfile(): ProfileDoc | null {
+  return (useQuery(api.forgeProfile.get) as ProfileDoc | null | undefined) ?? null;
 }
 
-export function useUpsertProfile() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useUpsertProfile(): (args: any) => Promise<unknown> {
   return useMutation(api.forgeProfile.upsert);
 }
 
-export function useAddPoints() {
+export function useAddPoints(): (args: { points: number }) => Promise<unknown> {
   return useMutation(api.forgeProfile.addPoints);
 }
 
-export function useCheckBadges() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useCheckBadges(): (args?: any) => Promise<{ awarded: string[] }> {
   return useMutation(api.forgeProfile.checkAndAwardBadges);
 }
 
 // ── Stories ──
 
-export function useStories() {
-  return useQuery(api.forgeStories.getAll) ?? [];
+export function useStories(): StoryDoc[] {
+  return (useQuery(api.forgeStories.getAll) as StoryDoc[] | undefined) ?? [];
 }
 
-export function useUpsertStory() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useUpsertStory(): (args: any) => Promise<unknown> {
   return useMutation(api.forgeStories.upsert);
 }
 
 // ── Speed Runs ──
 
-export function useSpeedRunAdd() {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSpeedRunAdd(): (args: any) => Promise<unknown> {
   return useMutation(api.forgeSpeedRuns.add);
 }
 
-export function useSpeedRunHistory(topicId?: string) {
-  return useQuery(api.forgeSpeedRuns.getHistory, { topicId, limit: 10 }) ?? [];
+export function useSpeedRunHistory(topicId?: string): SpeedRunDoc[] {
+  return (
+    useQuery(api.forgeSpeedRuns.getHistory, { topicId, limit: 10 }) as SpeedRunDoc[] | undefined
+  ) ?? [];
 }
 
-export function useSpeedRunBestScore(topicId?: string) {
-  return useQuery(api.forgeSpeedRuns.getBestScore, { topicId });
+export function useSpeedRunBestScore(topicId?: string): SpeedRunDoc | null {
+  return (
+    (useQuery(api.forgeSpeedRuns.getBestScore, { topicId }) as SpeedRunDoc | null | undefined) ??
+    null
+  );
 }
 
-export function useSpeedRunsRecent(limit?: number) {
-  return useQuery(api.forgeSpeedRuns.getRecent, { limit }) ?? [];
+export function useSpeedRunsRecent(limit?: number): SpeedRunDoc[] {
+  return (useQuery(api.forgeSpeedRuns.getRecent, { limit }) as SpeedRunDoc[] | undefined) ?? [];
 }
 
 // ── Drills ──
 
-export function useDrills(limit?: number) {
-  return useQuery(api.forgeDrills.getAll, { limit }) ?? [];
+export function useDrills(limit?: number): DrillDoc[] {
+  return (useQuery(api.forgeDrills.getAll, { limit }) as DrillDoc[] | undefined) ?? [];
 }
 
-export function useDrillsByScenario(scenarioId: string) {
-  return useQuery(api.forgeDrills.getByScenario, { scenarioId }) ?? [];
+export function useDrillsByScenario(scenarioId: string): DrillDoc[] {
+  return (
+    useQuery(api.forgeDrills.getByScenario, { scenarioId }) as DrillDoc[] | undefined
+  ) ?? [];
 }
 
-export function useRecentDrills(limit?: number) {
-  return useQuery(api.forgeDrills.getRecent, { limit }) ?? [];
+export function useRecentDrills(limit?: number): DrillDoc[] {
+  return (useQuery(api.forgeDrills.getRecent, { limit }) as DrillDoc[] | undefined) ?? [];
 }
 
-export function useDrillBestScore(scenarioId: string) {
-  return useQuery(api.forgeDrills.getBestByScenario, { scenarioId });
+export function useDrillBestScore(scenarioId: string): DrillDoc | null {
+  return (
+    (useQuery(api.forgeDrills.getBestByScenario, { scenarioId }) as DrillDoc | null | undefined) ??
+    null
+  );
 }

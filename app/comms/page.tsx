@@ -27,25 +27,11 @@ function ChannelIcon({ id }: { id: string }) {
 
 const CHANNELS = [
   {
-    id: "mock-interview",
-    title: "Mock Interview",
-    description: "AI-scored behavioral and technical interview practice",
-    route: "/interview/mock",
-    frequency: "CH-01",
-  },
-  {
-    id: "agent",
-    title: "Agent Chat",
-    description: "AI study companion for personalized coaching and Q&A",
-    route: "/agent",
-    frequency: "CH-02",
-  },
-  {
     id: "stories",
     title: "Story Bank",
     description: "Build and rehearse STAR stories for behavioral interviews",
     route: "/stories",
-    frequency: "CH-03",
+    frequency: "CH-01",
   },
 ];
 

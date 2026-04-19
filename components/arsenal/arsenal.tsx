@@ -49,11 +49,9 @@ const ACTIVITIES: Activity[] = [
   { id: "boot-triage", title: "Boot Triage", description: "Diagnose boot failures from symptoms and logs", category: "test", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 10, route: "/boot-triage" },
   { id: "fs-types-quiz", title: "Filesystem Types Quiz", description: "Identify the filesystem from a scenario description", category: "test", difficulty: "Medium", topics: ["linux"], estimatedMinutes: 6, route: "/filesystem-types?mode=quiz" },
   // PREPARE
-  { id: "mock-interview", title: "Mock Interview", description: "AI-scored behavioral and technical interview practice", category: "prepare", topics: ["behavioral"], estimatedMinutes: 15, route: "/interview/mock" },
   { id: "stories", title: "Story Bank", description: "Build and rehearse STAR stories for interviews", category: "prepare", topics: ["behavioral"], estimatedMinutes: 10, route: "/stories" },
   // TOOLS
   { id: "cards", title: "Card Browser", description: "Browse and search all flashcards in the system", category: "tools", topics: [], estimatedMinutes: 5, route: "/cards" },
-  { id: "agent", title: "Agent Chat", description: "AI study companion for personalized coaching", category: "tools", topics: [], estimatedMinutes: 10, route: "/agent" },
 ];
 
 // ── Category config with SVG icons ──

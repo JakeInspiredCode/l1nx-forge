@@ -13,11 +13,13 @@ import TelemetryBar from "@/components/ui/telemetry-bar";
 import BountyCard from "./bounty-card";
 import ScanOverlay from "@/components/ui/scan-overlay";
 
+import type { Doc, CampaignProgressFields, MissionProgressFields, ProfileFields } from "@/lib/data/schema";
+
 export default function MissionBoard() {
   const router = useRouter();
-  const profile = useQuery(api.forgeProfile.get);
-  const campaignStates = useQuery(api.forgeCampaigns.getAllCampaignStates);
-  const missionStates = useQuery(api.forgeMissions.getAllMissionStates);
+  const profile = useQuery<Doc<ProfileFields> | null>(api.forgeProfile.get);
+  const campaignStates = useQuery<Doc<CampaignProgressFields>[]>(api.forgeCampaigns.getAllCampaignStates);
+  const missionStates = useQuery<Doc<MissionProgressFields>[]>(api.forgeMissions.getAllMissionStates);
 
   const isLoading = !profile || !campaignStates || !missionStates;
 

@@ -93,8 +93,15 @@ function BadgeIcon({ earned }: { earned: boolean }) {
 }
 
 export default function ProfilePage() {
-  const profile = useQuery(api.forgeProfile.get);
-  const allProgress = useQuery(api.forgeProgress.getAll);
+  const profile = useQuery(api.forgeProfile.get) as {
+    streak?: number; totalPoints?: number; badges?: string[];
+    totalSessionMinutes?: number; lastSessionDate?: string;
+  } | null | undefined;
+  const allProgress = useQuery(api.forgeProgress.getAll) as Array<{
+    topicId: string; masteryPercent: number; currentTier: number;
+    totalCards: number; masteredCards: number; learningCards: number;
+    newCards: number; weakFlag: boolean;
+  }> | undefined;
   const [activeTab, setActiveTab] = useState<Tab>("stats");
   const sound = useSoundEngine();
 

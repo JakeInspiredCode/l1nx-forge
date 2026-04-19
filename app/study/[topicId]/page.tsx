@@ -130,19 +130,6 @@ export default function TopicStudyPage({ params }: { params: Promise<{ topicId: 
             <span className="font-semibold">Full Topic Drill</span>
             <span className="text-sm text-forge-text-dim ml-2">(up to 40 cards, all unlocked tiers)</span>
           </button>
-          <button
-            onClick={() => {
-              window.dispatchEvent(
-                new CustomEvent("open-floating-coach", {
-                  detail: { mode: "quiz", message: `Quiz me on ${topic.name}. Focus on my weakest cards in this topic.` },
-                })
-              );
-            }}
-            className="w-full bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-left hover:bg-purple-500/15 transition-colors"
-          >
-            <span className="font-semibold text-purple-400">Quiz Me on {topic.name}</span>
-            <span className="text-sm text-forge-text-dim ml-2">AI coach quizzes your weak spots</span>
-          </button>
         </div>
       </main>
   );

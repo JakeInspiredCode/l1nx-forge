@@ -53,8 +53,8 @@ function CardSetStep({ step, onStepComplete }: StepRendererProps) {
   // Otherwise fall back to topic+tier random selection.
   // Both queries always run (hooks can't be conditional) but only the
   // relevant result is used.
-  const rawCards = useQuery(api.forgeCards.getByTopicTier, { topicId, tier });
-  const allCards = useQuery(api.forgeCards.getAll);
+  const rawCards = useQuery<Array<{ cardId: string; [k: string]: unknown }>>(api.forgeCards.getByTopicTier, { topicId, tier });
+  const allCards = useQuery<Array<{ cardId: string; [k: string]: unknown }>>(api.forgeCards.getAll);
 
   const cards = useMemo(() => {
     if (cardIds && allCards) {

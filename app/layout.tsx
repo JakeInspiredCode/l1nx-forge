@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ConvexClientProvider from "@/components/convex-provider";
-import Mascot from "@/components/mascot/mascot";
+import DataProvider from "@/lib/data/provider";
 import BadgeBanner from "@/components/badge-banner";
 import Nav from "@/components/nav";
 
@@ -19,12 +18,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen">
-        <ConvexClientProvider>
+        <DataProvider>
           <Nav />
           {children}
-          <Mascot />
           <BadgeBanner />
-        </ConvexClientProvider>
+        </DataProvider>
       </body>
     </html>
   );

@@ -537,7 +537,10 @@ function ChunkBlock({
 }
 
 export default function StoriesPage() {
-  const convexStoriesRaw = useQuery(api.forgeStories.getAll);
+  const convexStoriesRaw = useQuery(api.forgeStories.getAll) as Array<{
+    storyId: string; question: string; framework: string; answer: string;
+    chunks?: Array<{ label: string; summary: string; content: string }>;
+  }> | undefined;
   const upsertStory = useMutation(api.forgeStories.upsert);
   const [seeded, setSeeded] = useState(false);
   const [hiddenStories, setHiddenStories] = useState<Set<string>>(new Set());

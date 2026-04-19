@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 const HUB_ROUTES: Record<string, string[]> = {
   "/missions": ["/missions", "/study"],
   "/arsenal": ["/arsenal", "/train", "/explore", "/foundations", "/terminal", "/cards", "/drill", "/filesystem-navigator", "/command-dissector", "/filesystem-types", "/boot-learn", "/boot-triage", "/train/quick-draw", "/train/diagnosis", "/explore/boot-process", "/explore/visual-explorer"],
-  "/comms": ["/comms", "/interview", "/stories", "/agent"],
+  "/comms": ["/comms", "/stories"],
   "/profile": ["/profile", "/progress"],
 };
 

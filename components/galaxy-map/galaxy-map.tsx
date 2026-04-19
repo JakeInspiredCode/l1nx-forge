@@ -80,12 +80,14 @@ function EnergyStream({
   );
 }
 
+import type { Doc, CampaignProgressFields, MissionProgressFields, ProfileFields, ProgressFields } from "@/lib/data/schema";
+
 export default function GalaxyMap() {
   const router = useRouter();
-  const profile = useQuery(api.forgeProfile.get);
-  const campaignStates = useQuery(api.forgeCampaigns.getAllCampaignStates);
-  const missionStates = useQuery(api.forgeMissions.getAllMissionStates);
-  const topicProgress = useQuery(api.forgeProgress.getAll);
+  const profile = useQuery<Doc<ProfileFields> | null>(api.forgeProfile.get);
+  const campaignStates = useQuery<Doc<CampaignProgressFields>[]>(api.forgeCampaigns.getAllCampaignStates);
+  const missionStates = useQuery<Doc<MissionProgressFields>[]>(api.forgeMissions.getAllMissionStates);
+  const topicProgress = useQuery<Doc<ProgressFields>[]>(api.forgeProgress.getAll);
   const enrollCampaign = useMutation(api.forgeCampaigns.enrollCampaign);
 
   const [hoveredSector, setHoveredSector] = useState<Sector | null>(null);
@@ -188,9 +190,15 @@ export default function GalaxyMap() {
     router.push(campaignId ? `/missions?campaign=${campaignId}` : "/missions");
   }, [router, selectedSector]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  }, []);
+  // Same optimization as system-map: only track mouse position while a sector
+  // is hovered, so idle movement doesn't cascade re-renders across the map.
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hoveredSector) return;
+      setMousePos({ x: e.clientX, y: e.clientY });
+    },
+    [hoveredSector],
+  );
 
   // Energy stream connections
   const lanes: [Sector, Sector][] = useMemo(() => {

@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
+import type { Doc, CampaignProgressFields, MissionProgressFields, ProfileFields } from "@/lib/data/schema";
 import { ALL_CAMPAIGNS, getMissionsForCampaign } from "@/lib/seeds/campaigns";
 import { getSectorForCampaign } from "@/lib/seeds/sectors";
 import type { Mission, MissionStatus, MissionStep } from "@/lib/types/campaign";
@@ -94,9 +95,9 @@ export default function SystemMap() {
   const searchParams = useSearchParams();
   const campaignIdParam = searchParams.get("campaign");
 
-  const profile = useQuery(api.forgeProfile.get);
-  const campaignStates = useQuery(api.forgeCampaigns.getAllCampaignStates);
-  const missionStates = useQuery(api.forgeMissions.getAllMissionStates);
+  const profile = useQuery<Doc<ProfileFields> | null>(api.forgeProfile.get);
+  const campaignStates = useQuery<Doc<CampaignProgressFields>[]>(api.forgeCampaigns.getAllCampaignStates);
+  const missionStates = useQuery<Doc<MissionProgressFields>[]>(api.forgeMissions.getAllMissionStates);
 
   const [hoveredMission, setHoveredMission] = useState<Mission | null>(null);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
@@ -116,8 +117,12 @@ export default function SystemMap() {
   const sector = activeCampaignId ? getSectorForCampaign(activeCampaignId) : undefined;
   const campaignColor = sector?.color ?? "#f59e0b";
 
-  // Missions for this campaign
-  const missions = activeCampaign ? getMissionsForCampaign(activeCampaign.id) : [];
+  // Missions for this campaign. Memoized so downstream `useMemo` deps that
+  // reference `missions` don't bust on every render.
+  const missions = useMemo(
+    () => (activeCampaign ? getMissionsForCampaign(activeCampaign.id) : []),
+    [activeCampaign],
+  );
 
   // Mission status lookup
   const missionStatusMap: Record<string, MissionStatus> = useMemo(() => {
@@ -157,16 +162,28 @@ export default function SystemMap() {
   }, [missionStates, missions]);
 
   // Decaying missions
-  const decayingMissionIds = missionStates
-    ?.filter((m) => m.status === "decaying" && missions.some((cm) => cm.id === m.missionId))
-    .map((m) => m.missionId) ?? [];
+  const decayingMissionIds = useMemo(
+    () =>
+      missionStates
+        ?.filter(
+          (m) =>
+            m.status === "decaying" &&
+            missions.some((cm) => cm.id === m.missionId),
+        )
+        .map((m) => m.missionId) ?? [],
+    [missionStates, missions],
+  );
 
   // Path nodes for campaign path
-  const pathNodes = missions.map((m, i) => ({
-    missionId: m.id,
-    cx: orbitalPositions[i]?.cx ?? 500,
-    cy: orbitalPositions[i]?.cy ?? 380,
-  }));
+  const pathNodes = useMemo(
+    () =>
+      missions.map((m, i) => ({
+        missionId: m.id,
+        cx: orbitalPositions[i]?.cx ?? 500,
+        cy: orbitalPositions[i]?.cy ?? 380,
+      })),
+    [missions, orbitalPositions],
+  );
 
   // Selected mission number
   const selectedMissionNumber = selectedMission
@@ -200,9 +217,16 @@ export default function SystemMap() {
     router.push(`/missions/${missionId}?skipToCheck=true`);
   }, [router]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  }, []);
+  // Only track mouse position while a mission is hovered. Without this guard,
+  // every idle mouse movement re-renders the whole map (hundreds of times per
+  // second of movement).
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!hoveredMission) return;
+      setMousePos({ x: e.clientX, y: e.clientY });
+    },
+    [hoveredMission],
+  );
 
   const hasNoCampaign = !isLoading && !activeCampaign;
 
