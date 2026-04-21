@@ -23,6 +23,10 @@ import { OPS_M01_QUESTIONS } from "./ops-m01";
 import { OPS_M02_QUESTIONS } from "./ops-m02";
 import { OPS_M03_QUESTIONS } from "./ops-m03";
 import { OPS_M04_QUESTIONS } from "./ops-m04";
+import { PWR_M01_QUESTIONS } from "./pwr-m01";
+import { PWR_M02_QUESTIONS } from "./pwr-m02";
+import { PWR_M03_QUESTIONS } from "./pwr-m03";
+import { PWR_M04_QUESTIONS } from "./pwr-m04";
 
 const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "linux-m01": MISSION_01_QUESTIONS,
@@ -49,6 +53,10 @@ const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "ops-m02": OPS_M02_QUESTIONS,
   "ops-m03": OPS_M03_QUESTIONS,
   "ops-m04": OPS_M04_QUESTIONS,
+  "pwr-m01": PWR_M01_QUESTIONS,
+  "pwr-m02": PWR_M02_QUESTIONS,
+  "pwr-m03": PWR_M03_QUESTIONS,
+  "pwr-m04": PWR_M04_QUESTIONS,
 };
 
 export function getMCQuestions(missionId: string): MCQuestion[] | null {

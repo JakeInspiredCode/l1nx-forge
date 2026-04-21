@@ -62,7 +62,6 @@ export const ALL_SECTORS: Sector[] = [
     campaignIds: ["power-core"],
     mapPosition: { x: 14, y: 60 },
     size: "sm",
-    comingSoon: true,
   },
   {
     id: "sector-ops",

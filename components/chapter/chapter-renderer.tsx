@@ -7,10 +7,15 @@ import {
   Bullets,
   Callout,
   CodeBlock,
+  Collapsible,
+  FillBlank,
+  FlipCards,
   Heading,
   InfoTable,
   KnowledgeCheck,
+  MCQInline,
   ThinkAboutIt,
+  WhyThisMatters,
 } from "./blocks";
 import { Prose } from "./prose";
 
@@ -61,6 +66,32 @@ function renderBlock(block: Block, idx: number) {
     case "knowledge-check":
       return (
         <KnowledgeCheck key={idx} question={block.question} answer={block.answer} />
+      );
+    case "why-this-matters":
+      return <WhyThisMatters key={idx} body={block.body} />;
+    case "collapsible":
+      return <Collapsible key={idx} intro={block.intro} items={block.items} />;
+    case "fill-blank":
+      return (
+        <FillBlank
+          key={idx}
+          prompt={block.prompt}
+          sentence={block.sentence}
+          blanks={block.blanks}
+          reveal={block.reveal}
+        />
+      );
+    case "flip-cards":
+      return <FlipCards key={idx} intro={block.intro} cards={block.cards} />;
+    case "mcq-inline":
+      return (
+        <MCQInline
+          key={idx}
+          question={block.question}
+          choices={block.choices}
+          correctAnswer={block.correctAnswer}
+          explanation={block.explanation}
+        />
       );
     case "custom-component":
       return (

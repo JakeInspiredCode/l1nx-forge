@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import type { CalloutVariant, TableCell } from "@/lib/types/chapter";
+import { useMemo, useState, type ReactNode } from "react";
+import type {
+  CalloutVariant,
+  CollapsibleItem,
+  FillBlankSlot,
+  FlipCardItem,
+  InlineChoice,
+  TableCell,
+} from "@/lib/types/chapter";
 import { Prose } from "./prose";
 
 // ─── Heading ────────────────────────────────────────────────────────────────
@@ -584,6 +591,606 @@ export function KnowledgeCheck({
           </div>
           <div style={{ color: "#E8E8F0" }}>
             <Prose html={answer} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── WhyThisMatters ─────────────────────────────────────────────────────────
+
+export function WhyThisMatters({ body }: { body: string }) {
+  return (
+    <div
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(197,138,255,0.10), rgba(139,92,246,0.05))",
+        border: "1px solid rgba(197,138,255,0.25)",
+        borderLeft: "3px solid #C58AFF",
+        borderRadius: 10,
+        padding: "16px 20px",
+        margin: "22px 0",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+          color: "#C58AFF",
+          fontWeight: 800,
+          fontSize: 13,
+          letterSpacing: "0.8px",
+          textTransform: "uppercase",
+        }}
+      >
+        <span style={{ fontSize: 15 }}>✦</span> Why this matters
+      </div>
+      <Prose html={body} />
+    </div>
+  );
+}
+
+// ─── Collapsible ────────────────────────────────────────────────────────────
+
+const COLLAPSIBLE_COLORS = ["#50C8FF", "#FFA832", "#7AE87A", "#FF6B6B", "#C58AFF", "#5AD0D0"];
+
+export function Collapsible({
+  intro,
+  items,
+}: {
+  intro?: string;
+  items: CollapsibleItem[];
+}) {
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const toggle = (i: number) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  };
+
+  return (
+    <div style={{ margin: "16px 0 20px" }}>
+      {intro && (
+        <div style={{ marginBottom: 6 }}>
+          <Prose html={intro} />
+        </div>
+      )}
+      <div style={{ display: "grid", gap: 8 }}>
+        {items.map((item, i) => {
+          const color = item.color ?? COLLAPSIBLE_COLORS[i % COLLAPSIBLE_COLORS.length];
+          const isOpen = expanded.has(i);
+          return (
+            <div
+              key={i}
+              onClick={() => toggle(i)}
+              style={{
+                padding: "14px 18px",
+                borderRadius: 8,
+                background: isOpen
+                  ? "rgba(255,255,255,0.04)"
+                  : "rgba(255,255,255,0.02)",
+                borderLeft: `3px solid ${color}`,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <strong style={{ color, fontSize: 15 }}>{item.title}</strong>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {!isOpen && (
+                    <span
+                      style={{
+                        color: "#8899AA",
+                        fontSize: 11,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      click to expand
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      color: "#8899AA",
+                      fontSize: 12,
+                      flexShrink: 0,
+                      transition: "transform 0.2s",
+                      transform: isOpen ? "rotate(90deg)" : "none",
+                    }}
+                  >
+                    ▸
+                  </span>
+                </div>
+              </div>
+              {isOpen && (
+                <div style={{ marginTop: 10 }}>
+                  <Prose html={item.body} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── FillBlank ──────────────────────────────────────────────────────────────
+
+function normalize(s: string) {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[.,!?'"`]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function matches(input: string, slot: FillBlankSlot) {
+  const norm = normalize(input);
+  if (norm === normalize(slot.answer)) return true;
+  if (slot.alternates) {
+    for (const alt of slot.alternates) {
+      if (norm === normalize(alt)) return true;
+    }
+  }
+  return false;
+}
+
+export function FillBlank({
+  prompt,
+  sentence,
+  blanks,
+  reveal,
+}: {
+  prompt: string;
+  sentence: string;
+  blanks: FillBlankSlot[];
+  reveal: string;
+}) {
+  const [values, setValues] = useState<string[]>(() => blanks.map(() => ""));
+  const [checked, setChecked] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+
+  const parts = useMemo(() => sentence.split(/(\{\d+\})/g), [sentence]);
+  const correctCount = useMemo(() => {
+    if (!checked) return 0;
+    return values.reduce(
+      (acc, v, i) => acc + (matches(v, blanks[i]) ? 1 : 0),
+      0
+    );
+  }, [values, blanks, checked]);
+  const allCorrect = checked && correctCount === blanks.length;
+
+  const updateValue = (i: number, v: string) => {
+    setValues((prev) => {
+      const next = [...prev];
+      next[i] = v;
+      return next;
+    });
+  };
+
+  return (
+    <div
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(122,232,122,0.08), rgba(60,200,120,0.04))",
+        border: "1px solid rgba(122,232,122,0.25)",
+        borderLeft: "3px solid #7AE87A",
+        borderRadius: 8,
+        padding: "18px 20px",
+        margin: "22px 0",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 10,
+          color: "#7AE87A",
+          fontWeight: 700,
+          fontSize: 13,
+          letterSpacing: "0.5px",
+        }}
+      >
+        <span style={{ fontSize: 15 }}>▣</span> FILL IN THE BLANK
+      </div>
+      <div style={{ color: "#D8E8D8", marginBottom: 12 }}>
+        <Prose html={prompt} />
+      </div>
+      <div
+        style={{
+          color: "#E0E8E0",
+          fontSize: 16,
+          lineHeight: 2,
+          fontFamily: "inherit",
+          margin: "6px 0 14px",
+        }}
+      >
+        {parts.map((part, idx) => {
+          const m = part.match(/^\{(\d+)\}$/);
+          if (m) {
+            const slotIdx = Number(m[1]);
+            const slot = blanks[slotIdx];
+            const val = values[slotIdx] ?? "";
+            const isCorrect = checked && matches(val, slot);
+            const isWrong = checked && val.length > 0 && !isCorrect;
+            return (
+              <input
+                key={idx}
+                value={val}
+                onChange={(e) => updateValue(slotIdx, e.target.value)}
+                placeholder={slot.hint ?? "…"}
+                disabled={revealed}
+                style={{
+                  display: "inline-block",
+                  minWidth: 90,
+                  width: `${Math.max((slot.answer.length + 2) * 10, 90)}px`,
+                  padding: "3px 8px",
+                  margin: "0 4px",
+                  background: isCorrect
+                    ? "rgba(42,138,74,0.25)"
+                    : isWrong
+                    ? "rgba(170,48,48,0.2)"
+                    : "rgba(0,0,0,0.35)",
+                  border: `1px solid ${
+                    isCorrect
+                      ? "rgba(90,218,122,0.6)"
+                      : isWrong
+                      ? "rgba(238,102,102,0.5)"
+                      : "rgba(122,232,122,0.3)"
+                  }`,
+                  borderRadius: 4,
+                  color: isCorrect ? "#9EE8AE" : "#E8E8F0",
+                  fontFamily:
+                    "'JetBrains Mono', 'Fira Code', monospace",
+                  fontSize: 15,
+                  outline: "none",
+                }}
+              />
+            );
+          }
+          return <span key={idx}>{part}</span>;
+        })}
+      </div>
+      {!revealed && (
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            onClick={() => setChecked(true)}
+            style={{
+              padding: "7px 18px",
+              background: "#7AE87A",
+              border: "none",
+              borderRadius: 6,
+              color: "#14281A",
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: "pointer",
+            }}
+          >
+            Check
+          </button>
+          <button
+            onClick={() => setRevealed(true)}
+            style={{
+              padding: "7px 16px",
+              background: "transparent",
+              border: "1px solid rgba(122,232,122,0.35)",
+              borderRadius: 6,
+              color: "#9EE8AE",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            Reveal answers
+          </button>
+          {checked && (
+            <span
+              style={{
+                color: allCorrect ? "#5ADA7A" : "#DDAA44",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              {correctCount} / {blanks.length} correct
+              {allCorrect ? " — nice." : " — try again or reveal."}
+            </span>
+          )}
+        </div>
+      )}
+      {revealed && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: 14,
+            background: "rgba(122,232,122,0.08)",
+            borderRadius: 6,
+            border: "1px solid rgba(122,232,122,0.2)",
+          }}
+        >
+          <div
+            style={{
+              color: "#7AE87A",
+              fontWeight: 700,
+              fontSize: 13,
+              marginBottom: 6,
+            }}
+          >
+            ANSWER
+          </div>
+          <div style={{ color: "#E8F0E8" }}>
+            <Prose html={reveal} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── FlipCards ──────────────────────────────────────────────────────────────
+
+function FlipCard({ card, index }: { card: FlipCardItem; index: number }) {
+  const [flipped, setFlipped] = useState(false);
+  const accent = COLLAPSIBLE_COLORS[index % COLLAPSIBLE_COLORS.length];
+  return (
+    <div
+      onClick={() => setFlipped((f) => !f)}
+      style={{
+        position: "relative",
+        minHeight: 140,
+        padding: "18px 18px",
+        background: flipped
+          ? "rgba(255,255,255,0.05)"
+          : "rgba(0,0,0,0.35)",
+        border: `1px solid ${accent}44`,
+        borderLeft: `3px solid ${accent}`,
+        borderRadius: 10,
+        cursor: "pointer",
+        transition: "all 0.25s",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 10,
+          fontSize: 10,
+          letterSpacing: "0.8px",
+          color: accent,
+          fontWeight: 700,
+          opacity: 0.7,
+        }}
+      >
+        {flipped ? "BACK · click to flip" : "FRONT · click to flip"}
+      </div>
+      <div
+        style={{
+          color: flipped ? "#E8ECF0" : accent,
+          fontSize: flipped ? 15 : 17,
+          fontWeight: flipped ? 500 : 700,
+          lineHeight: 1.5,
+          marginTop: 12,
+        }}
+      >
+        <Prose html={flipped ? card.back : card.front} />
+      </div>
+    </div>
+  );
+}
+
+export function FlipCards({
+  intro,
+  cards,
+}: {
+  intro?: string;
+  cards: FlipCardItem[];
+}) {
+  return (
+    <div style={{ margin: "22px 0" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+          color: "#FFA832",
+          fontWeight: 700,
+          fontSize: 13,
+          letterSpacing: "0.5px",
+        }}
+      >
+        <span style={{ fontSize: 15 }}>⟲</span> FLIP TO RECALL
+      </div>
+      {intro && (
+        <div style={{ marginBottom: 10 }}>
+          <Prose html={intro} />
+        </div>
+      )}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: 10,
+        }}
+      >
+        {cards.map((c, i) => (
+          <FlipCard key={i} card={c} index={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── MCQInline ──────────────────────────────────────────────────────────────
+
+export function MCQInline({
+  question,
+  choices,
+  correctAnswer,
+  explanation,
+}: {
+  question: string;
+  choices: InlineChoice[];
+  correctAnswer: string;
+  explanation: string;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [locked, setLocked] = useState(false);
+
+  const reveal = () => {
+    if (selected) setLocked(true);
+  };
+
+  const correct = selected === correctAnswer;
+
+  return (
+    <div
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(80,200,255,0.08), rgba(40,140,255,0.04))",
+        border: "1px solid rgba(80,200,255,0.25)",
+        borderLeft: "3px solid #50C8FF",
+        borderRadius: 8,
+        padding: "18px 20px",
+        margin: "22px 0",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 10,
+          color: "#50C8FF",
+          fontWeight: 700,
+          fontSize: 13,
+          letterSpacing: "0.5px",
+        }}
+      >
+        <span style={{ fontSize: 15 }}>◈</span> QUICK CHECK
+      </div>
+      <div style={{ color: "#E0E4E8", fontWeight: 500, marginBottom: 12 }}>
+        <Prose html={question} />
+      </div>
+      <div style={{ display: "grid", gap: 8, marginBottom: 12 }}>
+        {choices.map((c) => {
+          const isSelected = selected === c.label;
+          const isCorrectChoice = c.label === correctAnswer;
+          const showState = locked;
+          let bg = "rgba(255,255,255,0.03)";
+          let border = "1px solid rgba(255,255,255,0.1)";
+          let color = "#C8CCD0";
+          if (showState && isCorrectChoice) {
+            bg = "rgba(42,138,74,0.18)";
+            border = "1px solid rgba(90,218,122,0.55)";
+            color = "#9EE8AE";
+          } else if (showState && isSelected && !isCorrectChoice) {
+            bg = "rgba(170,48,48,0.18)";
+            border = "1px solid rgba(238,102,102,0.5)";
+            color = "#EE9999";
+          } else if (!showState && isSelected) {
+            bg = "rgba(80,200,255,0.12)";
+            border = "1px solid rgba(80,200,255,0.55)";
+            color = "#E8ECF0";
+          }
+          return (
+            <button
+              key={c.label}
+              type="button"
+              disabled={locked}
+              onClick={() => setSelected(c.label)}
+              style={{
+                textAlign: "left",
+                padding: "10px 14px",
+                background: bg,
+                border,
+                borderRadius: 8,
+                color,
+                fontSize: 14.5,
+                lineHeight: 1.55,
+                cursor: locked ? "default" : "pointer",
+                fontFamily: "inherit",
+                display: "flex",
+                gap: 10,
+                alignItems: "flex-start",
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: 800,
+                  color: showState && isCorrectChoice ? "#9EE8AE" : "#7090A8",
+                  minWidth: 18,
+                }}
+              >
+                {c.label}
+              </span>
+              <span>
+                <Prose html={c.text} />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {!locked && (
+        <button
+          onClick={reveal}
+          disabled={!selected}
+          style={{
+            padding: "7px 20px",
+            background: selected ? "#50C8FF" : "rgba(80,200,255,0.2)",
+            border: "none",
+            borderRadius: 6,
+            color: selected ? "#1A1A2E" : "#7090A8",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: selected ? "pointer" : "not-allowed",
+          }}
+        >
+          Check answer
+        </button>
+      )}
+      {locked && (
+        <div
+          style={{
+            marginTop: 8,
+            padding: 14,
+            background: correct
+              ? "rgba(42,138,74,0.12)"
+              : "rgba(255,170,50,0.1)",
+            borderRadius: 6,
+            border: `1px solid ${
+              correct ? "rgba(90,218,122,0.3)" : "rgba(255,170,50,0.25)"
+            }`,
+          }}
+        >
+          <div
+            style={{
+              color: correct ? "#5ADA7A" : "#FFA832",
+              fontWeight: 700,
+              fontSize: 13,
+              marginBottom: 6,
+            }}
+          >
+            {correct ? "CORRECT" : `ANSWER: ${correctAnswer}`}
+          </div>
+          <div style={{ color: "#E8ECF0" }}>
+            <Prose html={explanation} />
           </div>
         </div>
       )}
