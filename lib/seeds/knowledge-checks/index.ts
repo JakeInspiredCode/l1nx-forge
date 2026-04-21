@@ -19,6 +19,10 @@ import { NET_M01_QUESTIONS } from "./net-m01";
 import { NET_M02_QUESTIONS } from "./net-m02";
 import { NET_M03_QUESTIONS } from "./net-m03";
 import { NET_M04_QUESTIONS } from "./net-m04";
+import { FIB_M01_QUESTIONS } from "./fib-m01";
+import { FIB_M02_QUESTIONS } from "./fib-m02";
+import { FIB_M03_QUESTIONS } from "./fib-m03";
+import { FIB_M04_QUESTIONS } from "./fib-m04";
 import { OPS_M01_QUESTIONS } from "./ops-m01";
 import { OPS_M02_QUESTIONS } from "./ops-m02";
 import { OPS_M03_QUESTIONS } from "./ops-m03";
@@ -49,6 +53,10 @@ const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "net-m02": NET_M02_QUESTIONS,
   "net-m03": NET_M03_QUESTIONS,
   "net-m04": NET_M04_QUESTIONS,
+  "fib-m01": FIB_M01_QUESTIONS,
+  "fib-m02": FIB_M02_QUESTIONS,
+  "fib-m03": FIB_M03_QUESTIONS,
+  "fib-m04": FIB_M04_QUESTIONS,
   "ops-m01": OPS_M01_QUESTIONS,
   "ops-m02": OPS_M02_QUESTIONS,
   "ops-m03": OPS_M03_QUESTIONS,

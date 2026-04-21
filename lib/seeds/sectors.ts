@@ -49,8 +49,7 @@ export const ALL_SECTORS: Sector[] = [
     color: "#a855f7",
     campaignIds: ["fiber-core"],
     mapPosition: { x: 82, y: 56 },
-    size: "sm",
-    comingSoon: true,
+    size: "md",
   },
   {
     id: "sector-power",

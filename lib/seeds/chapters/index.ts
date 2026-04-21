@@ -1,4 +1,5 @@
 import type { ChapterSection } from "@/lib/types/chapter";
+import { FIBER_CHAPTERS } from "./fiber-chapters";
 import { HARDWARE_CHAPTERS } from "./hardware-chapters";
 import { NETWORKING_CHAPTERS } from "./networking-chapters";
 import { OPS_CHAPTERS } from "./ops-chapters";
@@ -7,6 +8,7 @@ import { POWER_CHAPTERS } from "./power-chapters";
 const ALL_CHAPTERS: ChapterSection[] = [
   ...HARDWARE_CHAPTERS,
   ...NETWORKING_CHAPTERS,
+  ...FIBER_CHAPTERS,
   ...OPS_CHAPTERS,
   ...POWER_CHAPTERS,
 ];
