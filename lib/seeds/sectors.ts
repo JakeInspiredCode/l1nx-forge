@@ -82,8 +82,7 @@ export const ALL_SECTORS: Sector[] = [
     color: "#ec4899",
     campaignIds: ["scale-core"],
     mapPosition: { x: 88, y: 38 },
-    size: "sm",
-    comingSoon: true,
+    size: "md",
   },
   {
     id: "sector-linux-advanced",

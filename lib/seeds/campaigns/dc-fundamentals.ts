@@ -85,46 +85,15 @@ export const OPS_CAMPAIGN: Campaign = {
 export const SCALE_CAMPAIGN: Campaign = {
   id: "scale-core",
   title: "Operation Horizon",
-  description: "Hyperscale architecture — rack density, cluster hierarchy, colo vs hyperscale, capacity planning.",
+  description: "Scale & Architecture — vocabulary, rack design, datacenter tiers, and the four operating models (hyperscale, colo, enterprise, edge).",
   topicId: "scale",
   tier: 1,
-  missions: ["scl-m01", "scl-m02", "scl-m03"],
-  estimatedDays: 4,
-  estimatedMinutes: 75,
+  missions: ["scl-m01", "scl-m02", "scl-m03", "scl-m04"],
+  estimatedDays: 5,
+  estimatedMinutes: 100,
   icon: "🏗️",
   color: "#06b6d4",
 };
-
-// ── Mission stubs (Tier 1 only — content from existing cards) ──
-
-function stubMission(id: string, campaignId: string, title: string, description: string, y: number, connections: string[]): Mission {
-  return {
-    id,
-    campaignId,
-    title,
-    description,
-    estimatedMinutes: 25,
-    defaultLoadout: [
-      {
-        id: `${id}-s1`,
-        type: "flashcards",
-        label: `Review: ${title}`,
-        description: `Flashcards covering ${title.toLowerCase()}`,
-        estimatedMinutes: 10,
-        required: true,
-        contentRef: { kind: "card-set", id: `${campaignId}-${id}`, params: { topicId: campaignId.replace("-core", ""), tier: 1, count: 8 } },
-      },
-    ],
-    knowledgeCheck: {
-      type: "card-quiz",
-      description: "Answer 4 of 5 correctly",
-      passThreshold: 0.8,
-      items: [],
-    },
-    mapPosition: { x: 50, y },
-    connections,
-  };
-}
 
 // ── Full Hardware missions (hw-m01..hw-m04) ──
 // 2 readings (chapter-section) + 1 curated flashcards step + 8–10 MCQs, mirrors Linux Core shape.
@@ -1386,6 +1355,258 @@ const FIBER_MISSIONS: Mission[] = [
   },
 ];
 
+// ── Full Scale & Architecture missions (scl-m01..scl-m04) ──
+// 2 readings (chapter-section) + 1 curated flashcards step + 8–10 MCQs.
+
+const SCALE_MISSIONS: Mission[] = [
+  {
+    id: "scl-m01",
+    campaignId: "scale-core",
+    title: "Infrastructure Vocabulary",
+    description: "Server vs host vs node vs box; rack vs blade vs chassis; PSU vs PDU vs busbar vs whip — the words you'll live in on the floor.",
+    estimatedMinutes: 25,
+    defaultLoadout: [
+      {
+        id: "scl-m01-s1",
+        type: "reading",
+        label: "Read: Server, Host, Node, Box — Same Metal, Different Hats",
+        description: "The compute stack; form factors (rack, blade, chassis, hyperconverged); blade blast radius",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s1" },
+      },
+      {
+        id: "scl-m01-s2",
+        type: "reading",
+        label: "Read: Power & Connectivity Language",
+        description: "PSU vs PDU vs busbar vs whip; NIC, ToR, EoR, DAC, fiber, patch panels, spine-leaf",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s2" },
+      },
+      {
+        id: "scl-m01-s3",
+        type: "flashcards",
+        label: "Review: Infrastructure Vocabulary",
+        description: "5 flashcards on DC ops, scale, and the operating models",
+        estimatedMinutes: 5,
+        required: false,
+        contentRef: {
+          kind: "card-set",
+          id: "scl-m01-cards",
+          params: {
+            topicId: "scale",
+            tier: 1,
+            cardIds: ["sc-002", "sc-001", "sc-010", "sc-005", "sc-003"],
+          },
+        },
+      },
+    ],
+    knowledgeCheck: {
+      type: "mixed",
+      description: "Score 8 of 10 on the multiple choice exam",
+      passThreshold: 0.8,
+      items: [
+        { type: "multiple-choice", contentRef: "scl-m01-q01" },
+        { type: "multiple-choice", contentRef: "scl-m01-q02" },
+        { type: "multiple-choice", contentRef: "scl-m01-q03" },
+        { type: "multiple-choice", contentRef: "scl-m01-q04" },
+        { type: "multiple-choice", contentRef: "scl-m01-q05" },
+        { type: "multiple-choice", contentRef: "scl-m01-q06" },
+        { type: "multiple-choice", contentRef: "scl-m01-q07" },
+        { type: "multiple-choice", contentRef: "scl-m01-q08" },
+        { type: "multiple-choice", contentRef: "scl-m01-q09" },
+        { type: "multiple-choice", contentRef: "scl-m01-q10" },
+      ],
+    },
+    mapPosition: { x: 50, y: 0 },
+    connections: ["scl-m02"],
+  },
+  {
+    id: "scl-m02",
+    campaignId: "scale-core",
+    title: "Rack & Cluster Design",
+    description: "U math, kW budgets, weight and floor loading, A+B cabling, airflow impedance, and the rack-to-region hierarchy.",
+    estimatedMinutes: 25,
+    defaultLoadout: [
+      {
+        id: "scl-m02-s1",
+        type: "reading",
+        label: "Read: Inside the Rack — U Math, Density, Weight, A+B",
+        description: "42U math, kW density tiers, static vs dynamic weight, floor PSF, A+B discipline",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s3" },
+      },
+      {
+        id: "scl-m02-s2",
+        type: "reading",
+        label: "Read: Airflow, Cable Discipline, and the Cluster Hierarchy",
+        description: "Clean cabling is cooling; thermal throttling; rack → row → pod → hall → AZ → region; alarm scoping",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s4" },
+      },
+      {
+        id: "scl-m02-s3",
+        type: "flashcards",
+        label: "Review: Rack & Cluster Design",
+        description: "3 flashcards on hierarchy, failure domains, and capacity planning",
+        estimatedMinutes: 5,
+        required: false,
+        contentRef: {
+          kind: "card-set",
+          id: "scl-m02-cards",
+          params: {
+            topicId: "scale",
+            tier: 1,
+            cardIds: ["sc-004", "sc-008", "sc-007"],
+          },
+        },
+      },
+    ],
+    knowledgeCheck: {
+      type: "mixed",
+      description: "Score 6 of 8 on the multiple choice exam",
+      passThreshold: 0.75,
+      items: [
+        { type: "multiple-choice", contentRef: "scl-m02-q01" },
+        { type: "multiple-choice", contentRef: "scl-m02-q02" },
+        { type: "multiple-choice", contentRef: "scl-m02-q03" },
+        { type: "multiple-choice", contentRef: "scl-m02-q04" },
+        { type: "multiple-choice", contentRef: "scl-m02-q05" },
+        { type: "multiple-choice", contentRef: "scl-m02-q06" },
+        { type: "multiple-choice", contentRef: "scl-m02-q07" },
+        { type: "multiple-choice", contentRef: "scl-m02-q08" },
+      ],
+    },
+    mapPosition: { x: 50, y: 1 },
+    connections: ["scl-m01", "scl-m03"],
+  },
+  {
+    id: "scl-m03",
+    campaignId: "scale-core",
+    title: "Data Center Tiers",
+    description: "Uptime Institute Tiers I–IV, N/N+1/2N notation, blast radius — what tier actually buys you and what it doesn't.",
+    estimatedMinutes: 25,
+    defaultLoadout: [
+      {
+        id: "scl-m03-s1",
+        type: "reading",
+        label: "Read: Data Center Tiers — The Uptime Institute Standard",
+        description: "Tier I–IV definitions, availability targets, concurrent maintainability vs fault tolerance",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s5" },
+      },
+      {
+        id: "scl-m03-s2",
+        type: "reading",
+        label: "Read: Redundancy Notation & Blast Radius",
+        description: "N / N+1 / 2N / 2N+1; blast radius discipline; common tier misconceptions",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s6" },
+      },
+      {
+        id: "scl-m03-s3",
+        type: "flashcards",
+        label: "Review: Tiers & Redundancy",
+        description: "3 flashcards on failure domains, purpose-built facilities, and monitoring",
+        estimatedMinutes: 5,
+        required: false,
+        contentRef: {
+          kind: "card-set",
+          id: "scl-m03-cards",
+          params: {
+            topicId: "scale",
+            tier: 1,
+            cardIds: ["sc-008", "sc-005", "sc-006"],
+          },
+        },
+      },
+    ],
+    knowledgeCheck: {
+      type: "mixed",
+      description: "Score 6 of 8 on the multiple choice exam",
+      passThreshold: 0.75,
+      items: [
+        { type: "multiple-choice", contentRef: "scl-m03-q01" },
+        { type: "multiple-choice", contentRef: "scl-m03-q02" },
+        { type: "multiple-choice", contentRef: "scl-m03-q03" },
+        { type: "multiple-choice", contentRef: "scl-m03-q04" },
+        { type: "multiple-choice", contentRef: "scl-m03-q05" },
+        { type: "multiple-choice", contentRef: "scl-m03-q06" },
+        { type: "multiple-choice", contentRef: "scl-m03-q07" },
+        { type: "multiple-choice", contentRef: "scl-m03-q08" },
+      ],
+    },
+    mapPosition: { x: 50, y: 2 },
+    connections: ["scl-m02", "scl-m04"],
+  },
+  {
+    id: "scl-m04",
+    campaignId: "scale-core",
+    title: "Hyperscale, Colo, Enterprise, Edge",
+    description: "The four operating models, how your job differs between them, and the glossary you'll live in: region, AZ, POP, MSP, dark site.",
+    estimatedMinutes: 25,
+    defaultLoadout: [
+      {
+        id: "scl-m04-s1",
+        type: "reading",
+        label: "Read: The Four Operating Models",
+        description: "Hyperscale vs Colo vs Enterprise vs Edge; how the job differs; remote hands",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s7" },
+      },
+      {
+        id: "scl-m04-s2",
+        type: "reading",
+        label: "Read: Cloud Regions, AZs, and the Glossary You'll Live In",
+        description: "Region vs AZ, multi-AZ vs multi-region, dark sites & lights-out, MSP, POP",
+        estimatedMinutes: 10,
+        required: true,
+        contentRef: { kind: "chapter-section", id: "scl-s8" },
+      },
+      {
+        id: "scl-m04-s3",
+        type: "flashcards",
+        label: "Review: Operating Models",
+        description: "3 flashcards on colo vs hyperscale, automation at scale, large-scale failure rates",
+        estimatedMinutes: 5,
+        required: false,
+        contentRef: {
+          kind: "card-set",
+          id: "scl-m04-cards",
+          params: {
+            topicId: "scale",
+            tier: 1,
+            cardIds: ["sc-010", "sc-009", "sc-101"],
+          },
+        },
+      },
+    ],
+    knowledgeCheck: {
+      type: "mixed",
+      description: "Score 6 of 8 on the multiple choice exam",
+      passThreshold: 0.75,
+      items: [
+        { type: "multiple-choice", contentRef: "scl-m04-q01" },
+        { type: "multiple-choice", contentRef: "scl-m04-q02" },
+        { type: "multiple-choice", contentRef: "scl-m04-q03" },
+        { type: "multiple-choice", contentRef: "scl-m04-q04" },
+        { type: "multiple-choice", contentRef: "scl-m04-q05" },
+        { type: "multiple-choice", contentRef: "scl-m04-q06" },
+        { type: "multiple-choice", contentRef: "scl-m04-q07" },
+        { type: "multiple-choice", contentRef: "scl-m04-q08" },
+      ],
+    },
+    mapPosition: { x: 50, y: 3 },
+    connections: ["scl-m03"],
+  },
+];
+
 export const DC_MISSIONS: Mission[] = [
   // Hardware — fully authored
   ...HARDWARE_MISSIONS,
@@ -1402,10 +1623,8 @@ export const DC_MISSIONS: Mission[] = [
   // Ops — fully authored
   ...OPS_MISSIONS,
 
-  // Scale
-  stubMission("scl-m01", "scale-core", "Datacenter Tiers", "Tier I-IV, redundancy, SLAs", 0, ["scl-m02"]),
-  stubMission("scl-m02", "scale-core", "Rack & Cluster Design", "U-space, power density, cabling standards", 1, ["scl-m01", "scl-m03"]),
-  stubMission("scl-m03", "scale-core", "Hyperscale vs Colo", "Scale differences, automation, custom hardware", 2, ["scl-m02"]),
+  // Scale & Architecture — fully authored
+  ...SCALE_MISSIONS,
 ];
 
 export const ALL_DC_CAMPAIGNS = [

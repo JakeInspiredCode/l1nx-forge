@@ -4,6 +4,7 @@ import { HARDWARE_CHAPTERS } from "./hardware-chapters";
 import { NETWORKING_CHAPTERS } from "./networking-chapters";
 import { OPS_CHAPTERS } from "./ops-chapters";
 import { POWER_CHAPTERS } from "./power-chapters";
+import { SCALE_CHAPTERS } from "./scale-chapters";
 
 const ALL_CHAPTERS: ChapterSection[] = [
   ...HARDWARE_CHAPTERS,
@@ -11,6 +12,7 @@ const ALL_CHAPTERS: ChapterSection[] = [
   ...FIBER_CHAPTERS,
   ...OPS_CHAPTERS,
   ...POWER_CHAPTERS,
+  ...SCALE_CHAPTERS,
 ];
 
 const BY_ID: Record<string, ChapterSection> = Object.fromEntries(
