@@ -9,15 +9,13 @@ const NAV_ITEMS = [
   { href: "/missions", label: "Missions", icon: "◆", color: "var(--color-v2-amber)" },
   { href: "/arsenal", label: "Arsenal", icon: "⬡", color: "var(--color-v2-green)" },
   { href: "/battle-station", label: "Battlestation", icon: "⚡", color: "var(--color-v2-danger)" },
-  { href: "/comms", label: "Comms", icon: "◎", color: "var(--color-v2-purple)" },
   { href: "/profile", label: "Profile", icon: "▲", color: "var(--color-v2-silver)" },
 ];
 
 // Sub-routes that should highlight each hub
 const HUB_ROUTES: Record<string, string[]> = {
   "/missions": ["/missions", "/study"],
-  "/arsenal": ["/arsenal", "/train", "/explore", "/foundations", "/terminal", "/cards", "/drill", "/filesystem-navigator", "/command-dissector", "/filesystem-types", "/boot-learn", "/boot-triage", "/train/quick-draw", "/train/diagnosis", "/explore/boot-process", "/explore/visual-explorer"],
-  "/comms": ["/comms", "/stories"],
+  "/arsenal": ["/arsenal", "/train", "/explore", "/foundations", "/terminal", "/cards", "/drill", "/filesystem-navigator", "/command-dissector", "/filesystem-types", "/boot-learn", "/boot-triage", "/train/quick-draw", "/train/diagnosis", "/explore/boot-process", "/explore/visual-explorer", "/stories"],
   "/profile": ["/profile", "/progress"],
 };
 
