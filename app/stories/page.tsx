@@ -267,23 +267,43 @@ function ChunkBlock({
                 </button>
               </div>
             </div>
-          ) : (
-            <div className="group relative">
+          ) : chunk.content ? (
+            <div className="space-y-2">
               <div className="markdown-content text-sm leading-relaxed">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {chunk.content}
                 </ReactMarkdown>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditing(true);
-                }}
-                className="absolute top-0 right-0 text-xs px-2 py-0.5 rounded border border-forge-border text-forge-text-dim hover:text-forge-accent hover:border-forge-accent opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                Edit
-              </button>
+              <div className="flex justify-end">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditing(true);
+                  }}
+                  className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded border border-forge-border text-forge-text-dim hover:text-forge-accent hover:border-forge-accent transition-colors"
+                >
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11.5 2.5l2 2L5 13l-3 1 1-3z" />
+                    <line x1="10" y1="4" x2="12" y2="6" />
+                  </svg>
+                  Edit
+                </button>
+              </div>
             </div>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditing(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 text-xs py-2.5 rounded border border-dashed border-forge-border text-forge-text-dim hover:text-forge-accent hover:border-forge-accent transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="3" x2="8" y2="13" />
+                <line x1="3" y1="8" x2="13" y2="8" />
+              </svg>
+              Add content
+            </button>
           )}
         </div>
       )}
