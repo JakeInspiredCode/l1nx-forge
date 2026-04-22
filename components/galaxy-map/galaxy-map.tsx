@@ -215,7 +215,7 @@ export default function GalaxyMap() {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-48px)] w-full relative overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="h-[calc(100vh-56px)] w-full relative overflow-hidden" onMouseMove={handleMouseMove}>
       {/* Starfield background */}
       <StarfieldCanvas />
       <ScanOverlay />

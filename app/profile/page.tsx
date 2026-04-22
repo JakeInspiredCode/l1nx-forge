@@ -128,7 +128,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="h-[calc(100vh-48px)] w-full relative overflow-hidden">
+    <div className="h-[calc(100vh-56px)] w-full relative overflow-hidden">
       <StarfieldCanvas />
       <ScanOverlay />
       <div className="viewport-vignette fixed inset-0 z-[8] pointer-events-none" />

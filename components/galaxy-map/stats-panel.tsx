@@ -47,8 +47,8 @@ function GlowGauge({
   const dashOffset = mounted ? circumference * (1 - pct) : circumference;
   const displayValue = max ? `${value}/${max}` : value.toLocaleString();
 
-  const px = size === "mid" ? "38px" : "52px";
-  const labelSize = size === "mid" ? "text-[7px]" : "text-[8px]";
+  const px = size === "mid" ? "44px" : "60px";
+  const labelSize = size === "mid" ? "text-[9px]" : "text-[10px]";
 
   return (
     <div className="flex flex-col items-center gap-0.5">
@@ -104,10 +104,10 @@ function GlowGauge({
               textAnchor="middle"
               dominantBaseline="central"
               fill="#8eafc8"
-              fontSize="7"
-              fontFamily="'Chakra Petch', sans-serif"
-              fontWeight="600"
-              letterSpacing="0.14em"
+              fontSize="8"
+              fontFamily="'Space Grotesk', sans-serif"
+              fontWeight="500"
+              letterSpacing="0.1em"
             >
               {suffix}
             </text>
@@ -138,12 +138,12 @@ function InlineStat({
         style={{ background: color, boxShadow: `0 0 4px ${color}60` }}
       />
       <span
-        className="text-[11px] telemetry-font font-semibold text-v2-text truncate"
+        className="text-sm telemetry-font font-semibold text-v2-text truncate"
         style={{ textShadow: `0 0 8px ${color}30` }}
       >
         {value}
       </span>
-      <span className="text-[7px] display-font tracking-[0.12em] text-[#6a7288] uppercase shrink-0">
+      <span className="text-[10px] display-font tracking-[0.1em] text-[#6a7288] uppercase shrink-0">
         {label}
       </span>
     </div>
@@ -209,7 +209,7 @@ export default function StatsPanel({
         >
           <div className="w-1.5 h-1.5 rounded-full bg-[#06d6d6] shadow-[0_0_6px_rgba(6,214,214,0.5)] shrink-0" />
           <div className="flex-1 min-w-0">
-            <span className="text-[10px] text-[#e0e4ec] display-font tracking-wider block truncate">
+            <span className="text-xs text-[#e0e4ec] display-font tracking-wider block truncate">
               {activeCampaignTitle}
             </span>
             {activeCampaignPct !== undefined && (
@@ -224,7 +224,7 @@ export default function StatsPanel({
                     }}
                   />
                 </div>
-                <span className="text-[8px] telemetry-font text-[#8eafc8]">
+                <span className="text-[10px] telemetry-font text-[#8eafc8]">
                   {activeCampaignPct}%
                 </span>
               </div>

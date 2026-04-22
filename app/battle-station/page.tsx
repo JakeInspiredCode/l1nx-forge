@@ -345,7 +345,7 @@ export default function BattleStationPage() {
   // ── Playing screen ──
   if (screen === "playing" && activeTicket) {
     return (
-      <div className="h-[calc(100vh-48px)] bg-v2-bg-deep flex flex-col">
+      <div className="h-[calc(100vh-56px)] bg-v2-bg-deep flex flex-col">
         <TicketTerminal
           key={terminalKey}
           ticket={activeTicket}
@@ -366,7 +366,7 @@ export default function BattleStationPage() {
 
   return (
     <div
-      className="w-full h-[calc(100vh-48px)] overflow-hidden flex flex-col"
+      className="w-full h-[calc(100vh-56px)] overflow-hidden flex flex-col"
       style={{ background: "#03040a", fontFamily: "'IBM Plex Sans', sans-serif", color: "#e0e4ec" }}
     >
       {/* Header — compact on small windows */}

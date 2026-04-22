@@ -40,16 +40,16 @@ export default function Nav() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-12">
+        <div className="flex items-center justify-between h-14">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <span
-              className="mono font-bold text-base tracking-wider"
+              className="mono font-bold text-lg tracking-wider"
               style={{ color: "var(--color-v2-cyan)" }}
             >
               L1NX
             </span>
           </Link>
-          <div className="flex items-center gap-0.5 sm:gap-1 ml-4 flex-1 justify-center">
+          <div className="flex items-center gap-1 sm:gap-1.5 ml-4 flex-1 justify-center">
             {NAV_ITEMS.map((item) => {
               const active = isActive(pathname, item.href);
               return (
@@ -58,7 +58,7 @@ export default function Nav() {
                   href={item.href}
                   aria-label={item.label}
                   aria-current={active ? "page" : undefined}
-                  className="nav-tab relative px-2.5 sm:px-3 py-1.5 rounded text-xs transition-all duration-150 flex items-center gap-1.5"
+                  className="nav-tab relative px-3 sm:px-4 py-2 rounded text-sm transition-all duration-150 flex items-center gap-2"
                   style={{
                     color: active ? item.color : "var(--color-v2-text-dim)",
                     background: active ? `color-mix(in srgb, ${item.color} 12%, transparent)` : "transparent",
@@ -67,7 +67,7 @@ export default function Nav() {
                     letterSpacing: "0.04em",
                   }}
                 >
-                  <span className="text-[10px]">{item.icon}</span>
+                  <span className="text-xs">{item.icon}</span>
                   <span className="hidden sm:inline">{item.label}</span>
                   {active && (
                     <span
@@ -93,7 +93,7 @@ export default function Nav() {
               }
             }}
             title="Relaunch the onboarding guide"
-            className="ml-2 px-2 h-7 flex items-center gap-1 rounded transition-colors text-[11px] shrink-0"
+            className="ml-2 px-2.5 h-8 flex items-center gap-1 rounded transition-colors text-xs shrink-0"
             style={{
               color: "var(--color-v2-text-muted)",
               fontFamily: "'IBM Plex Sans', sans-serif",
