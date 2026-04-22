@@ -30,12 +30,12 @@ const DEFAULT_STORIES: Story[] = [
   {
     storyId: "story-2",
     question: "Why this company / Why this role?",
-    framework: "~72s — Scale + Speed + Mission",
+    framework: "~72s — Company + Role + Fit",
     answer: "",
     chunks: [
-      { label: "A", summary: "Scale", content: "" },
-      { label: "B", summary: "Speed", content: "" },
-      { label: "C", summary: "Mission + fit", content: "" },
+      { label: "A", summary: "Why the company", content: "" },
+      { label: "B", summary: "Why this role", content: "" },
+      { label: "C", summary: "What I bring", content: "" },
     ],
   },
   {
@@ -47,20 +47,20 @@ const DEFAULT_STORIES: Story[] = [
       { label: "A", summary: "Situation", content: "" },
       { label: "B", summary: "Task", content: "" },
       { label: "C", summary: "Action", content: "" },
-      { label: "D", summary: "Result + thesis", content: "" },
+      { label: "D", summary: "Result", content: "" },
     ],
   },
   {
     storyId: "story-4",
     question: "Tell me about a time you resolved a critical issue under pressure.",
-    framework: "~85s — STAR + Escalation",
+    framework: "~85s — STAR + optional follow-up",
     answer: "",
     chunks: [
       { label: "A", summary: "Situation", content: "" },
       { label: "B", summary: "Task", content: "" },
       { label: "C", summary: "Action", content: "" },
       { label: "D", summary: "Result", content: "" },
-      { label: "E", summary: "Escalation example", content: "" },
+      { label: "E", summary: "Secondary example (optional)", content: "" },
     ],
   },
   {
@@ -71,7 +71,7 @@ const DEFAULT_STORIES: Story[] = [
     chunks: [
       { label: "A", summary: "Situation + Task", content: "" },
       { label: "B", summary: "Action", content: "" },
-      { label: "C", summary: "Result + bridge", content: "" },
+      { label: "C", summary: "Result", content: "" },
     ],
   },
   {
@@ -82,7 +82,7 @@ const DEFAULT_STORIES: Story[] = [
     chunks: [
       { label: "A", summary: "Situation + Task", content: "" },
       { label: "B", summary: "Action", content: "" },
-      { label: "C", summary: "Result + identity", content: "" },
+      { label: "C", summary: "Result", content: "" },
     ],
   },
   {
@@ -104,7 +104,7 @@ const DEFAULT_STORIES: Story[] = [
     chunks: [
       { label: "A", summary: "Situation + Task", content: "" },
       { label: "B", summary: "Action", content: "" },
-      { label: "C", summary: "Result + tooling bridge", content: "" },
+      { label: "C", summary: "Result", content: "" },
     ],
   },
   {
@@ -167,11 +167,11 @@ const DEFAULT_STORIES: Story[] = [
     storyId: "story-14",
     question:
       "How do you handle on-call rotations, physical demands, and schedule flexibility?",
-    framework: "~45s — Credentials + Bridge",
+    framework: "~45s — Experience + Approach + Commitment",
     answer: "",
     chunks: [
-      { label: "A", summary: "Physical credentials", content: "" },
-      { label: "B", summary: "Mental discipline bridge", content: "" },
+      { label: "A", summary: "Relevant experience", content: "" },
+      { label: "B", summary: "Approach under strain", content: "" },
       { label: "C", summary: "Closer", content: "" },
     ],
   },
@@ -182,7 +182,7 @@ const DEFAULT_STORIES: Story[] = [
     answer: "",
     chunks: [
       { label: "A", summary: "What others have vs. what I bring", content: "" },
-      { label: "B", summary: "How I reduce MTTD/MTTR", content: "" },
+      { label: "B", summary: "The impact I drive", content: "" },
       { label: "C", summary: "Closer", content: "" },
     ],
   },
@@ -455,8 +455,8 @@ export default function StoriesPage() {
             </div>
             <div>
               <span className="text-forge-accent font-semibold">Drill 2x/week:</span>{" "}
-              Q3, Q5, Q6, Q13 — strongest differentiators (iOS app, automation,
-              construction fit).
+              Q3, Q5, Q6, Q13 — strongest differentiators (biggest impact,
+              process wins, initiative, environment fit).
             </div>
             <div>
               <span className="text-forge-accent font-semibold">Drill 1x/week:</span>{" "}
