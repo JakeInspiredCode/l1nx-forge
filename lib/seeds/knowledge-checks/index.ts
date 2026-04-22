@@ -35,6 +35,14 @@ import { SCL_M01_QUESTIONS } from "./scl-m01";
 import { SCL_M02_QUESTIONS } from "./scl-m02";
 import { SCL_M03_QUESTIONS } from "./scl-m03";
 import { SCL_M04_QUESTIONS } from "./scl-m04";
+import { LINUX_M13_QUESTIONS } from "./linux-m13";
+import { LINUX_M14_QUESTIONS } from "./linux-m14";
+import { LINUX_M15_QUESTIONS } from "./linux-m15";
+import { LINUX_M16_QUESTIONS } from "./linux-m16";
+import { LINUX_M17_QUESTIONS } from "./linux-m17";
+import { LINUX_M18_QUESTIONS } from "./linux-m18";
+import { LINUX_M19_QUESTIONS } from "./linux-m19";
+import { LINUX_M20_QUESTIONS } from "./linux-m20";
 
 const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "linux-m01": MISSION_01_QUESTIONS,
@@ -73,6 +81,14 @@ const QUESTION_BANK: Record<string, MCQuestion[]> = {
   "scl-m02": SCL_M02_QUESTIONS,
   "scl-m03": SCL_M03_QUESTIONS,
   "scl-m04": SCL_M04_QUESTIONS,
+  "linux-m13": LINUX_M13_QUESTIONS,
+  "linux-m14": LINUX_M14_QUESTIONS,
+  "linux-m15": LINUX_M15_QUESTIONS,
+  "linux-m16": LINUX_M16_QUESTIONS,
+  "linux-m17": LINUX_M17_QUESTIONS,
+  "linux-m18": LINUX_M18_QUESTIONS,
+  "linux-m19": LINUX_M19_QUESTIONS,
+  "linux-m20": LINUX_M20_QUESTIONS,
 };
 
 export function getMCQuestions(missionId: string): MCQuestion[] | null {

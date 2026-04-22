@@ -1,6 +1,7 @@
 import type { ChapterSection } from "@/lib/types/chapter";
 import { FIBER_CHAPTERS } from "./fiber-chapters";
 import { HARDWARE_CHAPTERS } from "./hardware-chapters";
+import { LINUX_ADVANCED_CHAPTERS } from "./linux-advanced-chapters";
 import { NETWORKING_CHAPTERS } from "./networking-chapters";
 import { OPS_CHAPTERS } from "./ops-chapters";
 import { POWER_CHAPTERS } from "./power-chapters";
@@ -13,6 +14,7 @@ const ALL_CHAPTERS: ChapterSection[] = [
   ...OPS_CHAPTERS,
   ...POWER_CHAPTERS,
   ...SCALE_CHAPTERS,
+  ...LINUX_ADVANCED_CHAPTERS,
 ];
 
 const BY_ID: Record<string, ChapterSection> = Object.fromEntries(

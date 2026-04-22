@@ -249,6 +249,47 @@ export default function SectorNode({ sector, progress, onHover, onClick }: Secto
         </g>
       )}
 
+      {/* New-Campaign badge (above the star) — shown when sector is freshly released */}
+      {sector.isNew && !sector.comingSoon && (
+        <g className="pointer-events-none select-none">
+          <rect
+            x={cx - 52}
+            y={cy - r - 22}
+            width={104}
+            height={18}
+            rx={9}
+            ry={9}
+            fill="#0b1220"
+            stroke="#22c55e"
+            strokeWidth={1.4}
+            opacity={0.95}
+            style={{ filter: `drop-shadow(0 0 7px #22c55ecc)` }}
+          >
+            <animate
+              attributeName="opacity"
+              values="0.95;0.65;0.95"
+              dur="2.4s"
+              repeatCount="indefinite"
+            />
+          </rect>
+          <text
+            x={cx}
+            y={cy - r - 13}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#22c55e"
+            fontSize={10}
+            fontFamily="'Chakra Petch', sans-serif"
+            fontWeight={800}
+            letterSpacing="0.2em"
+            className="uppercase"
+            style={{ textShadow: "0 0 6px #22c55ecc" }}
+          >
+            New Campaign
+          </text>
+        </g>
+      )}
+
       {/* Title — unified size across all sectors */}
       <text
         x={cx}

@@ -173,6 +173,7 @@ export interface Sector {
   mapPosition: { x: number; y: number }; // 0-100 percentage coords
   size: "sm" | "md" | "lg";      // visual size on galaxy map
   comingSoon?: boolean;           // show a "COMING SOON" badge; still full-color
+  isNew?: boolean;                // show a "NEW CAMPAIGN" badge; freshly released content
 }
 
 export interface SectorProgress {

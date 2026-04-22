@@ -94,6 +94,7 @@ export const ALL_SECTORS: Sector[] = [
     campaignIds: ["linux-advanced"],
     mapPosition: { x: 38, y: 10 },
     size: "md",
+    isNew: true,
   },
 ];
 

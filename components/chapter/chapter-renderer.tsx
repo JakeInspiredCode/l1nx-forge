@@ -18,6 +18,7 @@ import {
   WhyThisMatters,
 } from "./blocks";
 import { Prose } from "./prose";
+import { getInteractiveComponent } from "./interactive";
 import { useLessonScale, scaleLabel } from "@/lib/use-lesson-scale";
 
 function renderBlock(block: Block, idx: number) {
@@ -94,22 +95,27 @@ function renderBlock(block: Block, idx: number) {
           explanation={block.explanation}
         />
       );
-    case "custom-component":
-      return (
-        <div
-          key={idx}
-          style={{
-            padding: 14,
-            border: "1px dashed rgba(255,170,50,0.3)",
-            borderRadius: 8,
-            color: "#8899AA",
-            fontSize: 10,
-            margin: "12px 0",
-          }}
-        >
-          (Custom component &quot;{block.id}&quot; — not yet implemented)
-        </div>
-      );
+    case "custom-component": {
+      const Component = getInteractiveComponent(block.id);
+      if (!Component) {
+        return (
+          <div
+            key={idx}
+            style={{
+              padding: 14,
+              border: "1px dashed rgba(255,170,50,0.3)",
+              borderRadius: 8,
+              color: "#B8C4D8",
+              fontSize: 10,
+              margin: "12px 0",
+            }}
+          >
+            (Custom component &quot;{block.id}&quot; — not yet implemented)
+          </div>
+        );
+      }
+      return <Component key={idx} {...(block.props ?? {})} />;
+    }
   }
 }
 
