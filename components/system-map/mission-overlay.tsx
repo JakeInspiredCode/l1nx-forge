@@ -31,7 +31,7 @@ export default function MissionOverlay({
   onDismiss,
 }: MissionOverlayProps) {
   const sound = useSoundEngine();
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const [isDeploying, setIsDeploying] = useState(false);
 
   // ── Loadout toggle state ──
   const [enabled, setEnabled] = useState<Record<string, boolean>>(() => {
@@ -56,20 +56,6 @@ export default function MissionOverlay({
     [activeSteps],
   );
 
-  // ── Mouse parallax ──
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      setMouseOffset({
-        x: (e.clientX - cx) * 0.006,
-        y: (e.clientY - cy) * 0.006,
-      });
-    };
-    window.addEventListener("mousemove", handle);
-    return () => window.removeEventListener("mousemove", handle);
-  }, []);
-
   // ── Escape to dismiss ──
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
@@ -81,14 +67,18 @@ export default function MissionOverlay({
 
   // ── Actions ──
   const handleDeploy = useCallback(() => {
+    if (isDeploying) return;
     sound.play("deploy");
+    setIsDeploying(true);
     onDeploy(mission.id, activeSteps);
-  }, [mission.id, activeSteps, onDeploy, sound]);
+  }, [isDeploying, mission.id, activeSteps, onDeploy, sound]);
 
   const handleSkipToCheck = useCallback(() => {
+    if (isDeploying) return;
     sound.play("deploy");
+    setIsDeploying(true);
     onSkipToCheck(mission.id);
-  }, [mission.id, onSkipToCheck, sound]);
+  }, [isDeploying, mission.id, onSkipToCheck, sound]);
 
   const isLocked = status === "locked";
   const isDeployable = !isLocked || enrolled;
@@ -102,12 +92,9 @@ export default function MissionOverlay({
       />
 
       <div className="fixed z-[65] inset-0 flex items-center justify-center pointer-events-none">
-        <div
-          className="pointer-events-auto w-[420px] max-h-[85vh] overflow-auto scroll-container"
-          style={{ transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)` }}
-        >
+        <div className="pointer-events-auto w-[420px] max-h-[85vh] overflow-auto scroll-container">
           <div
-            className="holo-panel p-6 animate-[holoMaterialize_0.3s_ease-out] relative"
+            className="holo-panel p-6 animate-[holoMaterialize_0.18s_ease-out] relative"
             style={{
               borderColor: `${campaignColor}30`,
               boxShadow: `0 0 40px ${campaignColor}15, inset 0 0 30px ${campaignColor}05`,
@@ -245,20 +232,40 @@ export default function MissionOverlay({
               ) : isAccomplished ? (
                 <ActionButton
                   onClick={handleDeploy}
+                  disabled={isDeploying}
                   variant="secondary"
                   className="flex-1"
                 >
-                  Review Mission
+                  {isDeploying ? (
+                    <>
+                      <span className="embark-dot" />
+                      <span className="embark-dot" style={{ animationDelay: "120ms" }} />
+                      <span className="embark-dot" style={{ animationDelay: "240ms" }} />
+                      <span className="ml-1">Loading</span>
+                    </>
+                  ) : (
+                    <>Review Mission</>
+                  )}
                 </ActionButton>
               ) : (
                 <>
-                  <ActionButton onClick={handleDeploy} className="flex-1">
-                    Deploy Mission
+                  <ActionButton onClick={handleDeploy} disabled={isDeploying} className="flex-1">
+                    {isDeploying ? (
+                      <>
+                        <span className="embark-dot" />
+                        <span className="embark-dot" style={{ animationDelay: "120ms" }} />
+                        <span className="embark-dot" style={{ animationDelay: "240ms" }} />
+                        <span className="ml-1">Deploying</span>
+                      </>
+                    ) : (
+                      <>Deploy Mission</>
+                    )}
                   </ActionButton>
                   <ActionButton
                     onClick={handleSkipToCheck}
                     variant="ghost"
                     size="sm"
+                    disabled={isDeploying}
                   >
                     Skip to Check
                   </ActionButton>

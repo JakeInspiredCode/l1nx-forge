@@ -186,7 +186,6 @@ export default function GalaxyMap() {
 
   const handleEmbark = useCallback(() => {
     const campaignId = selectedSector?.campaignIds[0];
-    setSelectedSector(null);
     router.push(campaignId ? `/missions?campaign=${campaignId}` : "/missions");
   }, [router, selectedSector]);
 

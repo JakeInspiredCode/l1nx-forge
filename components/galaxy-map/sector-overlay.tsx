@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Sector, SectorProgress, MissionStatus } from "@/lib/types/campaign";
 import { getCampaign, getMissionsForCampaign } from "@/lib/seeds/campaigns";
 import ActionButton from "@/components/ui/action-button";
@@ -24,8 +24,7 @@ export default function SectorOverlay({
   onDismiss,
 }: SectorOverlayProps) {
   const sound = useSoundEngine();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const [isEmbarking, setIsEmbarking] = useState(false);
 
   const campaign = getCampaign(sector.campaignIds[0]);
   const missions = campaign ? getMissionsForCampaign(campaign.id) : [];
@@ -33,20 +32,6 @@ export default function SectorOverlay({
   const pct = progress.totalMissions > 0
     ? Math.round((progress.completedMissions / progress.totalMissions) * 100)
     : 0;
-
-  // Parallax mouse tracking
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      setMouseOffset({
-        x: (e.clientX - cx) * 0.006,
-        y: (e.clientY - cy) * 0.006,
-      });
-    };
-    window.addEventListener("mousemove", handle);
-    return () => window.removeEventListener("mousemove", handle);
-  }, []);
 
   // Escape to close
   useEffect(() => {
@@ -65,9 +50,11 @@ export default function SectorOverlay({
   }, [campaign, onVolunteer, sound]);
 
   const handleEmbark = useCallback(() => {
+    if (isEmbarking) return;
     sound.play("deploy");
+    setIsEmbarking(true);
     onEmbark();
-  }, [onEmbark, sound]);
+  }, [isEmbarking, onEmbark, sound]);
 
   function getMissionStatusIcon(missionId: string): string {
     const status = missionStatuses[missionId];
@@ -101,17 +88,11 @@ export default function SectorOverlay({
 
       {/* Panel */}
       <div
-        ref={panelRef}
         className="fixed z-[65] inset-0 flex items-center justify-center pointer-events-none"
       >
+        <div className="pointer-events-auto w-[420px] max-h-[85vh] overflow-auto scroll-container">
         <div
-          className="pointer-events-auto w-[420px] max-h-[85vh] overflow-auto scroll-container"
-          style={{
-            transform: `translate(${mouseOffset.x}px, ${mouseOffset.y}px)`,
-          }}
-        >
-        <div
-          className="holo-panel p-6 animate-[holoMaterialize_0.3s_ease-out]"
+          className="holo-panel p-6 animate-[holoMaterialize_0.18s_ease-out]"
           style={{
             borderColor: `${sector.color}30`,
             boxShadow: `0 0 40px ${sector.color}15, inset 0 0 30px ${sector.color}05`,
@@ -241,9 +222,19 @@ export default function SectorOverlay({
             ) : (
               <ActionButton
                 onClick={handleEmbark}
+                disabled={isEmbarking}
                 className="flex-1"
               >
-                Embark to System →
+                {isEmbarking ? (
+                  <>
+                    <span className="embark-dot" />
+                    <span className="embark-dot" style={{ animationDelay: "120ms" }} />
+                    <span className="embark-dot" style={{ animationDelay: "240ms" }} />
+                    <span className="ml-1">Engaging drives</span>
+                  </>
+                ) : (
+                  <>Embark to System →</>
+                )}
               </ActionButton>
             )}
           </div>

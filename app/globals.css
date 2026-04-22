@@ -93,9 +93,9 @@ code, pre, .mono {
 }
 
 .display-font {
-  font-family: 'IBM Plex Sans', 'Chakra Petch', system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -273,9 +273,9 @@ html {
 .deploy-btn {
   position: relative;
   overflow: hidden;
-  font-family: 'Chakra Petch', sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.15em;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 14px 48px;
   font-size: 1.1rem;
@@ -466,15 +466,11 @@ html {
 @keyframes holoMaterialize {
   0% {
     opacity: 0;
-    transform: perspective(800px) rotateX(2deg) scale(0.85);
-  }
-  60% {
-    opacity: 1;
-    transform: perspective(800px) rotateX(0deg) scale(1.01);
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
-    transform: perspective(800px) rotateX(0deg) scale(1);
+    transform: translateY(0);
   }
 }
 @keyframes holoScanline {
@@ -482,7 +478,22 @@ html {
   100% { top: 110%; }
 }
 .holo-enter {
-  animation: holoMaterialize 0.4s cubic-bezier(0.22, 0.68, 0.36, 1) forwards;
+  animation: holoMaterialize 0.18s ease-out forwards;
+}
+
+/* Loading dots used inside Embark/Deploy buttons */
+@keyframes embarkDotPulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+.embark-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin: 0 1px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: embarkDotPulse 1s ease-in-out infinite;
 }
 
 /* Deploy shimmer */
@@ -729,10 +740,10 @@ html {
   justify-content: space-between;
 }
 .glass-panel-header span {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(6, 214, 214, 0.8);
   text-shadow: 0 0 10px rgba(6, 214, 214, 0.2);
@@ -747,21 +758,21 @@ html {
   justify-content: center;
 }
 .galaxy-title {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600;
-  font-size: 18px;
-  letter-spacing: 0.22em;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 19px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e0e4ec;
-  text-shadow: 0 0 20px rgba(6, 214, 214, 0.25), 0 0 40px rgba(6, 214, 214, 0.08);
+  color: #e8ecf3;
+  text-shadow: 0 0 20px rgba(6, 214, 214, 0.2), 0 0 40px rgba(6, 214, 214, 0.06);
 }
 .galaxy-subtitle {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-weight: 400;
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(6, 214, 214, 0.5);
+  color: rgba(6, 214, 214, 0.55);
   padding-left: 4px;
 }
 .header-accent-line {
@@ -779,10 +790,10 @@ html {
 
 /* Stats section titles */
 .stats-section-title {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
   font-size: 10px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(6, 214, 214, 0.7);
   text-shadow: 0 0 8px rgba(6, 214, 214, 0.15);
@@ -837,12 +848,12 @@ html {
   position: relative;
 }
 .metallic-title {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e0e4ec;
-  text-shadow: 0 0 20px rgba(6, 214, 214, 0.25);
+  color: #e8ecf3;
+  text-shadow: 0 0 20px rgba(6, 214, 214, 0.2);
 }
 .panel-header-bar {
   padding: 8px 14px;
@@ -854,10 +865,10 @@ html {
   justify-content: space-between;
 }
 .panel-header-bar span {
-  font-family: 'Chakra Petch', sans-serif;
-  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
   font-size: 11px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #06d6d6;
   text-shadow: 0 0 8px rgba(6, 214, 214, 0.3);

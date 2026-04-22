@@ -204,7 +204,6 @@ export default function SystemMap() {
   }, []);
 
   const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
-    setSelectedMission(null);
     sessionStorage.setItem(
       `loadout:${missionId}`,
       JSON.stringify(loadout.map((s) => s.id)),
@@ -213,7 +212,6 @@ export default function SystemMap() {
   }, [router]);
 
   const handleSkipToCheck = useCallback((missionId: string) => {
-    setSelectedMission(null);
     router.push(`/missions/${missionId}?skipToCheck=true`);
   }, [router]);
 
