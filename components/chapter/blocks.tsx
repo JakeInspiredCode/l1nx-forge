@@ -395,29 +395,50 @@ export function ThinkAboutIt({
         </>
       )}
       {revealed && (
-        <div
-          style={{
-            marginTop: 12,
-            padding: 14,
-            background: "rgba(255,170,50,0.1)",
-            borderRadius: 6,
-            border: "1px solid rgba(255,170,50,0.2)",
-          }}
-        >
+        <>
           <div
             style={{
-              color: "#FFA832",
-              fontWeight: 700,
-              fontSize: 13,
-              marginBottom: 6,
+              marginTop: 12,
+              padding: 14,
+              background: "rgba(255,170,50,0.1)",
+              borderRadius: 6,
+              border: "1px solid rgba(255,170,50,0.2)",
             }}
           >
-            INSIGHT
+            <div
+              style={{
+                color: "#FFA832",
+                fontWeight: 700,
+                fontSize: 13,
+                marginBottom: 6,
+              }}
+            >
+              INSIGHT
+            </div>
+            <div style={{ color: "#E8E0D8" }}>
+              <Prose html={answer} />
+            </div>
           </div>
-          <div style={{ color: "#E8E0D8" }}>
-            <Prose html={answer} />
-          </div>
-        </div>
+          <button
+            onClick={() => {
+              setUserAnswer("");
+              setRevealed(false);
+            }}
+            style={{
+              marginTop: 10,
+              padding: "6px 14px",
+              background: "transparent",
+              border: "1px solid rgba(255,170,50,0.35)",
+              borderRadius: 6,
+              color: "#FFC878",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            ↻ Try Again
+          </button>
+        </>
       )}
     </div>
   );
@@ -545,54 +566,76 @@ export function KnowledgeCheck({
         </>
       )}
       {revealed && (
-        <div
-          style={{
-            marginTop: 12,
-            padding: 14,
-            background: "rgba(80,200,255,0.08)",
-            borderRadius: 6,
-            border: "1px solid rgba(80,200,255,0.2)",
-          }}
-        >
+        <>
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 6,
+              marginTop: 12,
+              padding: 14,
+              background: "rgba(80,200,255,0.08)",
+              borderRadius: 6,
+              border: "1px solid rgba(80,200,255,0.2)",
             }}
           >
-            <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13 }}>
-              ANSWER
-            </span>
-            {confidence && (
-              <span
-                style={{
-                  fontSize: 12,
-                  padding: "2px 10px",
-                  borderRadius: 10,
-                  background:
-                    confidence === "Sure"
-                      ? "rgba(42,138,74,0.3)"
-                      : confidence === "Unsure"
-                      ? "rgba(170,122,32,0.3)"
-                      : "rgba(170,48,48,0.3)",
-                  color:
-                    confidence === "Sure"
-                      ? "#5ADA7A"
-                      : confidence === "Unsure"
-                      ? "#DDAA44"
-                      : "#EE6666",
-                }}
-              >
-                You were: {confidence}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 6,
+              }}
+            >
+              <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13 }}>
+                ANSWER
               </span>
-            )}
+              {confidence && (
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: "2px 10px",
+                    borderRadius: 10,
+                    background:
+                      confidence === "Sure"
+                        ? "rgba(42,138,74,0.3)"
+                        : confidence === "Unsure"
+                        ? "rgba(170,122,32,0.3)"
+                        : "rgba(170,48,48,0.3)",
+                    color:
+                      confidence === "Sure"
+                        ? "#5ADA7A"
+                        : confidence === "Unsure"
+                        ? "#DDAA44"
+                        : "#EE6666",
+                  }}
+                >
+                  You were: {confidence}
+                </span>
+              )}
+            </div>
+            <div style={{ color: "#E8E8F0" }}>
+              <Prose html={answer} />
+            </div>
           </div>
-          <div style={{ color: "#E8E8F0" }}>
-            <Prose html={answer} />
-          </div>
-        </div>
+          <button
+            onClick={() => {
+              setUserAnswer("");
+              setRevealed(false);
+              setConfidence(null);
+            }}
+            style={{
+              marginTop: 10,
+              padding: "6px 14px",
+              background: "transparent",
+              border: "1px solid rgba(80,200,255,0.35)",
+              borderRadius: 6,
+              color: "#9CD8FF",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            ↻ Try Again
+          </button>
+        </>
       )}
     </div>
   );
@@ -912,29 +955,73 @@ export function FillBlank({
         </div>
       )}
       {revealed && (
-        <div
-          style={{
-            marginTop: 12,
-            padding: 14,
-            background: "rgba(122,232,122,0.08)",
-            borderRadius: 6,
-            border: "1px solid rgba(122,232,122,0.2)",
-          }}
-        >
+        <>
           <div
             style={{
-              color: "#7AE87A",
-              fontWeight: 700,
-              fontSize: 13,
-              marginBottom: 6,
+              marginTop: 12,
+              padding: 14,
+              background: "rgba(122,232,122,0.08)",
+              borderRadius: 6,
+              border: "1px solid rgba(122,232,122,0.2)",
             }}
           >
-            ANSWER
+            <div
+              style={{
+                color: "#7AE87A",
+                fontWeight: 700,
+                fontSize: 13,
+                marginBottom: 6,
+              }}
+            >
+              ANSWER
+            </div>
+            <div style={{ color: "#E8F0E8" }}>
+              <Prose html={reveal} />
+            </div>
           </div>
-          <div style={{ color: "#E8F0E8" }}>
-            <Prose html={reveal} />
-          </div>
-        </div>
+          <button
+            onClick={() => {
+              setValues(blanks.map(() => ""));
+              setChecked(false);
+              setRevealed(false);
+            }}
+            style={{
+              marginTop: 10,
+              padding: "6px 14px",
+              background: "transparent",
+              border: "1px solid rgba(122,232,122,0.35)",
+              borderRadius: 6,
+              color: "#A8E8A8",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            ↻ Try Again
+          </button>
+        </>
+      )}
+      {!revealed && checked && (
+        <button
+          onClick={() => {
+            setValues(blanks.map(() => ""));
+            setChecked(false);
+          }}
+          style={{
+            marginTop: 10,
+            marginLeft: 10,
+            padding: "6px 14px",
+            background: "transparent",
+            border: "1px solid rgba(122,232,122,0.25)",
+            borderRadius: 6,
+            color: "#9EE8AE",
+            fontWeight: 600,
+            fontSize: 13,
+            cursor: "pointer",
+          }}
+        >
+          ↻ Clear
+        </button>
       )}
     </div>
   );
@@ -1166,33 +1253,54 @@ export function MCQInline({
         </button>
       )}
       {locked && (
-        <div
-          style={{
-            marginTop: 8,
-            padding: 14,
-            background: correct
-              ? "rgba(42,138,74,0.12)"
-              : "rgba(255,170,50,0.1)",
-            borderRadius: 6,
-            border: `1px solid ${
-              correct ? "rgba(90,218,122,0.3)" : "rgba(255,170,50,0.25)"
-            }`,
-          }}
-        >
+        <>
           <div
             style={{
-              color: correct ? "#5ADA7A" : "#FFA832",
-              fontWeight: 700,
-              fontSize: 13,
-              marginBottom: 6,
+              marginTop: 8,
+              padding: 14,
+              background: correct
+                ? "rgba(42,138,74,0.12)"
+                : "rgba(255,170,50,0.1)",
+              borderRadius: 6,
+              border: `1px solid ${
+                correct ? "rgba(90,218,122,0.3)" : "rgba(255,170,50,0.25)"
+              }`,
             }}
           >
-            {correct ? "CORRECT" : `ANSWER: ${correctAnswer}`}
+            <div
+              style={{
+                color: correct ? "#5ADA7A" : "#FFA832",
+                fontWeight: 700,
+                fontSize: 13,
+                marginBottom: 6,
+              }}
+            >
+              {correct ? "CORRECT" : `ANSWER: ${correctAnswer}`}
+            </div>
+            <div style={{ color: "#E8ECF0" }}>
+              <Prose html={explanation} />
+            </div>
           </div>
-          <div style={{ color: "#E8ECF0" }}>
-            <Prose html={explanation} />
-          </div>
-        </div>
+          <button
+            onClick={() => {
+              setSelected(null);
+              setLocked(false);
+            }}
+            style={{
+              marginTop: 10,
+              padding: "6px 14px",
+              background: "transparent",
+              border: "1px solid rgba(80,200,255,0.35)",
+              borderRadius: 6,
+              color: "#9CD8FF",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            ↻ Try Again
+          </button>
+        </>
       )}
     </div>
   );

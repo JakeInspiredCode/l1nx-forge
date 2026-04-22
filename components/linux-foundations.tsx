@@ -56,13 +56,23 @@ function ThinkAboutIt({ scenario, hint, answer, onComplete }) {
         </>
       )}
       {revealed && (
-        <div style={{
-          marginTop: 12, padding: 14, background: "rgba(255,170,50,0.1)", borderRadius: 6,
-          border: "1px solid rgba(255,170,50,0.2)",
-        }}>
-          <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 13, marginBottom: 6 }}>INSIGHT</div>
-          <p style={{ color: "#E8E0D8", lineHeight: 1.7, margin: 0 }}>{answer}</p>
-        </div>
+        <>
+          <div style={{
+            marginTop: 12, padding: 14, background: "rgba(255,170,50,0.1)", borderRadius: 6,
+            border: "1px solid rgba(255,170,50,0.2)",
+          }}>
+            <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 13, marginBottom: 6 }}>INSIGHT</div>
+            <p style={{ color: "#E8E0D8", lineHeight: 1.7, margin: 0 }}>{answer}</p>
+          </div>
+          <button
+            onClick={() => { setUserAnswer(""); setRevealed(false); }}
+            style={{
+              marginTop: 10, padding: "6px 14px", background: "transparent",
+              border: "1px solid rgba(255,170,50,0.35)", borderRadius: 6,
+              color: "#FFC878", fontWeight: 600, fontSize: 13, cursor: "pointer",
+            }}
+          >↻ Try Again</button>
+        </>
       )}
     </div>
   );
@@ -128,20 +138,30 @@ function KnowledgeCheck({ question, correctAnswer, onComplete }) {
         </>
       )}
       {revealed && (
-        <div style={{
-          marginTop: 12, padding: 14, background: "rgba(80,200,255,0.08)", borderRadius: 6,
-          border: "1px solid rgba(80,200,255,0.2)",
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13 }}>ANSWER</span>
-            <span style={{
-              fontSize: 12, padding: "2px 10px", borderRadius: 10,
-              background: confidence === "Sure" ? "rgba(42,138,74,0.3)" : confidence === "Unsure" ? "rgba(170,122,32,0.3)" : "rgba(170,48,48,0.3)",
-              color: confidence === "Sure" ? "#5ADA7A" : confidence === "Unsure" ? "#DDAA44" : "#EE6666",
-            }}>You were: {confidence}</span>
+        <>
+          <div style={{
+            marginTop: 12, padding: 14, background: "rgba(80,200,255,0.08)", borderRadius: 6,
+            border: "1px solid rgba(80,200,255,0.2)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13 }}>ANSWER</span>
+              <span style={{
+                fontSize: 12, padding: "2px 10px", borderRadius: 10,
+                background: confidence === "Sure" ? "rgba(42,138,74,0.3)" : confidence === "Unsure" ? "rgba(170,122,32,0.3)" : "rgba(170,48,48,0.3)",
+                color: confidence === "Sure" ? "#5ADA7A" : confidence === "Unsure" ? "#DDAA44" : "#EE6666",
+              }}>You were: {confidence}</span>
+            </div>
+            <p style={{ color: "#E8E8F0", lineHeight: 1.7, margin: 0 }}>{correctAnswer}</p>
           </div>
-          <p style={{ color: "#E8E8F0", lineHeight: 1.7, margin: 0 }}>{correctAnswer}</p>
-        </div>
+          <button
+            onClick={() => { setUserAnswer(""); setRevealed(false); setConfidence(null); }}
+            style={{
+              marginTop: 10, padding: "6px 14px", background: "transparent",
+              border: "1px solid rgba(80,200,255,0.35)", borderRadius: 6,
+              color: "#9CD8FF", fontWeight: 600, fontSize: 13, cursor: "pointer",
+            }}
+          >↻ Try Again</button>
+        </>
       )}
     </div>
   );
@@ -1221,6 +1241,18 @@ function OctalFlipCards() {
           r + w + x = 4 + 2 + 1 = 7 (full access)
         </div>
       )}
+      {(revealed[0] || revealed[1] || revealed[2]) && (
+        <div style={{ marginTop: 10, textAlign: "center" }}>
+          <button
+            onClick={() => setRevealed({})}
+            style={{
+              padding: "6px 14px", background: "transparent",
+              border: "1px solid rgba(80,200,255,0.35)", borderRadius: 6,
+              color: "#9CD8FF", fontWeight: 600, fontSize: 13, cursor: "pointer",
+            }}
+          >↻ Reset</button>
+        </div>
+      )}
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(6px); }
@@ -2048,6 +2080,22 @@ function FilesystemTree() {
               <code style={{ color: "#7DD8FF", background: "rgba(80,200,255,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "monospace", marginLeft: 4 }}>-d</code> directories only,
               <code style={{ color: "#7DD8FF", background: "rgba(80,200,255,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "monospace", marginLeft: 4 }}>-a</code> includes hidden files.
             </span>
+          </div>
+          <div style={{ marginTop: 12, textAlign: "right" }}>
+            <button
+              onClick={() => {
+                setPhase("prompt");
+                setCmdInput("");
+                setCmdHistory([]);
+                setExpanded(new Set([""]));
+                setSelectedDesc(null);
+              }}
+              style={{
+                padding: "6px 14px", background: "transparent",
+                border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6,
+                color: "#889", fontWeight: 600, fontSize: 12, cursor: "pointer",
+              }}
+            >↻ Reset</button>
           </div>
         </>
       )}

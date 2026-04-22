@@ -24,6 +24,15 @@ export default function MCKnowledgeCheck({
   const [submitted, setSubmitted] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
+  const handlePracticeAgain = useCallback(() => {
+    setCurrentIndex(0);
+    setCorrect(0);
+    setAnswered(0);
+    setSelected(null);
+    setSubmitted(false);
+    setShowResult(false);
+  }, []);
+
   const total = questions.length;
   const progress = total > 0 ? (answered / total) * 100 : 0;
   const q = questions[currentIndex];
@@ -70,11 +79,14 @@ export default function MCKnowledgeCheck({
             <p className="text-4xl font-bold glow-text-cyan mb-2">
               {correct} / {total}
             </p>
-            <p className="text-sm text-v2-text-dim">
+            <p className="text-sm text-v2-text-dim mb-4">
               {passed
                 ? "You've demonstrated mastery of this material."
                 : `Need ${Math.ceil(passThreshold * total)} correct to pass. Review and try again.`}
             </p>
+            <ActionButton variant="secondary" size="sm" onClick={handlePracticeAgain}>
+              ↻ Practice Again
+            </ActionButton>
           </div>
         </HexPanel>
       </div>

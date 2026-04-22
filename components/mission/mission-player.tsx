@@ -176,6 +176,8 @@ export default function MissionPlayer({ mission }: MissionPlayerProps) {
   const handleRetry = useCallback(() => {
     setPhase("knowledge-check");
     setDebriefData(null);
+    setCurrentStepIndex(0);
+    setStepsCompleted([]);
   }, []);
 
   // ── Phase rendering ──
@@ -276,7 +278,7 @@ export default function MissionPlayer({ mission }: MissionPlayerProps) {
         xpEarned={debriefData.xpEarned}
         onNextMission={campaign ? handleNextMission : undefined}
         onReturnToMap={handleReturnToMap}
-        onRetry={!debriefData.passed ? handleRetry : undefined}
+        onRetry={handleRetry}
       />
     );
   }

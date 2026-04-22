@@ -80,9 +80,14 @@ export default function MissionDebrief({
                   Next Mission
                 </ActionButton>
               )}
-              {!passed && onRetry && (
-                <ActionButton variant="primary" size="lg" onClick={onRetry} className="w-full">
-                  Try Again
+              {onRetry && (
+                <ActionButton
+                  variant={passed ? "secondary" : "primary"}
+                  size={passed ? "md" : "lg"}
+                  onClick={onRetry}
+                  className="w-full"
+                >
+                  {passed ? "↻ Practice Again" : "Try Again"}
                 </ActionButton>
               )}
               <ActionButton variant="secondary" size="md" onClick={onReturnToMap} className="w-full">

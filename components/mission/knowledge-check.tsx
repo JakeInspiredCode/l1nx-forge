@@ -91,6 +91,15 @@ export default function KnowledgeCheckScreen({ check, onComplete }: KnowledgeChe
   const [lastAnswer, setLastAnswer] = useState<"correct" | "wrong" | null>(null);
   const [revealed, setRevealed] = useState(false);
 
+  const handlePracticeAgain = useCallback(() => {
+    setCurrentIndex(0);
+    setCorrect(0);
+    setAnswered(0);
+    setShowResult(false);
+    setLastAnswer(null);
+    setRevealed(false);
+  }, []);
+
   const total = check.items.length;
   const progress = total > 0 ? (answered / total) * 100 : 0;
   const currentItem = check.items[currentIndex];
@@ -131,11 +140,14 @@ export default function KnowledgeCheckScreen({ check, onComplete }: KnowledgeChe
             <p className="text-4xl font-bold glow-text-cyan mb-2">
               {correct} / {total}
             </p>
-            <p className="text-sm text-v2-text-dim">
+            <p className="text-sm text-v2-text-dim mb-4">
               {passed
                 ? "You've demonstrated mastery of this material."
                 : `Need ${Math.ceil(check.passThreshold * total)} correct to pass. Review and try again.`}
             </p>
+            <ActionButton variant="secondary" size="sm" onClick={handlePracticeAgain}>
+              ↻ Practice Again
+            </ActionButton>
           </div>
         </HexPanel>
       </div>
