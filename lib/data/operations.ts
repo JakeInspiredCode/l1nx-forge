@@ -653,6 +653,15 @@ export const mutations: Record<string, MutationFn> = {
     };
     let mastered = 0, learning = 0, newCount = 0;
 
+    // Build latest-review-per-card lookup once — avoids O(cards × reviews) filter+sort.
+    const latestReviewByCard = new Map<string, { timestamp: string; quality: number }>();
+    for (const r of state.forgeReviews) {
+      const prev = latestReviewByCard.get(r.cardId);
+      if (!prev || r.timestamp.localeCompare(prev.timestamp) > 0) {
+        latestReviewByCard.set(r.cardId, { timestamp: r.timestamp, quality: r.quality });
+      }
+    }
+
     for (const card of cards) {
       const tierKey = `tier${card.tier}`;
       if (tiers[tierKey]) tiers[tierKey].total++;
@@ -663,11 +672,9 @@ export const mutations: Record<string, MutationFn> = {
         if (tiers[tierKey]) tiers[tierKey].qualified++;
       } else {
         learning++;
-        const reviewsForCard = state.forgeReviews
-          .filter((r) => r.cardId === card.cardId)
-          .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-        if (reviewsForCard[0] && reviewsForCard[0].quality >= 3) {
-          if (tiers[tierKey]) tiers[tierKey].qualified++;
+        const latest = latestReviewByCard.get(card.cardId);
+        if (latest && latest.quality >= 3 && tiers[tierKey]) {
+          tiers[tierKey].qualified++;
         }
       }
     }

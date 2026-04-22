@@ -92,9 +92,9 @@ export function Prose({ html }: { html: string }) {
     <p
       style={{
         color: "#D0D4D8",
-        fontSize: 16,
-        lineHeight: 1.8,
-        margin: "14px 0",
+        fontSize: 12,
+        lineHeight: 1.55,
+        margin: "10px 0",
       }}
     >
       {render(tokenize(html))}

@@ -84,9 +84,10 @@ export default function SessionSummary({ results, cards, duration, onClose }: Se
   const minutes = Math.floor(duration / 60);
   const seconds = duration % 60;
 
+  const cardsById = new Map(cards.map((c) => [c.id, c]));
   const weakCards = results
     .filter((r) => r.quality < 3)
-    .map((r) => cards.find((c) => c.id === r.cardId))
+    .map((r) => cardsById.get(r.cardId))
     .filter((c, i, arr): c is ForgeCard => c !== undefined && arr.findIndex((x) => x?.id === c.id) === i);
 
   const topicBreakdown: Record<string, { total: number; correct: number }> = {};

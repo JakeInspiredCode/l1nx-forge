@@ -28,8 +28,8 @@ export function Heading({
         <h2
           style={{
             color: "#E8ECF0",
-            fontSize: 28,
-            fontWeight: 800,
+            fontSize: 18,
+            fontWeight: 700,
             margin: "0 0 6px 0",
             lineHeight: 1.3,
           }}
@@ -40,9 +40,9 @@ export function Heading({
           <p
             style={{
               color: "#667",
-              fontSize: 15,
+              fontSize: 11,
               marginTop: 0,
-              marginBottom: 24,
+              marginBottom: 16,
               fontStyle: "italic",
             }}
           >
@@ -56,9 +56,9 @@ export function Heading({
     <h3
       style={{
         color: "#E8ECF0",
-        fontSize: 20,
+        fontSize: 15,
         fontWeight: 700,
-        margin: "28px 0 12px 0",
+        margin: "20px 0 10px 0",
         lineHeight: 1.3,
       }}
     >
@@ -78,12 +78,12 @@ export function CodeBlock({
   language?: string;
 }) {
   return (
-    <div style={{ margin: "16px 0" }}>
+    <div style={{ margin: "12px 0" }}>
       {label && (
         <div
           style={{
             color: "#607080",
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: 600,
             marginBottom: 4,
             letterSpacing: "0.5px",
@@ -101,7 +101,7 @@ export function CodeBlock({
           overflowX: "auto",
           margin: 0,
           fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-          fontSize: 14,
+          fontSize: 11,
           lineHeight: 1.6,
           color: "#C8D8E8",
         }}
@@ -144,8 +144,8 @@ export function InfoTable({
   rows: TableCell[][];
 }) {
   return (
-    <div style={{ overflowX: "auto", margin: "16px 0" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 15 }}>
+    <div style={{ overflowX: "auto", margin: "12px 0" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
         <thead>
           <tr>
             {headers.map((h, i) => (
@@ -157,7 +157,7 @@ export function InfoTable({
                   borderBottom: "2px solid rgba(80,200,255,0.3)",
                   color: "#50C8FF",
                   fontWeight: 700,
-                  fontSize: 13,
+                  fontSize: 10,
                   letterSpacing: "0.5px",
                   whiteSpace: "nowrap",
                 }}
@@ -204,7 +204,7 @@ const BULLET_COLORS = ["#50C8FF", "#FFA832", "#7AE87A", "#FF6B6B", "#C58AFF"];
 
 export function Bullets({ items }: { items: string[] }) {
   return (
-    <div style={{ display: "grid", gap: 6, margin: "12px 0 18px" }}>
+    <div style={{ display: "grid", gap: 6, margin: "10px 0 14px" }}>
       {items.map((item, i) => (
         <div
           key={i}
@@ -213,7 +213,7 @@ export function Bullets({ items }: { items: string[] }) {
             gap: 8,
             alignItems: "flex-start",
             color: "#C0C4C8",
-            fontSize: 15,
+            fontSize: 11,
             lineHeight: 1.6,
           }}
         >
@@ -275,7 +275,7 @@ export function Callout({
       style={{
         padding: "14px 18px",
         borderRadius: 10,
-        margin: "20px 0",
+        margin: "14px 0",
         background: s.bg,
         border: `1px solid ${s.accent}33`,
         borderLeft: `3px solid ${s.accent}`,
@@ -285,7 +285,7 @@ export function Callout({
         style={{
           color: s.accent,
           fontWeight: 700,
-          fontSize: 13,
+          fontSize: 10,
           letterSpacing: "0.5px",
           marginBottom: 8,
           display: "flex",
@@ -324,7 +324,7 @@ export function ThinkAboutIt({
         borderLeft: "3px solid #FFA832",
         borderRadius: 8,
         padding: "18px 20px",
-        margin: "20px 0",
+        margin: "14px 0",
       }}
     >
       <div
@@ -335,11 +335,11 @@ export function ThinkAboutIt({
           marginBottom: 10,
           color: "#FFA832",
           fontWeight: 700,
-          fontSize: 14,
+          fontSize: 11,
           letterSpacing: "0.5px",
         }}
       >
-        <span style={{ fontSize: 16 }}>⚡</span> THINK ABOUT IT
+        <span style={{ fontSize: 12 }}>⚡</span> THINK ABOUT IT
       </div>
       <div style={{ color: "#E0D8CF" }}>
         <Prose html={scenario} />
@@ -348,7 +348,7 @@ export function ThinkAboutIt({
         <p
           style={{
             color: "#A09080",
-            fontSize: 14,
+            fontSize: 11,
             fontStyle: "italic",
             margin: "0 0 12px 0",
           }}
@@ -370,7 +370,7 @@ export function ThinkAboutIt({
               borderRadius: 6,
               padding: 12,
               color: "#E8E0D8",
-              fontSize: 15,
+              fontSize: 11,
               fontFamily: "inherit",
               resize: "vertical",
               boxSizing: "border-box",
@@ -386,7 +386,7 @@ export function ThinkAboutIt({
               borderRadius: 6,
               color: "#1A1A2E",
               fontWeight: 700,
-              fontSize: 14,
+              fontSize: 11,
               cursor: "pointer",
             }}
           >
@@ -409,7 +409,7 @@ export function ThinkAboutIt({
               style={{
                 color: "#FFA832",
                 fontWeight: 700,
-                fontSize: 13,
+                fontSize: 10,
                 marginBottom: 6,
               }}
             >
@@ -432,7 +432,7 @@ export function ThinkAboutIt({
               borderRadius: 6,
               color: "#FFC878",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 10,
               cursor: "pointer",
             }}
           >
@@ -466,7 +466,7 @@ export function KnowledgeCheck({
         borderLeft: "3px solid #50C8FF",
         borderRadius: 8,
         padding: "18px 20px",
-        margin: "24px 0",
+        margin: "14px 0",
       }}
     >
       <div
@@ -477,11 +477,11 @@ export function KnowledgeCheck({
           marginBottom: 10,
           color: "#50C8FF",
           fontWeight: 700,
-          fontSize: 14,
+          fontSize: 11,
           letterSpacing: "0.5px",
         }}
       >
-        <span style={{ fontSize: 16 }}>◇</span> KNOWLEDGE CHECK
+        <span style={{ fontSize: 12 }}>◇</span> KNOWLEDGE CHECK
       </div>
       <div style={{ color: "#E0E4E8", fontWeight: 500 }}>
         <Prose html={question} />
@@ -500,7 +500,7 @@ export function KnowledgeCheck({
               borderRadius: 6,
               padding: 12,
               color: "#E8E8F0",
-              fontSize: 15,
+              fontSize: 11,
               fontFamily: "inherit",
               resize: "vertical",
               boxSizing: "border-box",
@@ -515,7 +515,7 @@ export function KnowledgeCheck({
               flexWrap: "wrap",
             }}
           >
-            <span style={{ color: "#7090A8", fontSize: 13, marginRight: 4 }}>
+            <span style={{ color: "#7090A8", fontSize: 10, marginRight: 4 }}>
               Confidence:
             </span>
             {["Sure", "Unsure", "Guessing"].map((c) => (
@@ -538,7 +538,7 @@ export function KnowledgeCheck({
                       ? "none"
                       : "1px solid rgba(255,255,255,0.15)",
                   color: confidence === c ? "#FFF" : "#8899AA",
-                  fontSize: 13,
+                  fontSize: 10,
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -556,7 +556,7 @@ export function KnowledgeCheck({
                 borderRadius: 6,
                 color: "#1A1A2E",
                 fontWeight: 700,
-                fontSize: 14,
+                fontSize: 11,
                 cursor: "pointer",
               }}
             >
@@ -584,13 +584,13 @@ export function KnowledgeCheck({
                 marginBottom: 6,
               }}
             >
-              <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13 }}>
+              <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 10 }}>
                 ANSWER
               </span>
               {confidence && (
                 <span
                   style={{
-                    fontSize: 12,
+                    fontSize: 10,
                     padding: "2px 10px",
                     borderRadius: 10,
                     background:
@@ -629,7 +629,7 @@ export function KnowledgeCheck({
               borderRadius: 6,
               color: "#9CD8FF",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 10,
               cursor: "pointer",
             }}
           >
@@ -653,7 +653,7 @@ export function WhyThisMatters({ body }: { body: string }) {
         borderLeft: "3px solid #C58AFF",
         borderRadius: 10,
         padding: "16px 20px",
-        margin: "22px 0",
+        margin: "14px 0",
       }}
     >
       <div
@@ -664,12 +664,12 @@ export function WhyThisMatters({ body }: { body: string }) {
           marginBottom: 8,
           color: "#C58AFF",
           fontWeight: 800,
-          fontSize: 13,
+          fontSize: 10,
           letterSpacing: "0.8px",
           textTransform: "uppercase",
         }}
       >
-        <span style={{ fontSize: 15 }}>✦</span> Why this matters
+        <span style={{ fontSize: 11 }}>✦</span> Why this matters
       </div>
       <Prose html={body} />
     </div>
@@ -698,7 +698,7 @@ export function Collapsible({
   };
 
   return (
-    <div style={{ margin: "16px 0 20px" }}>
+    <div style={{ margin: "12px 0 14px" }}>
       {intro && (
         <div style={{ marginBottom: 6 }}>
           <Prose html={intro} />
@@ -731,13 +731,13 @@ export function Collapsible({
                   gap: 12,
                 }}
               >
-                <strong style={{ color, fontSize: 15 }}>{item.title}</strong>
+                <strong style={{ color, fontSize: 11 }}>{item.title}</strong>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {!isOpen && (
                     <span
                       style={{
                         color: "#8899AA",
-                        fontSize: 11,
+                        fontSize: 10,
                         fontStyle: "italic",
                       }}
                     >
@@ -747,7 +747,7 @@ export function Collapsible({
                   <span
                     style={{
                       color: "#8899AA",
-                      fontSize: 12,
+                      fontSize: 10,
                       flexShrink: 0,
                       transition: "transform 0.2s",
                       transform: isOpen ? "rotate(90deg)" : "none",
@@ -833,7 +833,7 @@ export function FillBlank({
         borderLeft: "3px solid #7AE87A",
         borderRadius: 8,
         padding: "18px 20px",
-        margin: "22px 0",
+        margin: "14px 0",
       }}
     >
       <div
@@ -844,11 +844,11 @@ export function FillBlank({
           marginBottom: 10,
           color: "#7AE87A",
           fontWeight: 700,
-          fontSize: 13,
+          fontSize: 10,
           letterSpacing: "0.5px",
         }}
       >
-        <span style={{ fontSize: 15 }}>▣</span> FILL IN THE BLANK
+        <span style={{ fontSize: 11 }}>▣</span> FILL IN THE BLANK
       </div>
       <div style={{ color: "#D8E8D8", marginBottom: 12 }}>
         <Prose html={prompt} />
@@ -856,7 +856,7 @@ export function FillBlank({
       <div
         style={{
           color: "#E0E8E0",
-          fontSize: 16,
+          fontSize: 12,
           lineHeight: 2,
           fontFamily: "inherit",
           margin: "6px 0 14px",
@@ -899,7 +899,7 @@ export function FillBlank({
                   color: isCorrect ? "#9EE8AE" : "#E8E8F0",
                   fontFamily:
                     "'JetBrains Mono', 'Fira Code', monospace",
-                  fontSize: 15,
+                  fontSize: 11,
                   outline: "none",
                 }}
               />
@@ -919,7 +919,7 @@ export function FillBlank({
               borderRadius: 6,
               color: "#14281A",
               fontWeight: 700,
-              fontSize: 14,
+              fontSize: 11,
               cursor: "pointer",
             }}
           >
@@ -934,7 +934,7 @@ export function FillBlank({
               borderRadius: 6,
               color: "#9EE8AE",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 10,
               cursor: "pointer",
             }}
           >
@@ -944,7 +944,7 @@ export function FillBlank({
             <span
               style={{
                 color: allCorrect ? "#5ADA7A" : "#DDAA44",
-                fontSize: 13,
+                fontSize: 10,
                 fontWeight: 600,
               }}
             >
@@ -969,7 +969,7 @@ export function FillBlank({
               style={{
                 color: "#7AE87A",
                 fontWeight: 700,
-                fontSize: 13,
+                fontSize: 10,
                 marginBottom: 6,
               }}
             >
@@ -993,7 +993,7 @@ export function FillBlank({
               borderRadius: 6,
               color: "#A8E8A8",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 10,
               cursor: "pointer",
             }}
           >
@@ -1016,7 +1016,7 @@ export function FillBlank({
             borderRadius: 6,
             color: "#9EE8AE",
             fontWeight: 600,
-            fontSize: 13,
+            fontSize: 10,
             cursor: "pointer",
           }}
         >
@@ -1069,7 +1069,7 @@ function FlipCard({ card, index }: { card: FlipCardItem; index: number }) {
       <div
         style={{
           color: flipped ? "#E8ECF0" : accent,
-          fontSize: flipped ? 15 : 17,
+          fontSize: flipped ? 13 : 15,
           fontWeight: flipped ? 500 : 700,
           lineHeight: 1.5,
           marginTop: 12,
@@ -1089,7 +1089,7 @@ export function FlipCards({
   cards: FlipCardItem[];
 }) {
   return (
-    <div style={{ margin: "22px 0" }}>
+    <div style={{ margin: "14px 0" }}>
       <div
         style={{
           display: "flex",
@@ -1098,11 +1098,11 @@ export function FlipCards({
           marginBottom: 8,
           color: "#FFA832",
           fontWeight: 700,
-          fontSize: 13,
+          fontSize: 10,
           letterSpacing: "0.5px",
         }}
       >
-        <span style={{ fontSize: 15 }}>⟲</span> FLIP TO RECALL
+        <span style={{ fontSize: 11 }}>⟲</span> FLIP TO RECALL
       </div>
       {intro && (
         <div style={{ marginBottom: 10 }}>
@@ -1155,7 +1155,7 @@ export function MCQInline({
         borderLeft: "3px solid #50C8FF",
         borderRadius: 8,
         padding: "18px 20px",
-        margin: "22px 0",
+        margin: "14px 0",
       }}
     >
       <div
@@ -1166,11 +1166,11 @@ export function MCQInline({
           marginBottom: 10,
           color: "#50C8FF",
           fontWeight: 700,
-          fontSize: 13,
+          fontSize: 10,
           letterSpacing: "0.5px",
         }}
       >
-        <span style={{ fontSize: 15 }}>◈</span> QUICK CHECK
+        <span style={{ fontSize: 11 }}>◈</span> QUICK CHECK
       </div>
       <div style={{ color: "#E0E4E8", fontWeight: 500, marginBottom: 12 }}>
         <Prose html={question} />
@@ -1209,7 +1209,7 @@ export function MCQInline({
                 border,
                 borderRadius: 8,
                 color,
-                fontSize: 14.5,
+                fontSize: 11,
                 lineHeight: 1.55,
                 cursor: locked ? "default" : "pointer",
                 fontFamily: "inherit",
@@ -1245,7 +1245,7 @@ export function MCQInline({
             borderRadius: 6,
             color: selected ? "#1A1A2E" : "#7090A8",
             fontWeight: 700,
-            fontSize: 14,
+            fontSize: 11,
             cursor: selected ? "pointer" : "not-allowed",
           }}
         >
@@ -1271,7 +1271,7 @@ export function MCQInline({
               style={{
                 color: correct ? "#5ADA7A" : "#FFA832",
                 fontWeight: 700,
-                fontSize: 13,
+                fontSize: 10,
                 marginBottom: 6,
               }}
             >
@@ -1294,7 +1294,7 @@ export function MCQInline({
               borderRadius: 6,
               color: "#9CD8FF",
               fontWeight: 600,
-              fontSize: 13,
+              fontSize: 10,
               cursor: "pointer",
             }}
           >

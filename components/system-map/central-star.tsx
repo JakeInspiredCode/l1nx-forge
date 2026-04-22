@@ -3,14 +3,13 @@
 interface CentralStarProps {
   cx: number;
   cy: number;
-  icon: string;
   title: string;
   color: string;
   completedMissions: number;
   totalMissions: number;
 }
 
-export default function CentralStar({ cx, cy, icon, title, color, completedMissions, totalMissions }: CentralStarProps) {
+export default function CentralStar({ cx, cy, title, color, completedMissions, totalMissions }: CentralStarProps) {
   // Progress ring calculation
   const progressR = 55;
   const circumference = 2 * Math.PI * progressR;
@@ -91,18 +90,6 @@ export default function CentralStar({ cx, cy, icon, title, color, completedMissi
         fill={`url(#star-core)`}
         style={{ filter: `drop-shadow(0 0 20px ${color}) drop-shadow(0 0 40px ${color}80)` }}
       />
-
-      {/* Icon */}
-      <text
-        x={cx}
-        y={cy}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize={18}
-        className="pointer-events-none select-none"
-      >
-        {icon}
-      </text>
 
       {/* Campaign title below star */}
       <text

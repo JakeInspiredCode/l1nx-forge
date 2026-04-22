@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { SECTIONS, QUICK_REF } from "@/lib/seeds/foundations-content";
 import FoundationsNav from "@/components/foundations/foundations-nav";
+import { useLessonScale, scaleLabel } from "@/lib/use-lesson-scale";
 
 // ─── REUSABLE COMPONENTS ────────────────────────────────────────────────────
 
@@ -23,13 +24,13 @@ function ThinkAboutIt({ scenario, hint, answer, onComplete }) {
       background: "linear-gradient(135deg, rgba(255,170,50,0.08), rgba(255,120,20,0.04))",
       border: "1px solid rgba(255,170,50,0.25)",
       borderLeft: "3px solid #FFA832",
-      borderRadius: 8, padding: "18px 20px", margin: "20px 0",
+      borderRadius: 8, padding: "18px 20px", margin: "14px 0",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: "#FFA832", fontWeight: 700, fontSize: 14, letterSpacing: "0.5px" }}>
-        <span style={{ fontSize: 16 }}>⚡</span> THINK ABOUT IT
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: "#FFA832", fontWeight: 700, fontSize: 11, letterSpacing: "0.5px" }}>
+        <span style={{ fontSize: 12 }}>⚡</span> THINK ABOUT IT
       </div>
-      <p style={{ color: "#E0D8CF", lineHeight: 1.7, margin: "0 0 12px 0" }}>{scenario}</p>
-      {hint && <p style={{ color: "#A09080", fontSize: 14, fontStyle: "italic", margin: "0 0 12px 0" }}>Hint: {hint}</p>}
+      <p style={{ color: "#E0D8CF", lineHeight: 1.6, margin: "0 0 12px 0" }}>{scenario}</p>
+      {hint && <p style={{ color: "#A09080", fontSize: 11, fontStyle: "italic", margin: "0 0 12px 0" }}>Hint: {hint}</p>}
       {!revealed && (
         <>
           <textarea
@@ -38,7 +39,7 @@ function ThinkAboutIt({ scenario, hint, answer, onComplete }) {
             placeholder="Try to answer before revealing — or reveal when ready..."
             style={{
               width: "100%", minHeight: 70, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,170,50,0.2)",
-              borderRadius: 6, padding: 12, color: "#E8E0D8", fontSize: 15, fontFamily: "inherit", resize: "vertical",
+              borderRadius: 6, padding: 12, color: "#E8E0D8", fontSize: 11, fontFamily: "inherit", resize: "vertical",
               boxSizing: "border-box",
             }}
           />
@@ -47,7 +48,7 @@ function ThinkAboutIt({ scenario, hint, answer, onComplete }) {
             style={{
               marginTop: 10, padding: "8px 20px", background: "#FFA832",
               border: "none", borderRadius: 6, color: "#1A1A2E",
-              fontWeight: 700, fontSize: 14, cursor: "pointer",
+              fontWeight: 700, fontSize: 11, cursor: "pointer",
               transition: "all 0.2s",
             }}
           >
@@ -61,15 +62,15 @@ function ThinkAboutIt({ scenario, hint, answer, onComplete }) {
             marginTop: 12, padding: 14, background: "rgba(255,170,50,0.1)", borderRadius: 6,
             border: "1px solid rgba(255,170,50,0.2)",
           }}>
-            <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 13, marginBottom: 6 }}>INSIGHT</div>
-            <p style={{ color: "#E8E0D8", lineHeight: 1.7, margin: 0 }}>{answer}</p>
+            <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 10, marginBottom: 6 }}>INSIGHT</div>
+            <p style={{ color: "#E8E0D8", lineHeight: 1.6, margin: 0 }}>{answer}</p>
           </div>
           <button
             onClick={() => { setUserAnswer(""); setRevealed(false); }}
             style={{
               marginTop: 10, padding: "6px 14px", background: "transparent",
               border: "1px solid rgba(255,170,50,0.35)", borderRadius: 6,
-              color: "#FFC878", fontWeight: 600, fontSize: 13, cursor: "pointer",
+              color: "#FFC878", fontWeight: 600, fontSize: 10, cursor: "pointer",
             }}
           >↻ Try Again</button>
         </>
@@ -93,12 +94,12 @@ function KnowledgeCheck({ question, correctAnswer, onComplete }) {
       background: "linear-gradient(135deg, rgba(80,200,255,0.08), rgba(40,140,255,0.04))",
       border: "1px solid rgba(80,200,255,0.25)",
       borderLeft: "3px solid #50C8FF",
-      borderRadius: 8, padding: "18px 20px", margin: "24px 0",
+      borderRadius: 8, padding: "18px 20px", margin: "14px 0",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: "#50C8FF", fontWeight: 700, fontSize: 14, letterSpacing: "0.5px" }}>
-        <span style={{ fontSize: 16 }}>◇</span> KNOWLEDGE CHECK
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: "#50C8FF", fontWeight: 700, fontSize: 11, letterSpacing: "0.5px" }}>
+        <span style={{ fontSize: 12 }}>◇</span> KNOWLEDGE CHECK
       </div>
-      <p style={{ color: "#E0E4E8", lineHeight: 1.7, margin: "0 0 12px 0", fontWeight: 500 }}>{question}</p>
+      <p style={{ color: "#E0E4E8", lineHeight: 1.6, margin: "0 0 12px 0", fontWeight: 500 }}>{question}</p>
       {!revealed && (
         <>
           <textarea
@@ -107,18 +108,18 @@ function KnowledgeCheck({ question, correctAnswer, onComplete }) {
             placeholder="Try to answer before checking — or check when ready..."
             style={{
               width: "100%", minHeight: 70, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(80,200,255,0.2)",
-              borderRadius: 6, padding: 12, color: "#E8E8F0", fontSize: 15, fontFamily: "inherit", resize: "vertical",
+              borderRadius: 6, padding: 12, color: "#E8E8F0", fontSize: 11, fontFamily: "inherit", resize: "vertical",
               boxSizing: "border-box",
             }}
           />
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-            <span style={{ color: "#7090A8", fontSize: 13, marginRight: 4 }}>Confidence:</span>
+            <span style={{ color: "#7090A8", fontSize: 10, marginRight: 4 }}>Confidence:</span>
             {["Sure", "Unsure", "Guessing"].map((c) => (
               <button key={c} onClick={() => setConfidence(c)} style={{
                 padding: "5px 14px", borderRadius: 20,
                 background: confidence === c ? (c === "Sure" ? "#2A8A4A" : c === "Unsure" ? "#AA7A20" : "#AA3030") : "rgba(255,255,255,0.05)",
                 border: confidence === c ? "none" : "1px solid rgba(255,255,255,0.15)",
-                color: confidence === c ? "#FFF" : "#8899AA", fontSize: 13, fontWeight: 600, cursor: "pointer",
+                color: confidence === c ? "#FFF" : "#8899AA", fontSize: 10, fontWeight: 600, cursor: "pointer",
                 transition: "all 0.2s",
               }}>{c}</button>
             ))}
@@ -129,7 +130,7 @@ function KnowledgeCheck({ question, correctAnswer, onComplete }) {
                 background: "#50C8FF",
                 border: "none", borderRadius: 6,
                 color: "#1A1A2E",
-                fontWeight: 700, fontSize: 14,
+                fontWeight: 700, fontSize: 11,
                 cursor: "pointer",
                 transition: "all 0.2s",
               }}
@@ -144,21 +145,21 @@ function KnowledgeCheck({ question, correctAnswer, onComplete }) {
             border: "1px solid rgba(80,200,255,0.2)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13 }}>ANSWER</span>
+              <span style={{ color: "#50C8FF", fontWeight: 700, fontSize: 10 }}>ANSWER</span>
               <span style={{
-                fontSize: 12, padding: "2px 10px", borderRadius: 10,
+                fontSize: 10, padding: "2px 10px", borderRadius: 10,
                 background: confidence === "Sure" ? "rgba(42,138,74,0.3)" : confidence === "Unsure" ? "rgba(170,122,32,0.3)" : "rgba(170,48,48,0.3)",
                 color: confidence === "Sure" ? "#5ADA7A" : confidence === "Unsure" ? "#DDAA44" : "#EE6666",
               }}>You were: {confidence}</span>
             </div>
-            <p style={{ color: "#E8E8F0", lineHeight: 1.7, margin: 0 }}>{correctAnswer}</p>
+            <p style={{ color: "#E8E8F0", lineHeight: 1.6, margin: 0 }}>{correctAnswer}</p>
           </div>
           <button
             onClick={() => { setUserAnswer(""); setRevealed(false); setConfidence(null); }}
             style={{
               marginTop: 10, padding: "6px 14px", background: "transparent",
               border: "1px solid rgba(80,200,255,0.35)", borderRadius: 6,
-              color: "#9CD8FF", fontWeight: 600, fontSize: 13, cursor: "pointer",
+              color: "#9CD8FF", fontWeight: 600, fontSize: 10, cursor: "pointer",
             }}
           >↻ Try Again</button>
         </>
@@ -178,12 +179,12 @@ function Code({ children }) {
 
 function CodeBlock({ children, label }) {
   return (
-    <div style={{ margin: "16px 0" }}>
-      {label && <div style={{ color: "#607080", fontSize: 12, fontWeight: 600, marginBottom: 4, letterSpacing: "0.5px" }}>{label}</div>}
+    <div style={{ margin: "12px 0" }}>
+      {label && <div style={{ color: "#607080", fontSize: 10, fontWeight: 600, marginBottom: 4, letterSpacing: "0.5px" }}>{label}</div>}
       <pre style={{
         background: "rgba(0,0,0,0.4)", border: "1px solid rgba(80,200,255,0.12)", borderRadius: 8,
         padding: "14px 16px", overflowX: "auto", margin: 0,
-        fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 14, lineHeight: 1.6, color: "#C8D8E8",
+        fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 11, lineHeight: 1.6, color: "#C8D8E8",
       }}>{children}</pre>
     </div>
   );
@@ -191,14 +192,14 @@ function CodeBlock({ children, label }) {
 
 function InfoTable({ headers, rows }) {
   return (
-    <div style={{ overflowX: "auto", margin: "16px 0" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 15 }}>
+    <div style={{ overflowX: "auto", margin: "12px 0" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
         <thead>
           <tr>
             {headers.map((h, i) => (
               <th key={i} style={{
                 textAlign: "left", padding: "10px 14px", borderBottom: "2px solid rgba(80,200,255,0.3)",
-                color: "#50C8FF", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px", whiteSpace: "nowrap",
+                color: "#50C8FF", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px", whiteSpace: "nowrap",
               }}>{h}</th>
             ))}
           </tr>
@@ -221,7 +222,7 @@ function InfoTable({ headers, rows }) {
 }
 
 function SectionHeading({ children }) {
-  return <h3 style={{ color: "#E8ECF0", fontSize: 20, fontWeight: 700, margin: "28px 0 12px 0", lineHeight: 1.3 }}>{children}</h3>;
+  return <h3 style={{ color: "#E8ECF0", fontSize: 15, fontWeight: 700, margin: "20px 0 10px 0", lineHeight: 1.3 }}>{children}</h3>;
 }
 
 // ─── INTERACTIVE: OS FUNCTION CARDS (COLLAPSIBLE) ───────────────────────────
@@ -248,11 +249,11 @@ function OsFunctionCards() {
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong style={{ color: item.color }}>{item.title}</strong>
-            <span style={{ color: "#556", fontSize: 12, flexShrink: 0, marginLeft: 12, transition: "transform 0.2s", transform: expanded.has(i) ? "rotate(90deg)" : "none" }}>▸</span>
-            {!expanded.has(i) && <span style={{ color: "#445", fontSize: 11, marginLeft: 6, fontStyle: "italic" }}>click to expand</span>}
+            <span style={{ color: "#556", fontSize: 10, flexShrink: 0, marginLeft: 12, transition: "transform 0.2s", transform: expanded.has(i) ? "rotate(90deg)" : "none" }}>▸</span>
+            {!expanded.has(i) && <span style={{ color: "#445", fontSize: 10, marginLeft: 6, fontStyle: "italic" }}>click to expand</span>}
           </div>
           {expanded.has(i) && (
-            <p style={{ color: "#B8BCC0", fontSize: 15, lineHeight: 1.7, margin: "10px 0 0 0" }}>{item.body}</p>
+            <p style={{ color: "#B8BCC0", fontSize: 11, lineHeight: 1.6, margin: "10px 0 0 0" }}>{item.body}</p>
           )}
         </div>
       ))}
@@ -284,11 +285,11 @@ function CliTermsCards() {
         }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <strong style={{ color: item.color }}>{item.term}</strong>
-            <span style={{ color: "#556", fontSize: 12, flexShrink: 0, marginLeft: 12, transition: "transform 0.2s", transform: expanded.has(i) ? "rotate(90deg)" : "none" }}>▸</span>
-            {!expanded.has(i) && <span style={{ color: "#445", fontSize: 11, marginLeft: 6, fontStyle: "italic" }}>click to expand</span>}
+            <span style={{ color: "#556", fontSize: 10, flexShrink: 0, marginLeft: 12, transition: "transform 0.2s", transform: expanded.has(i) ? "rotate(90deg)" : "none" }}>▸</span>
+            {!expanded.has(i) && <span style={{ color: "#445", fontSize: 10, marginLeft: 6, fontStyle: "italic" }}>click to expand</span>}
           </div>
           {expanded.has(i) && (
-            <p style={{ color: "#B8BCC0", fontSize: 15, lineHeight: 1.7, margin: "10px 0 0 0" }}>{item.desc}</p>
+            <p style={{ color: "#B8BCC0", fontSize: 11, lineHeight: 1.6, margin: "10px 0 0 0" }}>{item.desc}</p>
           )}
         </div>
       ))}
@@ -333,14 +334,14 @@ function LayerSorter({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ SORT THE LAYERS — Drag to stack from bottom (1 = hardware) to top (4 = applications)
         </div>
         <button onClick={() => { setItems([...correctOrder].sort(() => Math.random() - 0.5)); setChecked(false); setIsCorrect(false); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>
       </div>
@@ -362,24 +363,24 @@ function LayerSorter({ onComplete }) {
               transition: "all 0.2s",
             }}
           >
-            <span style={{ color: "#556", fontSize: 13, fontWeight: 600, minWidth: 20 }}>{items.length - i}</span>
+            <span style={{ color: "#556", fontSize: 10, fontWeight: 600, minWidth: 20 }}>{items.length - i}</span>
             <span style={{
-              color: layerColors[item], fontWeight: 700, fontSize: 15, minWidth: 120,
+              color: layerColors[item], fontWeight: 700, fontSize: 11, minWidth: 120,
             }}>{item}</span>
-            <span style={{ color: "#778899", fontSize: 13 }}>
+            <span style={{ color: "#778899", fontSize: 10 }}>
               {checked && isCorrect ? layerDescs[item] : ""}
             </span>
-            <span style={{ marginLeft: "auto", color: "#445", fontSize: 18 }}>⠿</span>
+            <span style={{ marginLeft: "auto", color: "#445", fontSize: 13 }}>⠿</span>
           </div>
         ))}
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14 }}>
         <button onClick={check} style={{
           padding: "8px 22px", background: "#50C8FF", border: "none", borderRadius: 6,
-          color: "#1A1A2E", fontWeight: 700, fontSize: 14, cursor: "pointer",
+          color: "#1A1A2E", fontWeight: 700, fontSize: 11, cursor: "pointer",
         }}>Check Order</button>
         {checked && (
-          <span style={{ color: isCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 14 }}>
+          <span style={{ color: isCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 11 }}>
             {isCorrect ? "✓ Correct! Bottom to top: Hardware (1) → Kernel (2) → User Space (3) → Applications (4)" : "✗ Not quite — remember: hardware is the foundation at the bottom, kernel sits on it, then user space, then apps on top."}
           </span>
         )}
@@ -434,15 +435,15 @@ function CommandDissector() {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 6, letterSpacing: "0.5px" }}>
+      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, marginBottom: 6, letterSpacing: "0.5px" }}>
         ▸ COMMAND DISSECTOR — Hover over each part to see what it does
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         {commands.map((c, i) => (
           <button key={i} onClick={() => { setCmdIdx(i); setHovered(null); }} style={{
-            padding: "5px 14px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer",
+            padding: "5px 14px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer",
             background: cmdIdx === i ? "rgba(80,200,255,0.15)" : "rgba(255,255,255,0.04)",
             border: cmdIdx === i ? "1px solid rgba(80,200,255,0.4)" : "1px solid rgba(255,255,255,0.08)",
             color: cmdIdx === i ? "#50C8FF" : "#778899",
@@ -452,7 +453,7 @@ function CommandDissector() {
       </div>
       <div style={{
         background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: "16px 18px",
-        fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 17, lineHeight: 1.6,
+        fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 13, lineHeight: 1.6,
         border: "1px solid rgba(80,200,255,0.1)",
       }}>
         {commands[cmdIdx].parts.map((p, i) => (
@@ -478,7 +479,7 @@ function CommandDissector() {
           <div style={{
             padding: "8px 14px", background: "rgba(0,0,0,0.3)", borderRadius: 6,
             color: typeColors[commands[cmdIdx].parts[hovered].type],
-            fontSize: 14, fontWeight: 500, display: "inline-block",
+            fontSize: 11, fontWeight: 500, display: "inline-block",
           }}>
             {commands[cmdIdx].parts[hovered].label}
           </div>
@@ -486,7 +487,7 @@ function CommandDissector() {
       </div>
       <div style={{ display: "flex", gap: 16, marginTop: 12, flexWrap: "wrap" }}>
         {Object.entries(typeColors).map(([type, color]) => (
-          <span key={type} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+          <span key={type} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10 }}>
             <span style={{ width: 10, height: 10, borderRadius: 3, background: color, display: "inline-block" }} />
             <span style={{ color: "#889" }}>{type}</span>
           </span>
@@ -773,11 +774,11 @@ Swap:         8.0Gi       0B     8.0Gi`,
   return (
     <div ref={containerRef} style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+          <span style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
             ▸ RESOURCE INVESTIGATION
           </span>
           <button
@@ -786,15 +787,15 @@ Swap:         8.0Gi       0B     8.0Gi`,
             style={{
               width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
               background: "rgba(80,200,255,0.1)", border: "1px solid rgba(80,200,255,0.25)", color: "#50C8FF",
-              fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
+              fontSize: 10, fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
             }}
           >?</button>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {total > 0 && <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{score}/{total}</span>}
-          <span style={{ color: "#556", fontSize: 12 }}>{investigated.size}/4 checked</span>
+          {total > 0 && <span style={{ color: "#7AE87A", fontSize: 10, fontWeight: 600 }}>{score}/{total}</span>}
+          <span style={{ color: "#556", fontSize: 10 }}>{investigated.size}/4 checked</span>
           <button onClick={() => { jumpTo(0); setScore(0); setTotal(0); setScenarioResults({}); }} style={{
-            padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+            padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
             background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
           }}>↻ Reset</button>
         </div>
@@ -807,21 +808,21 @@ Swap:         8.0Gi       0B     8.0Gi`,
           background: "rgba(80,200,255,0.06)", border: "1px solid rgba(80,200,255,0.2)",
           display: "flex", alignItems: "flex-start", gap: 12,
         }}>
-          <span style={{ fontSize: 18, flexShrink: 0 }}>🔍</span>
+          <span style={{ fontSize: 13, flexShrink: 0 }}>🔍</span>
           <div style={{ flex: 1 }}>
-            <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 13, marginBottom: 4 }}>How this works</div>
-            <div style={{ color: "#C8CCD0", fontSize: 13, lineHeight: 1.5 }}>
+            <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 10, marginBottom: 4 }}>How this works</div>
+            <div style={{ color: "#C8CCD0", fontSize: 10, lineHeight: 1.5 }}>
               You're an ops engineer responding to a server incident. Click each resource panel below to run a diagnostic command and see the output.
               Look for <span style={{ color: "#FF5555", fontWeight: 600 }}>red/highlighted values</span> — they indicate trouble.
               After checking all 4 resources, pick which one is the bottleneck.
             </div>
             <button onClick={() => advanceGuide(1)} style={{
-              marginTop: 8, padding: "5px 14px", borderRadius: 5, fontSize: 12, fontWeight: 600, cursor: "pointer",
+              marginTop: 8, padding: "5px 14px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
               background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.35)", color: "#50C8FF",
             }}>Got it</button>
           </div>
           <button onClick={() => setGuideDismissed(true)} style={{
-            background: "none", border: "none", color: "#556", cursor: "pointer", fontSize: 14, padding: 2, flexShrink: 0,
+            background: "none", border: "none", color: "#556", cursor: "pointer", fontSize: 11, padding: 2, flexShrink: 0,
           }}>✕</button>
         </div>
       )}
@@ -845,7 +846,7 @@ Swap:         8.0Gi       0B     8.0Gi`,
             <button key={i} onClick={() => jumpTo(i)} style={{
               width: 40, height: 40, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
               background: bgColor, border: `1.5px solid ${borderColor}`,
-              color: textColor, fontWeight: 800, fontSize: 14, cursor: "pointer",
+              color: textColor, fontWeight: 800, fontSize: 11, cursor: "pointer",
               transition: "all 0.2s",
             }}>{icon}</button>
           );
@@ -857,8 +858,8 @@ Swap:         8.0Gi       0B     8.0Gi`,
         padding: "12px 16px", borderRadius: 8, marginBottom: 16,
         background: "rgba(255,168,50,0.06)", border: "1px solid rgba(255,168,50,0.2)",
       }}>
-        <span style={{ color: "#FFA832", fontWeight: 700, fontSize: 13 }}>INCIDENT: </span>
-        <span style={{ color: "#E0D8CF", fontSize: 15 }}>{s.prompt}</span>
+        <span style={{ color: "#FFA832", fontWeight: 700, fontSize: 10 }}>INCIDENT: </span>
+        <span style={{ color: "#E0D8CF", fontSize: 11 }}>{s.prompt}</span>
       </div>
 
       {/* ── Guide: Step 1 — Click first resource hint ── */}
@@ -868,8 +869,8 @@ Swap:         8.0Gi       0B     8.0Gi`,
           background: "rgba(80,200,255,0.05)", border: "1px dashed rgba(80,200,255,0.25)",
           display: "flex", alignItems: "center", gap: 8,
         }}>
-          <span style={{ color: "#50C8FF", fontSize: 14 }}>↓</span>
-          <span style={{ color: "#50C8FF", fontSize: 12, fontWeight: 600 }}>
+          <span style={{ color: "#50C8FF", fontSize: 11 }}>↓</span>
+          <span style={{ color: "#50C8FF", fontSize: 10, fontWeight: 600 }}>
             Click any resource panel below to run its diagnostic command
           </span>
         </div>
@@ -907,11 +908,11 @@ Swap:         8.0Gi       0B     8.0Gi`,
                   boxShadow: isInvestigated && r.status === "critical" ? `0 0 8px ${statusColors[r.status]}88` : "none",
                   transition: "all 0.3s",
                 }} />
-                <span style={{ color, fontWeight: 700, fontSize: 15, minWidth: 70 }}>{name}</span>
+                <span style={{ color, fontWeight: 700, fontSize: 11, minWidth: 70 }}>{name}</span>
 
                 {/* Command badge — always visible, dims after investigation */}
                 <span style={{
-                  fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 12,
+                  fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 10,
                   color: isInvestigated ? "#445" : "#50C8FF",
                   background: isInvestigated ? "rgba(255,255,255,0.02)" : "rgba(80,200,255,0.08)",
                   padding: "3px 10px", borderRadius: 4,
@@ -923,7 +924,7 @@ Swap:         8.0Gi       0B     8.0Gi`,
 
                 {/* Status badge — always reserve space to prevent reflow */}
                 <span style={{
-                  fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
+                  fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
                   background: isInvestigated ? `${statusColors[r.status]}22` : "transparent",
                   color: isInvestigated ? statusColors[r.status] : "transparent",
                   minWidth: 60, textAlign: "center",
@@ -932,7 +933,7 @@ Swap:         8.0Gi       0B     8.0Gi`,
 
                 {/* Right side — CTA or toggle arrow */}
                 <span style={{
-                  color: isInvestigated ? "#556" : "#50C8FF", fontSize: 12, fontWeight: 600, marginLeft: "auto",
+                  color: isInvestigated ? "#556" : "#50C8FF", fontSize: 10, fontWeight: 600, marginLeft: "auto",
                   transition: "transform 0.2s, color 0.3s",
                   transform: isExpanded ? "rotate(90deg)" : "none",
                 }}>{isInvestigated ? "▸" : "Click to run ▸"}</span>
@@ -953,14 +954,14 @@ Swap:         8.0Gi       0B     8.0Gi`,
                       <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF5F57" }} />
                       <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FEBC2E" }} />
                       <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#28C840" }} />
-                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#556", marginLeft: 8 }}>ops@srv-{String(scenarioIdx + 1).padStart(2, "0")}:~$</span>
-                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#50C8FF" }}> {r.cmd}</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 10, color: "#556", marginLeft: 8 }}>ops@srv-{String(scenarioIdx + 1).padStart(2, "0")}:~$</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 10, color: "#50C8FF" }}> {r.cmd}</span>
                     </div>
                     {/* Output */}
                     <pre style={{
                       margin: 0, padding: "10px 14px",
                       fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                      fontSize: 12, lineHeight: 1.5, overflowX: "auto",
+                      fontSize: 10, lineHeight: 1.5, overflowX: "auto",
                       color: "#A0B0C0", whiteSpace: "pre",
                     }}>
                       {renderOutput(r.output)}
@@ -972,10 +973,10 @@ Swap:         8.0Gi       0B     8.0Gi`,
                     background: `${statusColors[r.status]}11`,
                     borderLeft: `3px solid ${statusColors[r.status]}`,
                   }}>
-                    <span style={{ color: statusColors[r.status], fontWeight: 700, fontSize: 12 }}>
+                    <span style={{ color: statusColors[r.status], fontWeight: 700, fontSize: 10 }}>
                       {r.status === "critical" ? "⚠ " : r.status === "warning" ? "△ " : "✓ "}
                     </span>
-                    <span style={{ color: "#C8CCD0", fontSize: 13 }}>{r.highlight}</span>
+                    <span style={{ color: "#C8CCD0", fontSize: 10 }}>{r.highlight}</span>
                   </div>
                 </div>
               )}
@@ -991,8 +992,8 @@ Swap:         8.0Gi       0B     8.0Gi`,
           background: "rgba(80,200,255,0.04)", border: "1px solid rgba(80,200,255,0.15)",
           display: "flex", alignItems: "center", gap: 8,
         }}>
-          <span style={{ color: "#50C8FF", fontSize: 13 }}>💡</span>
-          <span style={{ color: "#AAB4BE", fontSize: 12 }}>
+          <span style={{ color: "#50C8FF", fontSize: 10 }}>💡</span>
+          <span style={{ color: "#AAB4BE", fontSize: 10 }}>
             Look for <span style={{ color: "#FF5555", fontWeight: 600 }}>red highlighted values</span> in the output — they point to the problem.
             Keep checking all 4 resources to compare.
           </span>
@@ -1006,8 +1007,8 @@ Swap:         8.0Gi       0B     8.0Gi`,
           background: "rgba(122,232,122,0.05)", border: "1px solid rgba(122,232,122,0.2)",
           display: "flex", alignItems: "center", gap: 8,
         }}>
-          <span style={{ color: "#7AE87A", fontSize: 13 }}>✓</span>
-          <span style={{ color: "#AAB4BE", fontSize: 12 }}>
+          <span style={{ color: "#7AE87A", fontSize: 10 }}>✓</span>
+          <span style={{ color: "#AAB4BE", fontSize: 10 }}>
             All resources checked. Now pick which one is the bottleneck from the dropdown below.
             Which resource had <span style={{ color: "#FF5555", fontWeight: 600 }}>CRITICAL</span> status?
           </span>
@@ -1018,17 +1019,17 @@ Swap:         8.0Gi       0B     8.0Gi`,
       {!checked && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           {!allInvestigated && (
-            <span style={{ color: "#556", fontSize: 13, fontStyle: "italic" }}>Investigate all 4 resources before diagnosing...</span>
+            <span style={{ color: "#556", fontSize: 10, fontStyle: "italic" }}>Investigate all 4 resources before diagnosing...</span>
           )}
           {allInvestigated && (
             <>
-              <span style={{ color: "#AAB4BE", fontSize: 13, fontWeight: 600 }}>Diagnosis:</span>
+              <span style={{ color: "#AAB4BE", fontSize: 10, fontWeight: 600 }}>Diagnosis:</span>
               <select
                 value={diagnosis || ""}
                 onChange={(e) => setDiagnosis(e.target.value)}
                 style={{
                   padding: "8px 14px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(80,200,255,0.3)",
-                  borderRadius: 6, color: "#E8ECF0", fontSize: 14,
+                  borderRadius: 6, color: "#E8ECF0", fontSize: 11,
                   fontFamily: "'JetBrains Mono', monospace",
                 }}
               >
@@ -1040,7 +1041,7 @@ Swap:         8.0Gi       0B     8.0Gi`,
               <button onClick={check} disabled={!diagnosis} style={{
                 padding: "8px 22px", background: diagnosis ? "#50C8FF" : "rgba(80,200,255,0.15)",
                 border: "none", borderRadius: 6, color: diagnosis ? "#1A1A2E" : "#556",
-                fontWeight: 700, fontSize: 14, cursor: diagnosis ? "pointer" : "not-allowed",
+                fontWeight: 700, fontSize: 11, cursor: diagnosis ? "pointer" : "not-allowed",
               }}>Diagnose</button>
             </>
           )}
@@ -1056,23 +1057,23 @@ Swap:         8.0Gi       0B     8.0Gi`,
             <span style={{ color: diagnosis === s.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 700 }}>
               {diagnosis === s.answer ? "✓ Correct diagnosis!" : `✗ The bottleneck is ${s.answer}, not ${diagnosis}.`}
             </span>
-            <p style={{ color: "#C8CCD0", margin: "8px 0 0 0", fontSize: 14, lineHeight: 1.6 }}>{s.explanation}</p>
+            <p style={{ color: "#C8CCD0", margin: "8px 0 0 0", fontSize: 11, lineHeight: 1.6 }}>{s.explanation}</p>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {scenarioIdx < scenarios.length - 1 && (
               <button onClick={() => jumpTo(scenarioIdx + 1)} style={{
                 padding: "8px 22px", background: "#50C8FF", border: "none", borderRadius: 6,
-                color: "#1A1A2E", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                color: "#1A1A2E", fontWeight: 700, fontSize: 11, cursor: "pointer",
               }}>Next Scenario →</button>
             )}
             <button onClick={() => jumpTo(scenarioIdx)} style={{
               padding: "8px 22px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)",
-              borderRadius: 6, color: "#AAB4BE", fontWeight: 600, fontSize: 14, cursor: "pointer",
+              borderRadius: 6, color: "#AAB4BE", fontWeight: 600, fontSize: 11, cursor: "pointer",
             }}>Retry This Scenario</button>
             {Object.keys(scenarioResults).length === scenarios.length && (
               <button onClick={() => { setScenarioResults({}); setScore(0); setTotal(0); jumpTo(0); }} style={{
                 padding: "8px 22px", background: "rgba(255,168,50,0.12)", border: "1px solid rgba(255,168,50,0.35)",
-                borderRadius: 6, color: "#FFA832", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                borderRadius: 6, color: "#FFA832", fontWeight: 700, fontSize: 11, cursor: "pointer",
               }}>Reset All</button>
             )}
           </div>
@@ -1114,18 +1115,18 @@ function PathResolver({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ PATH RESOLVER — Challenge {chIdx + 1}/{challenges.length}
         </div>
         <button onClick={() => { setChIdx(0); setUserAnswer(""); setRevealed(false); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>
       </div>
-      <p style={{ color: "#C8CCD0", margin: "0 0 6px 0", fontSize: 15 }}>
+      <p style={{ color: "#C8CCD0", margin: "0 0 6px 0", fontSize: 11 }}>
         You are in <Code>{ch.cwd}</Code>. Where does <Code>{ch.path}</Code> resolve to?
       </p>
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12, flexWrap: "wrap" }}>
@@ -1137,7 +1138,7 @@ function PathResolver({ onComplete }) {
           style={{
             flex: 1, minWidth: 200, padding: "10px 14px", background: "rgba(0,0,0,0.3)",
             border: `1px solid ${revealed ? (isCorrect ? "rgba(122,232,122,0.4)" : "rgba(255,107,107,0.4)") : "rgba(80,200,255,0.2)"}`,
-            borderRadius: 6, color: "#E8E8F0", fontSize: 15,
+            borderRadius: 6, color: "#E8E8F0", fontSize: 11,
             fontFamily: "'JetBrains Mono', monospace",
           }}
           onKeyDown={(e) => e.key === "Enter" && !revealed && handleCheck()}
@@ -1146,18 +1147,18 @@ function PathResolver({ onComplete }) {
           <button onClick={handleCheck} disabled={!userAnswer.trim()} style={{
             padding: "10px 20px", background: userAnswer.trim() ? "#50C8FF" : "rgba(80,200,255,0.15)",
             border: "none", borderRadius: 6, color: userAnswer.trim() ? "#1A1A2E" : "#556",
-            fontWeight: 700, fontSize: 14, cursor: userAnswer.trim() ? "pointer" : "not-allowed",
+            fontWeight: 700, fontSize: 11, cursor: userAnswer.trim() ? "pointer" : "not-allowed",
           }}>Resolve</button>
         )}
       </div>
       {revealed && (
         <div style={{ marginTop: 14 }}>
           <div style={{
-            color: isCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 700, fontSize: 14, marginBottom: 8,
+            color: isCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 700, fontSize: 11, marginBottom: 8,
           }}>
             {isCorrect ? "✓ Correct!" : `✗ The answer is ${finalPath}`}
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4, fontSize: 14 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4, fontSize: 11 }}>
             <span style={{ color: "#889" }}>Step by step:</span>
             <Code>{ch.cwd}</Code>
             {ch.steps.map((step, i) => (
@@ -1170,7 +1171,7 @@ function PathResolver({ onComplete }) {
           {chIdx < challenges.length - 1 && (
             <button onClick={next} style={{
               marginTop: 12, padding: "8px 22px", background: "#50C8FF", border: "none", borderRadius: 6,
-              color: "#1A1A2E", fontWeight: 700, fontSize: 14, cursor: "pointer",
+              color: "#1A1A2E", fontWeight: 700, fontSize: 11, cursor: "pointer",
             }}>Next Challenge →</button>
           )}
         </div>
@@ -1209,19 +1210,19 @@ function OctalFlipCards() {
                 transform: isRevealed ? "none" : "none",
               }}
             >
-              <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 14, marginBottom: 6 }}>
+              <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 11, marginBottom: 6 }}>
                 {card.perm} ({card.letter})
               </div>
               {isRevealed ? (
                 <div style={{
-                  color: "#E8ECF0", fontSize: 28, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                  color: "#E8ECF0", fontSize: 18, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
                   animation: "fadeInUp 0.3s ease-out",
                 }}>
                   {card.value}
                 </div>
               ) : (
                 <div style={{
-                  color: "#50C8FF", fontSize: 14, opacity: 0.5,
+                  color: "#50C8FF", fontSize: 11, opacity: 0.5,
                   fontFamily: "'Chakra Petch', sans-serif", letterSpacing: "0.5px",
                 }}>
                   tap to reveal
@@ -1235,7 +1236,7 @@ function OctalFlipCards() {
         <div style={{
           marginTop: 10, padding: "8px 14px", borderRadius: 6,
           background: "rgba(122,232,122,0.06)", border: "1px solid rgba(122,232,122,0.15)",
-          color: "#7AE87A", fontSize: 13, fontWeight: 600, textAlign: "center",
+          color: "#7AE87A", fontSize: 10, fontWeight: 600, textAlign: "center",
           animation: "fadeInUp 0.3s ease-out",
         }}>
           r + w + x = 4 + 2 + 1 = 7 (full access)
@@ -1248,7 +1249,7 @@ function OctalFlipCards() {
             style={{
               padding: "6px 14px", background: "transparent",
               border: "1px solid rgba(80,200,255,0.35)", borderRadius: 6,
-              color: "#9CD8FF", fontWeight: 600, fontSize: 13, cursor: "pointer",
+              color: "#9CD8FF", fontWeight: 600, fontSize: 10, cursor: "pointer",
             }}
           >↻ Reset</button>
         </div>
@@ -1339,23 +1340,23 @@ function PermissionBuilder({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ PERMISSION LAB
         </div>
         <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
           {(["decode", "encode", "octal"] as const).map((m) => (
             <button key={m} onClick={() => setMode(m)} style={{
-              padding: "4px 14px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
+              padding: "4px 14px", borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: "pointer",
               background: mode === m ? "rgba(80,200,255,0.15)" : "rgba(255,255,255,0.04)",
               border: mode === m ? "1px solid rgba(80,200,255,0.4)" : "1px solid rgba(255,255,255,0.08)",
               color: mode === m ? "#50C8FF" : "#778899",
             }}>{modeLabels[m]}</button>
           ))}
           <button onClick={() => { setBits([true, true, true, true, false, true, true, false, false]); setUserInput(""); setChecked(false); }} style={{
-            padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+            padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
             background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778", marginLeft: 4,
           }}>↻ Reset</button>
         </div>
@@ -1364,10 +1365,10 @@ function PermissionBuilder({ onComplete }) {
       {/* ── DECODE MODE: toggle bits, see English + live octal ── */}
       {mode === "decode" && (
         <>
-          <p style={{ color: "#889", fontSize: 14, margin: "0 0 12px 0" }}>Toggle permission bits and see the meaning and octal value update in real time.</p>
+          <p style={{ color: "#889", fontSize: 11, margin: "0 0 12px 0" }}>Toggle permission bits and see the meaning and octal value update in real time.</p>
           <div style={{
             background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: 16,
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 22, textAlign: "center",
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 15, textAlign: "center",
             border: "1px solid rgba(80,200,255,0.1)", marginBottom: 14,
           }}>
             {/* rwx string display */}
@@ -1386,11 +1387,11 @@ function PermissionBuilder({ onComplete }) {
               ))}
             </div>
             {/* Live octal readout */}
-            <div style={{ marginTop: 8, fontSize: 14, color: "#889" }}>
+            <div style={{ marginTop: 8, fontSize: 11, color: "#889" }}>
               <span style={{ color: "#556", marginRight: 6 }}>chmod</span>
               {[0, 1, 2].map((gi) => (
                 <span key={gi} style={{
-                  color: groupColors[gi], fontWeight: 700, fontSize: 18,
+                  color: groupColors[gi], fontWeight: 700, fontSize: 13,
                   transition: "all 0.15s",
                 }}>
                   {octalDigit(gi * 3)}
@@ -1405,13 +1406,13 @@ function PermissionBuilder({ onComplete }) {
                 border: `1px solid ${groupColors[li]}33`,
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                  <span style={{ color: groupColors[li], fontWeight: 700, fontSize: 13 }}>{label}</span>
-                  <span style={{ color: groupColors[li], fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 700, opacity: 0.7 }}>{octalDigit(li * 3)}</span>
+                  <span style={{ color: groupColors[li], fontWeight: 700, fontSize: 10 }}>{label}</span>
+                  <span style={{ color: groupColors[li], fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{octalDigit(li * 3)}</span>
                 </div>
-                <div style={{ color: "#C8CCD0", fontSize: 13 }}>
+                <div style={{ color: "#C8CCD0", fontSize: 10 }}>
                   {bits[li * 3] ? "4" : "0"} + {bits[li * 3 + 1] ? "2" : "0"} + {bits[li * 3 + 2] ? "1" : "0"} = {octalDigit(li * 3)}
                 </div>
-                <div style={{ color: "#889", fontSize: 12, marginTop: 2 }}>Can {describe(li * 3)}</div>
+                <div style={{ color: "#889", fontSize: 10, marginTop: 2 }}>Can {describe(li * 3)}</div>
               </div>
             ))}
           </div>
@@ -1421,8 +1422,8 @@ function PermissionBuilder({ onComplete }) {
       {/* ── ENCODE MODE: English → rwx string ── */}
       {mode === "encode" && challenge && (
         <>
-          <p style={{ color: "#889", fontSize: 14, margin: "0 0 6px 0" }}>Write the 9-character permission string for this description:</p>
-          <p style={{ color: "#E8ECF0", fontSize: 15, margin: "0 0 14px 0", lineHeight: 1.6 }}>{challenge.desc}</p>
+          <p style={{ color: "#889", fontSize: 11, margin: "0 0 6px 0" }}>Write the 9-character permission string for this description:</p>
+          <p style={{ color: "#E8ECF0", fontSize: 11, margin: "0 0 14px 0", lineHeight: 1.6 }}>{challenge.desc}</p>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <input
               value={userInput}
@@ -1433,7 +1434,7 @@ function PermissionBuilder({ onComplete }) {
               style={{
                 padding: "10px 14px", background: "rgba(0,0,0,0.3)",
                 border: `1px solid ${checked ? (userInput === challenge.answer ? "rgba(122,232,122,0.4)" : "rgba(255,107,107,0.4)") : "rgba(80,200,255,0.2)"}`,
-                borderRadius: 6, color: "#E8E8F0", fontSize: 18, width: 140,
+                borderRadius: 6, color: "#E8E8F0", fontSize: 13, width: 140,
                 fontFamily: "'JetBrains Mono', monospace", letterSpacing: 2, textAlign: "center",
               }}
               onKeyDown={(e) => e.key === "Enter" && !checked && userInput.length === inputLength && checkAnswer()}
@@ -1442,12 +1443,12 @@ function PermissionBuilder({ onComplete }) {
               <button onClick={checkAnswer} disabled={userInput.length !== inputLength} style={{
                 padding: "10px 20px", background: userInput.length === inputLength ? "#50C8FF" : "rgba(80,200,255,0.15)",
                 border: "none", borderRadius: 6, color: userInput.length === inputLength ? "#1A1A2E" : "#556",
-                fontWeight: 700, fontSize: 14, cursor: userInput.length === inputLength ? "pointer" : "not-allowed",
+                fontWeight: 700, fontSize: 11, cursor: userInput.length === inputLength ? "pointer" : "not-allowed",
               }}>Check</button>
             )}
           </div>
           {checked && (
-            <div style={{ marginTop: 10, color: userInput === challenge.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 14 }}>
+            <div style={{ marginTop: 10, color: userInput === challenge.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 11 }}>
               {userInput === challenge.answer ? "✓ Perfect!" : `✗ Correct answer: ${challenge.answer}`}
             </div>
           )}
@@ -1457,10 +1458,10 @@ function PermissionBuilder({ onComplete }) {
       {/* ── OCTAL MODE: rwx string → 3-digit octal ── */}
       {mode === "octal" && challenge && (
         <>
-          <p style={{ color: "#889", fontSize: 14, margin: "0 0 6px 0" }}>Convert this permission string to its 3-digit octal number:</p>
+          <p style={{ color: "#889", fontSize: 11, margin: "0 0 6px 0" }}>Convert this permission string to its 3-digit octal number:</p>
           <div style={{
             background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: "12px 20px", marginBottom: 14,
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 24, textAlign: "center",
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 16, textAlign: "center",
             border: "1px solid rgba(80,200,255,0.1)",
           }}>
             {challenge.desc.split("").map((ch, i) => (
@@ -1472,7 +1473,7 @@ function PermissionBuilder({ onComplete }) {
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ color: "#556", fontFamily: "'JetBrains Mono', monospace", fontSize: 16 }}>chmod</span>
+              <span style={{ color: "#556", fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>chmod</span>
               <input
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value.replace(/[^0-7]/g, ""))}
@@ -1482,7 +1483,7 @@ function PermissionBuilder({ onComplete }) {
                 style={{
                   padding: "10px 14px", background: "rgba(0,0,0,0.3)",
                   border: `1px solid ${checked ? (userInput === challenge.answer ? "rgba(122,232,122,0.4)" : "rgba(255,107,107,0.4)") : "rgba(80,200,255,0.2)"}`,
-                  borderRadius: 6, color: "#E8E8F0", fontSize: 22, width: 80,
+                  borderRadius: 6, color: "#E8E8F0", fontSize: 15, width: 80,
                   fontFamily: "'JetBrains Mono', monospace", letterSpacing: 4, textAlign: "center",
                 }}
                 onKeyDown={(e) => e.key === "Enter" && !checked && userInput.length === 3 && checkAnswer()}
@@ -1492,27 +1493,27 @@ function PermissionBuilder({ onComplete }) {
               <button onClick={checkAnswer} disabled={userInput.length !== 3} style={{
                 padding: "10px 20px", background: userInput.length === 3 ? "#50C8FF" : "rgba(80,200,255,0.15)",
                 border: "none", borderRadius: 6, color: userInput.length === 3 ? "#1A1A2E" : "#556",
-                fontWeight: 700, fontSize: 14, cursor: userInput.length === 3 ? "pointer" : "not-allowed",
+                fontWeight: 700, fontSize: 11, cursor: userInput.length === 3 ? "pointer" : "not-allowed",
               }}>Check</button>
             )}
             {checked && (
               <button onClick={nextOctalChallenge} style={{
                 padding: "10px 20px", background: "rgba(80,200,255,0.1)",
                 border: "1px solid rgba(80,200,255,0.3)", borderRadius: 6, color: "#50C8FF",
-                fontWeight: 700, fontSize: 14, cursor: "pointer",
+                fontWeight: 700, fontSize: 11, cursor: "pointer",
               }}>Next →</button>
             )}
           </div>
           {checked && (
             <div style={{ marginTop: 10 }}>
-              <div style={{ color: userInput === challenge.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 14 }}>
+              <div style={{ color: userInput === challenge.answer ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 11 }}>
                 {userInput === challenge.answer ? "✓ Perfect!" : `✗ Correct answer: ${challenge.answer}`}
               </div>
               {/* Show the breakdown */}
               <div style={{
                 marginTop: 8, padding: "10px 14px", borderRadius: 6,
                 background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)",
-                fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#C8CCD0",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#C8CCD0",
               }}>
                 {[0, 1, 2].map((gi) => {
                   const g = challenge.desc.slice(gi * 3, gi * 3 + 3);
@@ -1562,14 +1563,14 @@ function SignalSimulator({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ SIGNAL SIMULATOR — Send a signal to a running database process
         </div>
         {signal && <button onClick={() => { setSignal(null); setResult(null); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>}
       </div>
@@ -1583,8 +1584,8 @@ function SignalSimulator({ onComplete }) {
           background: !signal ? "#7AE87A" : result?.outcome === "graceful" ? "#556" : "#FF4444",
           boxShadow: !signal ? "0 0 8px rgba(122,232,122,0.5)" : "none",
         }} />
-        <span style={{ color: "#C8D8E8", fontSize: 15 }}>PID 1842 — postgres</span>
-        <span style={{ color: "#667", fontSize: 13, marginLeft: "auto" }}>
+        <span style={{ color: "#C8D8E8", fontSize: 11 }}>PID 1842 — postgres</span>
+        <span style={{ color: "#667", fontSize: 10, marginLeft: "auto" }}>
           {!signal ? "STATE: running — writing transaction" : result?.outcome === "graceful" ? "STATE: exited (0)" : "STATE: killed (9)"}
         </span>
       </div>
@@ -1592,11 +1593,11 @@ function SignalSimulator({ onComplete }) {
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={() => sendSignal("SIGTERM")} style={{
             padding: "10px 24px", background: "rgba(255,168,50,0.15)", border: "1px solid rgba(255,168,50,0.4)",
-            borderRadius: 6, color: "#FFA832", fontWeight: 700, fontSize: 14, cursor: "pointer",
+            borderRadius: 6, color: "#FFA832", fontWeight: 700, fontSize: 11, cursor: "pointer",
           }}>Send SIGTERM (15)</button>
           <button onClick={() => sendSignal("SIGKILL")} style={{
             padding: "10px 24px", background: "rgba(255,68,68,0.15)", border: "1px solid rgba(255,68,68,0.4)",
-            borderRadius: 6, color: "#FF4444", fontWeight: 700, fontSize: 14, cursor: "pointer",
+            borderRadius: 6, color: "#FF4444", fontWeight: 700, fontSize: 11, cursor: "pointer",
           }}>Send SIGKILL (9)</button>
         </div>
       )}
@@ -1606,10 +1607,10 @@ function SignalSimulator({ onComplete }) {
           background: result.outcome === "graceful" ? "rgba(122,232,122,0.06)" : "rgba(255,68,68,0.06)",
           border: `1px solid ${result.outcome === "graceful" ? "rgba(122,232,122,0.2)" : "rgba(255,68,68,0.2)"}`,
         }}>
-          <p style={{ color: "#C8CCD0", margin: 0, fontSize: 14, lineHeight: 1.7 }}>{result.text}</p>
+          <p style={{ color: "#C8CCD0", margin: 0, fontSize: 11, lineHeight: 1.6 }}>{result.text}</p>
           <button onClick={reset} style={{
             marginTop: 12, padding: "6px 18px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)",
-            borderRadius: 6, color: "#889", fontWeight: 600, fontSize: 13, cursor: "pointer",
+            borderRadius: 6, color: "#889", fontWeight: 600, fontSize: 10, cursor: "pointer",
           }}>Try the other signal</button>
         </div>
       )}
@@ -1639,18 +1640,18 @@ function RackDiagnosis({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ RACK FAILURE DIAGNOSIS
         </div>
         {checked && <button onClick={() => { setSelected(null); setChecked(false); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>}
       </div>
-      <p style={{ color: "#E8ECF0", fontSize: 15, margin: "0 0 16px 0", lineHeight: 1.6 }}>
+      <p style={{ color: "#E8ECF0", fontSize: 11, margin: "0 0 16px 0", lineHeight: 1.6 }}>
         A rack of 8 servers goes completely unreachable at the same time. All 8 failing independently at the exact same moment is nearly impossible. <strong>What shared infrastructure component failed?</strong>
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 14 }}>
@@ -1661,7 +1662,7 @@ function RackDiagnosis({ onComplete }) {
             border: `1px solid ${selected === c.id ? "rgba(80,200,255,0.4)" : "rgba(255,255,255,0.06)"}`,
             transition: "all 0.2s",
           }}>
-            <span style={{ color: selected === c.id ? "#50C8FF" : "#AAB4BE", fontWeight: 600, fontSize: 14 }}>{c.name}</span>
+            <span style={{ color: selected === c.id ? "#50C8FF" : "#AAB4BE", fontWeight: 600, fontSize: 11 }}>{c.name}</span>
           </button>
         ))}
       </div>
@@ -1669,7 +1670,7 @@ function RackDiagnosis({ onComplete }) {
         <button onClick={check} disabled={!selected} style={{
           padding: "8px 22px", background: selected ? "#50C8FF" : "rgba(80,200,255,0.15)",
           border: "none", borderRadius: 6, color: selected ? "#1A1A2E" : "#556",
-          fontWeight: 700, fontSize: 14, cursor: selected ? "pointer" : "not-allowed",
+          fontWeight: 700, fontSize: 11, cursor: selected ? "pointer" : "not-allowed",
         }}>Diagnose</button>
       )}
       {checked && comp && (
@@ -1681,8 +1682,8 @@ function RackDiagnosis({ onComplete }) {
           <span style={{ color: comp.correct ? "#7AE87A" : "#FF6B6B", fontWeight: 700 }}>
             {comp.correct ? "✓ Correct — shared infrastructure!" : "✗ Not a shared component."}
           </span>
-          <p style={{ color: "#C8CCD0", margin: "8px 0 0 0", fontSize: 14, lineHeight: 1.6 }}>{comp.explanation}</p>
-          <p style={{ color: "#889", margin: "10px 0 0 0", fontSize: 13, fontStyle: "italic" }}>
+          <p style={{ color: "#C8CCD0", margin: "8px 0 0 0", fontSize: 11, lineHeight: 1.6 }}>{comp.explanation}</p>
+          <p style={{ color: "#889", margin: "10px 0 0 0", fontSize: 10, fontStyle: "italic" }}>
             The key insight: simultaneous failures point to shared dependencies — ToR switch (network), PDU (power), or cooling. Never to individual server hardware.
           </p>
         </div>
@@ -1721,14 +1722,14 @@ function FlashcardRapidFire() {
     return (
       <div style={{
         background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-        borderRadius: 10, padding: 30, margin: "20px 0", textAlign: "center",
+        borderRadius: 10, padding: 30, margin: "14px 0", textAlign: "center",
       }}>
-        <div style={{ fontSize: 40, marginBottom: 10 }}>✦</div>
-        <div style={{ color: "#E8ECF0", fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Complete!</div>
-        <div style={{ color: "#7AE87A", fontSize: 18, fontWeight: 600 }}>{score}/{cards.length} self-rated correct</div>
+        <div style={{ fontSize: 24, marginBottom: 10 }}>✦</div>
+        <div style={{ color: "#E8ECF0", fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Complete!</div>
+        <div style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{score}/{cards.length} self-rated correct</div>
         <button onClick={() => { setIdx(0); setFlipped(false); setUserAnswer(""); setScore(0); setDone(false); }} style={{
           marginTop: 16, padding: "10px 28px", background: "#50C8FF", border: "none", borderRadius: 6,
-          color: "#1A1A2E", fontWeight: 700, fontSize: 15, cursor: "pointer",
+          color: "#1A1A2E", fontWeight: 700, fontSize: 11, cursor: "pointer",
         }}>Shuffle &amp; Retry</button>
       </div>
     );
@@ -1737,14 +1738,14 @@ function FlashcardRapidFire() {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ RAPID-FIRE FLASHCARDS — {idx + 1}/{cards.length}
         </div>
         <button onClick={() => { setIdx(0); setFlipped(false); setUserAnswer(""); setScore(0); setDone(false); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>
       </div>
@@ -1756,8 +1757,8 @@ function FlashcardRapidFire() {
         border: "1px solid rgba(80,200,255,0.15)", textAlign: "center", minHeight: 120,
         display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
       }}>
-        <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{cards[idx].term}</div>
-        <div style={{ color: "#667", fontSize: 14, marginBottom: 12 }}>What is this?</div>
+        <div style={{ color: "#50C8FF", fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{cards[idx].term}</div>
+        <div style={{ color: "#667", fontSize: 11, marginBottom: 12 }}>What is this?</div>
         {!flipped ? (
           <>
             <textarea
@@ -1768,7 +1769,7 @@ function FlashcardRapidFire() {
               style={{
                 width: "100%", maxWidth: 500, minHeight: 60, background: "rgba(255,255,255,0.04)",
                 border: "1px solid rgba(80,200,255,0.15)", borderRadius: 6, padding: 10,
-                color: "#E8E8F0", fontSize: 15, fontFamily: "inherit", resize: "vertical",
+                color: "#E8E8F0", fontSize: 11, fontFamily: "inherit", resize: "vertical",
                 textAlign: "center", boxSizing: "border-box",
               }}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); flip(); } }}
@@ -1777,7 +1778,7 @@ function FlashcardRapidFire() {
               marginTop: 10, padding: "8px 28px",
               background: "#50C8FF",
               border: "none", borderRadius: 6, color: "#1A1A2E",
-              fontWeight: 700, fontSize: 14, cursor: "pointer",
+              fontWeight: 700, fontSize: 11, cursor: "pointer",
             }}>Flip</button>
           </>
         ) : (
@@ -1786,16 +1787,16 @@ function FlashcardRapidFire() {
               padding: "14px 20px", background: "rgba(80,200,255,0.08)", borderRadius: 8,
               border: "1px solid rgba(80,200,255,0.2)", maxWidth: 500, width: "100%",
             }}>
-              <div style={{ color: "#E8ECF0", fontSize: 15, lineHeight: 1.6 }}>{cards[idx].def}</div>
+              <div style={{ color: "#E8ECF0", fontSize: 11, lineHeight: 1.6 }}>{cards[idx].def}</div>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
               <button onClick={() => rate(true)} style={{
                 padding: "8px 24px", background: "rgba(122,232,122,0.15)", border: "1px solid rgba(122,232,122,0.4)",
-                borderRadius: 6, color: "#7AE87A", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                borderRadius: 6, color: "#7AE87A", fontWeight: 700, fontSize: 11, cursor: "pointer",
               }}>Got It ✓</button>
               <button onClick={() => rate(false)} style={{
                 padding: "8px 24px", background: "rgba(255,107,107,0.15)", border: "1px solid rgba(255,107,107,0.4)",
-                borderRadius: 6, color: "#FF6B6B", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                borderRadius: 6, color: "#FF6B6B", fontWeight: 700, fontSize: 11, cursor: "pointer",
               }}>Missed It ✗</button>
             </div>
           </>
@@ -1901,7 +1902,7 @@ function FilesystemTree() {
           onClick={() => { if (hasChildren) toggle(fullPath); setSelectedDesc({ name: fullPath || "/", desc: node.desc }); }}
           style={{
             display: "flex", alignItems: "center", gap: 0, padding: "2px 0",
-            cursor: "pointer", fontSize: 13, whiteSpace: "pre",
+            cursor: "pointer", fontSize: 10, whiteSpace: "pre",
             fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
             background: selectedDesc?.name === (fullPath || "/") ? "rgba(80,200,255,0.08)" : "transparent",
             borderRadius: 3,
@@ -1923,9 +1924,9 @@ function FilesystemTree() {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 10, letterSpacing: "0.5px" }}>
+      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, marginBottom: 10, letterSpacing: "0.5px" }}>
         ▸ FILESYSTEM EXPLORER
       </div>
 
@@ -1942,14 +1943,14 @@ function FilesystemTree() {
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FF5F57" }} />
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#FEBC2E" }} />
           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#28C840" }} />
-          <span style={{ fontFamily: "monospace", fontSize: 11, color: "#556", marginLeft: 8 }}>ops@srv-01:~$</span>
+          <span style={{ fontFamily: "monospace", fontSize: 10, color: "#556", marginLeft: 8 }}>ops@srv-01:~$</span>
         </div>
 
         <div style={{ padding: "12px 14px" }}>
           {/* Phase: prompt */}
           {phase === "prompt" && (
             <div>
-              <p style={{ color: "#A0B0C0", fontSize: 14, margin: "0 0 10px 0", lineHeight: 1.6,
+              <p style={{ color: "#A0B0C0", fontSize: 11, margin: "0 0 10px 0", lineHeight: 1.6,
                 fontFamily: "'JetBrains Mono', monospace",
               }}>
                 <span style={{ color: "#FFA832" }}># </span>
@@ -1963,13 +1964,13 @@ function FilesystemTree() {
           {/* Phase: hint */}
           {phase === "hint" && cmdHistory.length === 0 && (
             <div style={{ marginBottom: 10 }}>
-              <p style={{ color: "#A0B0C0", fontSize: 13, margin: "0 0 6px 0",
+              <p style={{ color: "#A0B0C0", fontSize: 10, margin: "0 0 6px 0",
                 fontFamily: "'JetBrains Mono', monospace",
               }}>
                 <span style={{ color: "#FFA832" }}># </span>
                 The command is <span style={{ color: "#50C8FF" }}>tree</span>. Common flags:
               </p>
-              <p style={{ color: "#778899", fontSize: 13, margin: "0 0 0 0",
+              <p style={{ color: "#778899", fontSize: 10, margin: "0 0 0 0",
                 fontFamily: "'JetBrains Mono', monospace", lineHeight: 1.8,
               }}>
                 <span style={{ color: "#7AE87A" }}>tree /</span>          — show tree from root<br/>
@@ -1982,7 +1983,7 @@ function FilesystemTree() {
           {/* Command history */}
           {cmdHistory.map((entry, i) => (
             <div key={i} style={{ marginBottom: 8 }}>
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}>
                 <span style={{ color: "#7AE87A" }}>ops@srv-01</span>
                 <span style={{ color: "#556" }}>:</span>
                 <span style={{ color: "#50C8FF" }}>~</span>
@@ -1990,17 +1991,17 @@ function FilesystemTree() {
                 <span style={{ color: "#E8ECF0" }}>{entry.cmd}</span>
               </div>
               {entry.type === "error" && (
-                <div style={{ color: "#FF6B6B", fontSize: 13, fontFamily: "monospace", marginTop: 2 }}>{entry.msg}</div>
+                <div style={{ color: "#FF6B6B", fontSize: 10, fontFamily: "monospace", marginTop: 2 }}>{entry.msg}</div>
               )}
               {entry.type === "partial" && (
-                <div style={{ color: "#FFA832", fontSize: 13, fontFamily: "monospace", marginTop: 2 }}>{entry.msg}</div>
+                <div style={{ color: "#FFA832", fontSize: 10, fontFamily: "monospace", marginTop: 2 }}>{entry.msg}</div>
               )}
             </div>
           ))}
 
           {/* Input line */}
           {phase !== "tree" && (
-            <div style={{ display: "flex", alignItems: "center", gap: 0, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 0, fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}>
               <span style={{ color: "#7AE87A" }}>ops@srv-01</span>
               <span style={{ color: "#556" }}>:</span>
               <span style={{ color: "#50C8FF" }}>~</span>
@@ -2014,7 +2015,7 @@ function FilesystemTree() {
                 autoFocus
                 style={{
                   flex: 1, background: "transparent", border: "none", outline: "none",
-                  color: "#E8ECF0", fontSize: 13, fontFamily: "'JetBrains Mono', monospace",
+                  color: "#E8ECF0", fontSize: 10, fontFamily: "'JetBrains Mono', monospace",
                   padding: 0, margin: 0,
                 }}
               />
@@ -2026,14 +2027,14 @@ function FilesystemTree() {
             <button onClick={handleHint} style={{
               marginTop: 10, padding: "5px 14px", background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.1)", borderRadius: 5,
-              color: "#667", fontSize: 12, cursor: "pointer", fontFamily: "monospace",
+              color: "#667", fontSize: 10, cursor: "pointer", fontFamily: "monospace",
             }}>Need a hint?</button>
           )}
 
           {/* Success: show the command that worked */}
           {phase === "tree" && (
             <div>
-              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, marginBottom: 8 }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, marginBottom: 8 }}>
                 <span style={{ color: "#7AE87A" }}>ops@srv-01</span>
                 <span style={{ color: "#556" }}>:</span>
                 <span style={{ color: "#50C8FF" }}>~</span>
@@ -2059,13 +2060,13 @@ function FilesystemTree() {
             <div style={{ flex: "1 1 200px", minHeight: 60, display: "flex", alignItems: "flex-start" }}>
               {selectedDesc ? (
                 <div style={{ padding: 14, background: "rgba(80,200,255,0.06)", borderRadius: 8, border: "1px solid rgba(80,200,255,0.15)", width: "100%" }}>
-                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#50C8FF", marginBottom: 6, fontWeight: 600 }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#50C8FF", marginBottom: 6, fontWeight: 600 }}>
                     {selectedDesc.name}
                   </div>
-                  <p style={{ color: "#E8ECF0", margin: 0, fontSize: 14, lineHeight: 1.6 }}>{selectedDesc.desc}</p>
+                  <p style={{ color: "#E8ECF0", margin: 0, fontSize: 11, lineHeight: 1.6 }}>{selectedDesc.desc}</p>
                 </div>
               ) : (
-                <p style={{ color: "#556", fontSize: 14, fontStyle: "italic" }}>Click any node to learn what it's for.</p>
+                <p style={{ color: "#556", fontSize: 11, fontStyle: "italic" }}>Click any node to learn what it's for.</p>
               )}
             </div>
           </div>
@@ -2073,8 +2074,8 @@ function FilesystemTree() {
             marginTop: 12, padding: "10px 14px", borderRadius: 6,
             background: "rgba(122,232,122,0.06)", borderLeft: "3px solid #4A9A5A",
           }}>
-            <span style={{ color: "#7AE87A", fontWeight: 700, fontSize: 12 }}>COMMAND LEARNED: </span>
-            <span style={{ color: "#C8CCD0", fontSize: 13 }}>
+            <span style={{ color: "#7AE87A", fontWeight: 700, fontSize: 10 }}>COMMAND LEARNED: </span>
+            <span style={{ color: "#C8CCD0", fontSize: 10 }}>
               <code style={{ color: "#7DD8FF", background: "rgba(80,200,255,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "monospace" }}>tree</code> displays directory structures visually. Useful flags:
               <code style={{ color: "#7DD8FF", background: "rgba(80,200,255,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "monospace", marginLeft: 4 }}>-L N</code> limits depth,
               <code style={{ color: "#7DD8FF", background: "rgba(80,200,255,0.1)", padding: "1px 5px", borderRadius: 3, fontFamily: "monospace", marginLeft: 4 }}>-d</code> directories only,
@@ -2093,7 +2094,7 @@ function FilesystemTree() {
               style={{
                 padding: "6px 14px", background: "transparent",
                 border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6,
-                color: "#889", fontWeight: 600, fontSize: 12, cursor: "pointer",
+                color: "#889", fontWeight: 600, fontSize: 10, cursor: "pointer",
               }}
             >↻ Reset</button>
           </div>
@@ -2140,23 +2141,23 @@ function FlipCardChallenge({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ FLIP CARD CHALLENGE — Guess the advantage from the clue, then flip to reveal
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {allFlipped && <span style={{ color: "#7AE87A", fontSize: 13, fontWeight: 600 }}>{correctCount}/{cards.length} correct</span>}
+          {allFlipped && <span style={{ color: "#7AE87A", fontSize: 10, fontWeight: 600 }}>{correctCount}/{cards.length} correct</span>}
           {flipped.size > 0 && (
             <button onClick={handleReset} style={{
-              padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+              padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
               background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
             }}>↻ Reset</button>
           )}
         </div>
       </div>
-      <p style={{ color: "#778", fontSize: 14, margin: "0 0 14px 0" }}>Each card shows a clue. Pick which Linux advantage it represents, then flip.</p>
+      <p style={{ color: "#778", fontSize: 11, margin: "0 0 14px 0" }}>Each card shows a clue. Pick which Linux advantage it represents, then flip.</p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
         {cards.map((card, i) => {
           const isFlipped = flipped.has(i);
@@ -2172,8 +2173,8 @@ function FlipCardChallenge({ onComplete }) {
             }}>
               {!isFlipped ? (
                 <div style={{ padding: "12px 10px", flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ color: "#E8ECF0", fontSize: 22, fontWeight: 800, lineHeight: 1 }}>{card.clue}</div>
-                  <div style={{ color: "#667", fontSize: 11, marginTop: 3, marginBottom: 10 }}>{card.clueLabel}</div>
+                  <div style={{ color: "#E8ECF0", fontSize: 15, fontWeight: 800, lineHeight: 1 }}>{card.clue}</div>
+                  <div style={{ color: "#667", fontSize: 10, marginTop: 3, marginBottom: 10 }}>{card.clueLabel}</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, width: "100%" }}>
                     {options.map((opt) => {
                       const pillColor = optionColors[opt] || "#778899";
@@ -2189,7 +2190,7 @@ function FlipCardChallenge({ onComplete }) {
                     })}
                   </div>
                   <button onClick={() => handleFlip(i)} disabled={!guess} style={{
-                    marginTop: 8, padding: "4px 14px", borderRadius: 5, fontSize: 11, fontWeight: 700, cursor: guess ? "pointer" : "not-allowed",
+                    marginTop: 8, padding: "4px 14px", borderRadius: 5, fontSize: 10, fontWeight: 700, cursor: guess ? "pointer" : "not-allowed",
                     background: guess ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
                     border: "1px solid rgba(255,255,255,0.12)", color: guess ? "#CCD" : "#445",
                     transition: "all 0.2s",
@@ -2198,14 +2199,14 @@ function FlipCardChallenge({ onComplete }) {
               ) : (
                 <div style={{ padding: "10px 10px", flex: 1, display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <div style={{ color: card.color, fontWeight: 800, fontSize: 14 }}>{card.advantage}</div>
+                    <div style={{ color: card.color, fontWeight: 800, fontSize: 11 }}>{card.advantage}</div>
                     <span style={{
                       fontSize: 10, padding: "1px 6px", borderRadius: 6,
                       background: wasCorrect ? "rgba(122,232,122,0.2)" : "rgba(255,107,107,0.2)",
                       color: wasCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 700,
                     }}>{wasCorrect ? "✓" : "✗"}</span>
                   </div>
-                  <p style={{ color: "#B8BCC0", fontSize: 12, lineHeight: 1.5, margin: 0, flex: 1 }}>{card.body}</p>
+                  <p style={{ color: "#B8BCC0", fontSize: 10, lineHeight: 1.5, margin: 0, flex: 1 }}>{card.body}</p>
                 </div>
               )}
             </div>
@@ -2281,7 +2282,7 @@ function DistroFamilySort({ onComplete }) {
       onDragStart={() => handleDragStart(card, source)}
       style={{
         display: "inline-flex", alignItems: "center", gap: 6,
-        padding: "6px 12px", borderRadius: 6, cursor: "grab", fontSize: 13, fontWeight: 600,
+        padding: "6px 12px", borderRadius: 6, cursor: "grab", fontSize: 10, fontWeight: 600,
         background: checked && source !== "pool"
           ? (card.family === source ? "rgba(122,232,122,0.1)" : "rgba(255,107,107,0.1)")
           : "rgba(255,255,255,0.05)",
@@ -2307,20 +2308,20 @@ function DistroFamilySort({ onComplete }) {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
-      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, marginBottom: 6, letterSpacing: "0.5px" }}>
+      <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, marginBottom: 6, letterSpacing: "0.5px" }}>
         ▸ SORT INTO FAMILIES — Drag each card into the correct distribution family
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
         <button onClick={() => { setPool([...allCards].sort(() => Math.random() - 0.5)); setRhel([]); setDebian([]); setChecked(false); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>
       </div>
       <div style={{ display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
         {Object.entries(typeColors).map(([type, color]) => (
-          <span key={type} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12 }}>
+          <span key={type} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10 }}>
             <span style={{ width: 8, height: 8, borderRadius: 2, background: color, display: "inline-block" }} />
             <span style={{ color: "#778" }}>{typeLabels[type]}</span>
           </span>
@@ -2338,7 +2339,7 @@ function DistroFamilySort({ onComplete }) {
         }}
       >
         {pool.length > 0 ? pool.map(c => renderCard(c, "pool")) : (
-          <span style={{ color: "#445", fontSize: 13, fontStyle: "italic" }}>All cards placed — check your answers below</span>
+          <span style={{ color: "#445", fontSize: 10, fontStyle: "italic" }}>All cards placed — check your answers below</span>
         )}
       </div>
 
@@ -2349,22 +2350,22 @@ function DistroFamilySort({ onComplete }) {
           onDrop={() => handleDrop("rhel")}
           style={bucketStyle("rhel")}
         >
-          <div style={{ color: "#FF6B6B", fontWeight: 800, fontSize: 14, marginBottom: 10, letterSpacing: "0.5px" }}>RHEL FAMILY</div>
+          <div style={{ color: "#FF6B6B", fontWeight: 800, fontSize: 11, marginBottom: 10, letterSpacing: "0.5px" }}>RHEL FAMILY</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {rhel.map(c => renderCard(c, "rhel"))}
           </div>
-          {rhel.length === 0 && <span style={{ color: "#334", fontSize: 13 }}>Drop cards here</span>}
+          {rhel.length === 0 && <span style={{ color: "#334", fontSize: 10 }}>Drop cards here</span>}
         </div>
         <div
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => handleDrop("debian")}
           style={bucketStyle("debian")}
         >
-          <div style={{ color: "#A78BFA", fontWeight: 800, fontSize: 14, marginBottom: 10, letterSpacing: "0.5px" }}>DEBIAN FAMILY</div>
+          <div style={{ color: "#A78BFA", fontWeight: 800, fontSize: 11, marginBottom: 10, letterSpacing: "0.5px" }}>DEBIAN FAMILY</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {debian.map(c => renderCard(c, "debian"))}
           </div>
-          {debian.length === 0 && <span style={{ color: "#334", fontSize: 13 }}>Drop cards here</span>}
+          {debian.length === 0 && <span style={{ color: "#334", fontSize: 10 }}>Drop cards here</span>}
         </div>
       </div>
 
@@ -2372,10 +2373,10 @@ function DistroFamilySort({ onComplete }) {
         <button onClick={check} disabled={!allPlaced} style={{
           padding: "8px 22px", background: allPlaced ? "#50C8FF" : "rgba(80,200,255,0.15)",
           border: "none", borderRadius: 6, color: allPlaced ? "#1A1A2E" : "#556",
-          fontWeight: 700, fontSize: 14, cursor: allPlaced ? "pointer" : "not-allowed",
+          fontWeight: 700, fontSize: 11, cursor: allPlaced ? "pointer" : "not-allowed",
         }}>Check Sort</button>
         {checked && (
-          <span style={{ color: allCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 14 }}>
+          <span style={{ color: allCorrect ? "#7AE87A" : "#FF6B6B", fontWeight: 600, fontSize: 11 }}>
             {allCorrect
               ? "✓ Perfect sort! RHEL family uses dnf and XFS. Debian family uses apt and ext4."
               : `${rhelWrongCount + debianWrongCount} card${rhelWrongCount + debianWrongCount > 1 ? "s" : ""} in the wrong bucket — drag them to the correct family and re-check.`}
@@ -2398,23 +2399,23 @@ function NetworkAddressBuilder() {
   return (
     <div style={{
       background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 10, padding: 20, margin: "20px 0",
+      borderRadius: 10, padding: 20, margin: "14px 0",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px" }}>
+        <div style={{ color: "#AAB4BE", fontWeight: 700, fontSize: 10, letterSpacing: "0.5px" }}>
           ▸ NETWORK ADDRESS BUILDER — Construct a connection
         </div>
         <button onClick={() => { setIp("10.0.5.20"); setPort("443"); setProtocol("TCP"); }} style={{
-          padding: "3px 10px", borderRadius: 5, fontSize: 11, fontWeight: 600, cursor: "pointer",
+          padding: "3px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600, cursor: "pointer",
           background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#778",
         }}>↻ Reset</button>
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
         <div>
-          <div style={{ color: "#FF6B6B", fontSize: 12, fontWeight: 700, marginBottom: 4 }}>IP ADDRESS (the building)</div>
+          <div style={{ color: "#FF6B6B", fontSize: 10, fontWeight: 700, marginBottom: 4 }}>IP ADDRESS (the building)</div>
           <select value={ip} onChange={e => setIp(e.target.value)} style={{
             padding: "8px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,107,107,0.3)",
-            borderRadius: 6, color: "#FF6B6B", fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
+            borderRadius: 6, color: "#FF6B6B", fontSize: 11, fontFamily: "'JetBrains Mono', monospace",
           }}>
             <option value="10.0.5.20">10.0.5.20</option>
             <option value="192.168.1.100">192.168.1.100</option>
@@ -2422,19 +2423,19 @@ function NetworkAddressBuilder() {
           </select>
         </div>
         <div>
-          <div style={{ color: "#FFA832", fontSize: 12, fontWeight: 700, marginBottom: 4 }}>PORT (the apartment)</div>
+          <div style={{ color: "#FFA832", fontSize: 10, fontWeight: 700, marginBottom: 4 }}>PORT (the apartment)</div>
           <select value={port} onChange={e => setPort(e.target.value)} style={{
             padding: "8px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,168,50,0.3)",
-            borderRadius: 6, color: "#FFA832", fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
+            borderRadius: 6, color: "#FFA832", fontSize: 11, fontFamily: "'JetBrains Mono', monospace",
           }}>
             {Object.entries(portMap).map(([p, s]) => <option key={p} value={p}>{p} ({s})</option>)}
           </select>
         </div>
         <div>
-          <div style={{ color: "#7AE87A", fontSize: 12, fontWeight: 700, marginBottom: 4 }}>PROTOCOL (the language)</div>
+          <div style={{ color: "#7AE87A", fontSize: 10, fontWeight: 700, marginBottom: 4 }}>PROTOCOL (the language)</div>
           <select value={protocol} onChange={e => setProtocol(e.target.value)} style={{
             padding: "8px 12px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(122,232,122,0.3)",
-            borderRadius: 6, color: "#7AE87A", fontSize: 14, fontFamily: "'JetBrains Mono', monospace",
+            borderRadius: 6, color: "#7AE87A", fontSize: 11, fontFamily: "'JetBrains Mono', monospace",
           }}>
             <option value="TCP">TCP (reliable)</option>
             <option value="UDP">UDP (fast)</option>
@@ -2444,7 +2445,7 @@ function NetworkAddressBuilder() {
       <div style={{
         background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: 16,
         border: "1px solid rgba(80,200,255,0.1)",
-        fontFamily: "'JetBrains Mono', monospace", fontSize: 15, textAlign: "center",
+        fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textAlign: "center",
       }}>
         <span style={{ color: "#FF6B6B" }}>{ip}</span>
         <span style={{ color: "#556" }}>:</span>
@@ -2454,7 +2455,7 @@ function NetworkAddressBuilder() {
         <span style={{ color: "#556" }}> → </span>
         <span style={{ color: "#50C8FF" }}>{serviceName}</span>
       </div>
-      <p style={{ color: "#889", fontSize: 13, marginTop: 10, textAlign: "center" }}>
+      <p style={{ color: "#889", fontSize: 10, marginTop: 10, textAlign: "center" }}>
         {protocol === "TCP" ? "TCP guarantees delivery — packets arrive in order, lost packets are retransmitted. Used for SSH, HTTP, databases." : "UDP sends packets without confirmation — faster, but no delivery guarantee. Used for DNS queries, streaming, monitoring metrics."}
       </p>
     </div>
@@ -2470,6 +2471,7 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
   const [activeSection, setActiveSection] = useState(initialSection ?? 1);
   const [completedInteractions, setCompletedInteractions] = useState(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [lessonScale, cycleLessonScale] = useLessonScale();
   const contentRef = useRef(null);
 
   const markComplete = (id) => setCompletedInteractions(prev => new Set([...prev, id]));
@@ -2515,20 +2517,20 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
         display: "flex", alignItems: "center", height: 56, gap: 14, flexShrink: 0,
       }}>
         <a href="/" style={{
-          color: "#50C8FF", fontSize: 14, cursor: "pointer", textDecoration: "none",
+          color: "#50C8FF", fontSize: 11, cursor: "pointer", textDecoration: "none",
           padding: "4px 8px", display: "flex", alignItems: "center", fontWeight: 600,
           opacity: 0.8, transition: "opacity 0.15s",
         }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.8}
         >← L1NX</a>
-        <span style={{ color: "rgba(255,255,255,0.08)", fontSize: 18 }}>|</span>
+        <span style={{ color: "rgba(255,255,255,0.08)", fontSize: 13 }}>|</span>
         <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{
-          background: "none", border: "none", color: "#AAB4BE", fontSize: 20, cursor: "pointer",
+          background: "none", border: "none", color: "#AAB4BE", fontSize: 15, cursor: "pointer",
           padding: "4px 8px", display: "flex", alignItems: "center",
         }}>☰</button>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-          <span style={{ color: "#50C8FF", fontWeight: 800, fontSize: 15, whiteSpace: "nowrap" }}>LINUX FOUNDATIONS</span>
-          <span style={{ color: "#445", fontSize: 14 }}>|</span>
-          <span style={{ color: "#AAB4BE", fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ color: "#50C8FF", fontWeight: 800, fontSize: 11, whiteSpace: "nowrap" }}>LINUX FOUNDATIONS</span>
+          <span style={{ color: "#445", fontSize: 11 }}>|</span>
+          <span style={{ color: "#AAB4BE", fontSize: 11, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {SECTIONS[activeSection - 1].icon} {SECTIONS[activeSection - 1].title}
           </span>
         </div>
@@ -2536,7 +2538,30 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
           <div style={{ width: 100, height: 5, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden" }}>
             <div style={{ height: "100%", borderRadius: 3, background: "#50C8FF", width: `${progress}%`, transition: "width 0.4s" }} />
           </div>
-          <span style={{ color: "#667", fontSize: 12, fontWeight: 600, minWidth: 36 }}>{progress}%</span>
+          <span style={{ color: "#667", fontSize: 10, fontWeight: 600, minWidth: 36 }}>{progress}%</span>
+          <button
+            onClick={cycleLessonScale}
+            title={`Text size: ${scaleLabel(lessonScale)} (click to cycle XS → S → M → L)`}
+            aria-label={`Change text size (currently ${scaleLabel(lessonScale)})`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 6,
+              color: "#AAB4BE",
+              fontSize: 11,
+              fontWeight: 600,
+              padding: "0 8px",
+              height: 24,
+              cursor: "pointer",
+              letterSpacing: "0.5px",
+            }}
+          >
+            <span style={{ fontFamily: "'Geist', sans-serif", fontSize: 13, letterSpacing: 0 }}>Aa</span>
+            <span>{scaleLabel(lessonScale)}</span>
+          </button>
         </div>
       </div>
 
@@ -2545,7 +2570,7 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
 
         {/* ─── CONTENT ─── */}
         <div ref={contentRef} style={{
-          flex: 1, overflowY: "auto", padding: "32px 24px 80px", maxWidth: 820, margin: "0 auto",
+          flex: 1, overflowY: "auto", padding: "20px 24px 56px", maxWidth: 820, margin: "0 auto", zoom: lessonScale,
         }}>
           {renderSection()}
           {/* ─── NAVIGATION ─── */}
@@ -2555,7 +2580,7 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
               <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "center" }}>
                 <button onClick={onMissionComplete} style={{
                   padding: "12px 32px", background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.4)",
-                  borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 15, cursor: "pointer",
+                  borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 11, cursor: "pointer",
                   width: "100%", maxWidth: 360,
                   transition: "all 0.2s",
                   boxShadow: "0 0 8px rgba(80,200,255,0.1)",
@@ -2563,7 +2588,7 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
                 {activeSection < 10 && (
                   <button onClick={() => goTo(activeSection + 1)} style={{
                     padding: "6px 16px", background: "transparent", border: "none",
-                    color: "#556", fontSize: 12, cursor: "pointer",
+                    color: "#556", fontSize: 10, cursor: "pointer",
                     transition: "color 0.2s",
                   }}>Leave the mission for now and read on →</button>
                 )}
@@ -2574,14 +2599,14 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
                 {activeSection > 1 && (
                   <button onClick={() => goTo(activeSection - 1)} style={{
                     padding: "10px 24px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 8, color: "#AAB4BE", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                    borderRadius: 8, color: "#AAB4BE", fontWeight: 600, fontSize: 11, cursor: "pointer",
                   }}>← Previous</button>
                 )}
                 <div style={{ flex: 1 }} />
                 {activeSection < 10 && (
                   <button onClick={() => goTo(activeSection + 1)} style={{
                     padding: "10px 24px", background: "rgba(80,200,255,0.15)", border: "1px solid rgba(80,200,255,0.3)",
-                    borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                    borderRadius: 8, color: "#50C8FF", fontWeight: 700, fontSize: 11, cursor: "pointer",
                   }}>Next Section →</button>
                 )}
               </div>
@@ -2601,16 +2626,16 @@ export default function LinuxFoundations({ initialSection, missionMode, onMissio
 function Section1({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>1. What Is an Operating System?</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>Everything between your keystroke and the pixel on screen.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>1. What Is an Operating System?</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>Everything between your keystroke and the pixel on screen.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         You press a key on your keyboard. Characters appear on a screen. Between those two events, thousands of operations occur: electrical signals travel from the keyboard to a USB controller, get translated into a scan code, routed through a driver, interpreted by a program, rendered as pixels by a graphics card, and pushed to a display. You never see any of it.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         That invisible machinery is the <strong style={{ color: "#E8ECF0" }}>operating system</strong> (OS).
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>An OS does three things:</p>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>An OS does three things:</p>
 
       <OsFunctionCards />
 
@@ -2621,13 +2646,13 @@ function Section1({ markComplete }) {
       />
 
       <SectionHeading>The Kernel vs. Everything Else</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The OS has layers. At the center is the <strong style={{ color: "#E8ECF0" }}>kernel</strong> — the code that runs with full hardware access. It handles memory allocation, process scheduling, device drivers, and system calls. Everything else (your file manager, your web browser, your terminal) runs in <strong style={{ color: "#E8ECF0" }}>user space</strong>, where it must ask the kernel for permission to do anything involving hardware.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         When a program wants to read a file, it doesn't talk to the disk directly. It makes a <strong style={{ color: "#E8ECF0" }}>system call</strong> — a formal request to the kernel. The kernel checks permissions, locates the data on disk, copies it into the program's memory, and returns control. This happens millions of times per second on a busy server.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         <strong style={{ color: "#FFA832" }}>Why does this matter for datacenter operations?</strong> Because when something goes wrong — a disk fails, a process consumes all available memory, a network interface drops — the symptoms you see and the tools you use all interact with the kernel. Understanding this layer is how you move from "the server is broken" to "the kernel remounted the filesystem read-only because it detected I/O errors on the NVMe drive."
       </p>
 
@@ -2645,33 +2670,33 @@ function Section1({ markComplete }) {
 function Section2({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>2. What Is Linux?</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>The kernel that runs 90%+ of the world's servers.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>2. What Is Linux?</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>The kernel that runs 90%+ of the world's servers.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Linux is an operating system kernel created by Linus Torvalds in 1991. Specifically, "Linux" refers to the kernel — the core component that manages hardware, memory, and processes. What most people call "Linux" is actually a <strong style={{ color: "#E8ECF0" }}>distribution</strong> (distro): the kernel bundled with a package manager, system utilities, default configurations, and sometimes a graphical interface.
       </p>
 
       <SectionHeading>Why Linux Dominates Servers</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Over 90% of the world's servers run Linux. Every major cloud provider (AWS, Azure, GCP) defaults to Linux. Every top supercomputer runs Linux. The reasons are practical:
       </p>
       <FlipCardChallenge onComplete={() => markComplete("s2-flip")} />
 
       <SectionHeading>Distributions You Will Encounter</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A distribution packages the Linux kernel with tools, a package manager, and default configurations. In datacenter environments, you will primarily see:
       </p>
       <DistroFamilySort onComplete={() => markComplete("s2-sort")} />
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The commands and concepts are nearly identical across distributions. The main differences are the package manager (<Code>dnf</Code> vs. <Code>apt</Code>), the default filesystem (<Code>XFS</Code> vs. <Code>ext4</Code>), and where certain configuration files live. Learn one, and the other is a short translation.
       </p>
 
       <SectionHeading>What Is a Package?</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A <strong style={{ color: "#E8ECF0" }}>package</strong> is a compressed bundle of files — the program itself, its configuration files, and metadata describing what it needs to run. Think of it as a shipping box that contains both the product and the assembly instructions.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The <strong style={{ color: "#E8ECF0" }}>package manager</strong> (<Code>apt</Code>, <Code>dnf</Code>) installs, updates, and removes these packages. Its critical capability is <strong style={{ color: "#E8ECF0" }}>dependency resolution</strong>. Most programs rely on shared libraries — reusable code that other programs also use. When you install a package, the package manager automatically finds and installs every library (dependency) that program needs. Without one, you would track down and install each dependency by hand — unmanageable on a system running dozens of services.
       </p>
 
@@ -2699,35 +2724,35 @@ function Section2({ markComplete }) {
 function Section3({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>3. The Command Line — Your Primary Interface</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>No GUI. No mouse. Just text — and that's an advantage.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>3. The Command Line — Your Primary Interface</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>No GUI. No mouse. Just text — and that's an advantage.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Most computers you have used have a <strong style={{ color: "#E8ECF0" }}>graphical user interface</strong> (GUI): windows, icons, a mouse pointer. Servers almost never have one. They sit in racks in a datacenter — no monitor, no keyboard, no mouse attached. You access them remotely, and when you do, you get a <strong style={{ color: "#E8ECF0" }}>command line interface</strong> (CLI).
       </p>
 
       <SectionHeading>Terminal, Shell, Command Line — What's What?</SectionHeading>
       <CliTermsCards />
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The relationship: you open a <strong style={{ color: "#FF6B6B" }}>terminal</strong>, which runs a <strong style={{ color: "#FFA832" }}>shell</strong>, and you interact with both via the <strong style={{ color: "#50C8FF" }}>command line</strong>.
       </p>
 
       <SectionHeading>From Commands to Scripts</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         When you type a command and press Enter, the shell executes it immediately. But what if you need to run the same 15 commands every morning — checking disk usage, verifying services, reviewing logs?
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A <strong style={{ color: "#E8ECF0" }}>script</strong> is just a text file containing a sequence of shell commands. Instead of typing each command interactively, you write them all into a file, mark that file as executable, and run it once. The shell reads it top-to-bottom and executes each command in order — exactly as if you had typed them yourself, but faster and without mistakes.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         This is the bridge from "operator" to "automator." Scripting is how a datacenter technician goes from manually checking one server at a time to running a health check across an entire fleet with a single command.
       </p>
 
       <SectionHeading>Anatomy of a Command</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Every command follows a pattern: <Code>command [options] [arguments]</Code>
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Options usually start with a dash. A single dash with a letter (<Code>-l</Code>) is a short option. Two dashes with a word (<Code>--all</Code>) is a long option. Short options can often be combined: <Code>-l -a</Code> becomes <Code>-la</Code>.
       </p>
 
@@ -2740,16 +2765,16 @@ function Section3({ markComplete }) {
       />
 
       <SectionHeading>Where Commands Live</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         When you type <Code>ls</Code>, how does the shell know what program to run? The shell searches a list of directories called the <strong style={{ color: "#E8ECF0" }}>PATH</strong>. The PATH is an environment variable — a named value stored in your shell session — that contains a colon-separated list of directories.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Typical PATH directories: <Code>/usr/local/bin</Code>, <Code>/usr/bin</Code>, <Code>/bin</Code>, <Code>/usr/sbin</Code>, <Code>/sbin</Code>
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         When you type <Code>ls</Code>, the shell checks each directory in order until it finds an executable file named <Code>ls</Code>. If it does not find one, you get "command not found."
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         This matters because when you install new software, it needs to be in a PATH directory — or you call it by its full path (e.g., <Code>/opt/monitoring/bin/check_health</Code>).
       </p>
 
@@ -2765,25 +2790,25 @@ function Section3({ markComplete }) {
 function Section4({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>4. How Computers Work — The Operations Perspective</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>You don't need a CS degree. You need to know where to look when something breaks.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>4. How Computers Work — The Operations Perspective</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>You don't need a CS degree. You need to know where to look when something breaks.</p>
 
       <SectionHeading>CPU — The Executor</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The <strong style={{ color: "#E8ECF0" }}>Central Processing Unit</strong> executes instructions. It fetches an instruction from memory, decodes it, executes it, and moves to the next one — billions of times per second. Modern servers have CPUs with dozens of cores, each capable of running instructions independently.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         For operations, what matters is <strong style={{ color: "#E8ECF0" }}>CPU utilization</strong>. If all cores are saturated, the system becomes sluggish. When troubleshooting a slow server, CPU is one of the first things to check.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         CPUs also generate heat proportional to their workload. In a datacenter, thousands of CPUs at high utilization create enormous thermal loads — which is why cooling infrastructure is critical.
       </p>
 
       <SectionHeading>RAM — The Fast Workspace</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         <strong style={{ color: "#E8ECF0" }}>Random Access Memory</strong> is where the CPU keeps data it is actively working with. It is fast (nanoseconds to access) but volatile — everything is lost when power is lost.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The critical concept: <strong style={{ color: "#E8ECF0" }}>RAM is finite.</strong> A server might have 128 GB, 256 GB, or more — but if running processes demand more memory than is physically available, the system must start using <strong style={{ color: "#E8ECF0" }}>swap</strong> (disk space used as overflow memory). Swap is orders of magnitude slower than RAM, so a system that is "swapping" performs terribly.
       </p>
 
@@ -2795,18 +2820,18 @@ function Section4({ markComplete }) {
       />
 
       <SectionHeading>Storage — The Persistent Record</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Storage (SSDs, NVMe drives, HDDs) holds data that persists across reboots: the OS, applications, logs, user data. Much slower than RAM but retains data without power.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Key concepts: <strong style={{ color: "#E8ECF0" }}>Capacity</strong> — storage fills up, and when a filesystem reaches 100%, services that try to write fail. Monitoring disk usage is a fundamental ops task. <strong style={{ color: "#E8ECF0" }}>Speed</strong> — NVMe drives (connected directly to the CPU via PCIe) are vastly faster than SATA SSDs, which are vastly faster than spinning HDDs. <strong style={{ color: "#E8ECF0" }}>Health</strong> — storage devices have a finite lifespan. Both SSDs and HDDs report health data through <strong style={{ color: "#E8ECF0" }}>S.M.A.R.T.</strong> (Self-Monitoring, Analysis, and Reporting Technology), which ops teams monitor to predict failures.
       </p>
 
       <SectionHeading>The Bus — How Components Talk</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The CPU, RAM, storage, GPUs, and network cards all communicate through <strong style={{ color: "#E8ECF0" }}>buses</strong> — data pathways on the motherboard. The most important one in modern servers is <strong style={{ color: "#E8ECF0" }}>PCIe</strong> (Peripheral Component Interconnect Express). GPUs, NVMe drives, and high-speed network cards all connect via PCIe lanes.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         For datacenter operations, bus architecture matters because GPU training workloads are bandwidth-sensitive. A GPU that cannot feed data fast enough through its PCIe connection becomes a bottleneck — the GPU sits idle waiting for data, wasting expensive compute time.
       </p>
 
@@ -2824,35 +2849,35 @@ function Section4({ markComplete }) {
 function Section5({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>5. Files, Directories, and the Filesystem Tree</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>One tree. Everything lives in it — including hardware.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>5. Files, Directories, and the Filesystem Tree</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>One tree. Everything lives in it — including hardware.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Every piece of data on a Linux system lives in a <strong style={{ color: "#E8ECF0" }}>file</strong>. Every file lives inside a <strong style={{ color: "#E8ECF0" }}>directory</strong> (folder). Directories can contain other directories, forming a tree structure.
       </p>
 
       <SectionHeading>The Tree Model</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Unlike Windows, which uses drive letters (C:\, D:\), Linux has a single tree rooted at <Code>/</Code> (called "root"). Everything branches from there. This is called the <strong style={{ color: "#E8ECF0" }}>Filesystem Hierarchy Standard</strong> (FHS). It defines where things go so that any Linux administrator on any distribution can find configuration in <Code>/etc</Code>, logs in <Code>/var/log</Code>, and temporary files in <Code>/tmp</Code> without guessing.
       </p>
 
       <FilesystemTree />
 
       <SectionHeading>Paths — Addresses for Files</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A <strong style={{ color: "#E8ECF0" }}>path</strong> is the address of a file or directory. Two types: an <strong style={{ color: "#E8ECF0" }}>absolute path</strong> starts from root <Code>/</Code> and works from anywhere (e.g., <Code>/var/log/syslog</Code>). A <strong style={{ color: "#E8ECF0" }}>relative path</strong> starts from wherever you currently are — it depends on context.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Two special symbols: <Code>.</Code> (single dot) is the current directory. <Code>..</Code> (double dot) is the parent directory (one level up). So if you are in <Code>/var/log</Code>, the path <Code>../../etc</Code> means "go up to <Code>/var</Code>, up to <Code>/</Code>, then down into <Code>etc</Code>" — ending at <Code>/etc</Code>.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         At any moment, you are "standing" in a directory — your <strong style={{ color: "#E8ECF0" }}>current working directory</strong>. In scripts and documentation, <strong style={{ color: "#FFA832" }}>always use absolute paths</strong> to avoid ambiguity.
       </p>
 
       <PathResolver onComplete={() => markComplete("s5-path")} />
 
       <SectionHeading>Everything Is a File</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Linux takes a philosophically extreme position: almost everything is represented as a file. Regular files, directories, hardware devices, running processes, kernel parameters — all accessible through the filesystem.
       </p>
 
@@ -2870,13 +2895,13 @@ function Section5({ markComplete }) {
         ]}
       />
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A naming note worth internalizing: traditional SATA/SAS drives appear as <Code>/dev/sda</Code>, <Code>/dev/sdb</Code>, etc. But in high-density datacenters — like the xAI facilities in the Memphis area — you will primarily work with <strong style={{ color: "#E8ECF0" }}>NVMe</strong> drives, which connect directly to the CPU over PCIe. NVMe drives use: <Code>/dev/nvme0n1</Code> (controller 0, namespace 1), with partitions as <Code>/dev/nvme0n1p1</Code>, <Code>/dev/nvme0n1p2</Code>, etc. Recognizing <Code>sd*</Code> vs. <Code>nvme*</Code> tells you immediately what storage hardware you're dealing with.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         GPUs are files too. At xAI's Colossus cluster, the compute nodes are packed with NVIDIA GPUs — and the kernel exposes each one as a device file (<Code>/dev/nvidia0</Code>, <Code>/dev/nvidia1</Code>, etc.). When you run <Code>nvidia-smi</Code> to check GPU health, it reads status through this device-file interface. The "everything is a file" philosophy is not academic — it is how you interact with the hardware that powers the compute infrastructure.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         You can literally read <Code>/proc/cpuinfo</Code> as if it were a text file and see your CPU details. The kernel generates this content on the fly when you read it — the "file" does not exist on disk. This means the same tools you use to work with regular files (<Code>cat</Code>, <Code>grep</Code>, <Code>less</Code>) also work for inspecting hardware and kernel state. One set of tools, consistent interface.
       </p>
 
@@ -2892,26 +2917,26 @@ function Section5({ markComplete }) {
 function Section6({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>6. Users, Groups, and Ownership</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>Isolation and access control — the foundation of Linux security.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>6. Users, Groups, and Ownership</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>Isolation and access control — the foundation of Linux security.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Linux is a <strong style={{ color: "#E8ECF0" }}>multi-user</strong> system. Even when only one person is logged in, the system has multiple user accounts operating behind the scenes — each service (web server, database, logging daemon) typically runs as its own user.
       </p>
 
       <SectionHeading>Why Multi-User Matters</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Isolation. If the web server is compromised by an attacker, the damage is limited to what the <Code>www-data</Code> user can access. It cannot read database files owned by the <Code>postgres</Code> user. It cannot modify system configuration owned by <Code>root</Code>.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Every file and process has an <strong style={{ color: "#E8ECF0" }}>owner</strong> (a user) and a <strong style={{ color: "#E8ECF0" }}>group</strong>. Access is controlled based on three categories: the <strong style={{ color: "#FF6B6B" }}>User</strong> (owner, usually who created it), the <strong style={{ color: "#FFA832" }}>Group</strong> (a named collection of users), and <strong style={{ color: "#7AE87A" }}>Others</strong> (everyone else on the system).
       </p>
 
       <SectionHeading>The root Account</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         <Code>root</Code> is the superuser — unrestricted access to every file, process, and system function. Root can delete any file, kill any process, and modify any configuration.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Because of this power, you almost never log in as root directly. Instead, you log in as a normal user and use <Code>sudo</Code> (superuser do) to execute specific commands with root privileges when necessary. This creates an audit trail and reduces catastrophic accidents.
       </p>
 
@@ -2922,7 +2947,7 @@ function Section6({ markComplete }) {
       />
 
       <SectionHeading>Permissions — The Access Control Model</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Every file has three permission sets: one for the owner, one for the group, and one for everyone else. Each set can grant three abilities:
       </p>
       <InfoTable
@@ -2933,16 +2958,16 @@ function Section6({ markComplete }) {
           [<span><strong style={{ color: "#50C8FF" }}>Execute</strong> (x)</span>, "Run the file as a program", "Enter (cd into) the directory"],
         ]}
       />
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         These permissions are displayed as a string like <Code>rwxr-xr--</Code>, which reads as three groups of three characters — owner, group, others.
       </p>
 
       <SectionHeading>Octal (Numeric) Notation</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         While <Code>rwxr-xr--</Code> is how Linux <em>displays</em> permissions, the <Code>chmod</Code> command often uses a shorthand: a three-digit number called <strong style={{ color: "#E8ECF0" }}>octal notation</strong>. Each permission bit has a numeric value:
       </p>
       <OctalFlipCards />
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         For each group (owner, group, others), you <strong style={{ color: "#E8ECF0" }}>sum the values</strong> of the granted permissions. The result is a single digit from 0 to 7. Three digits — one per group — give you the full permission.
       </p>
 
@@ -2950,8 +2975,8 @@ function Section6({ markComplete }) {
         background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: "16px 20px", margin: "14px 0 20px",
         border: "1px solid rgba(80,200,255,0.1)", fontFamily: "'JetBrains Mono', monospace",
       }}>
-        <div style={{ color: "#889", fontSize: 12, marginBottom: 10, fontFamily: "'Chakra Petch', sans-serif", letterSpacing: "0.5px" }}>EXAMPLE: CONVERTING rwxr-xr-- TO OCTAL</div>
-        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 15 }}>
+        <div style={{ color: "#889", fontSize: 10, marginBottom: 10, fontFamily: "'Chakra Petch', sans-serif", letterSpacing: "0.5px" }}>EXAMPLE: CONVERTING rwxr-xr-- TO OCTAL</div>
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 11 }}>
           <span style={{ color: "#FF6B6B", fontWeight: 700 }}>Owner:</span>
           <span style={{ color: "#C8CCD0" }}>rwx = 4 + 2 + 1 = <strong style={{ color: "#E8ECF0" }}>7</strong></span>
           <span style={{ color: "#FFA832", fontWeight: 700 }}>Group:</span>
@@ -2960,13 +2985,13 @@ function Section6({ markComplete }) {
           <span style={{ color: "#C8CCD0" }}>r-- = 4 + 0 + 0 = <strong style={{ color: "#E8ECF0" }}>4</strong></span>
         </div>
         <div style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10 }}>
-          <span style={{ color: "#889", fontSize: 13 }}>Result: </span>
-          <span style={{ color: "#50C8FF", fontSize: 20, fontWeight: 700 }}>754</span>
-          <span style={{ color: "#889", fontSize: 13 }}> — so <Code>chmod 754 file</Code> sets these exact permissions.</span>
+          <span style={{ color: "#889", fontSize: 10 }}>Result: </span>
+          <span style={{ color: "#50C8FF", fontSize: 15, fontWeight: 700 }}>754</span>
+          <span style={{ color: "#889", fontSize: 10 }}> — so <Code>chmod 754 file</Code> sets these exact permissions.</span>
         </div>
       </div>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Common patterns you will see everywhere:
       </p>
       <InfoTable
@@ -2994,10 +3019,10 @@ function Section6({ markComplete }) {
 function Section7({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>7. Processes — Programs in Motion</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>A program is a file on disk. A process is that file alive in memory.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>7. Processes — Programs in Motion</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>A program is a file on disk. A process is that file alive in memory.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A <strong style={{ color: "#E8ECF0" }}>program</strong> is a file on disk — a set of instructions. A <strong style={{ color: "#E8ECF0" }}>process</strong> is what happens when that program is loaded into memory and begins executing. The same program can have multiple processes running simultaneously (e.g., multiple users each running their own instance of a text editor).
       </p>
 
@@ -3013,42 +3038,42 @@ function Section7({ markComplete }) {
             padding: "12px 14px", borderRadius: 8, background: "rgba(255,255,255,0.02)",
             border: `1px solid ${item.color}22`,
           }}>
-            <div style={{ color: item.color, fontWeight: 700, fontSize: 13, marginBottom: 6 }}>{item.phase}</div>
-            <div style={{ color: "#B8BCC0", fontSize: 14, lineHeight: 1.5 }}>{item.desc}</div>
+            <div style={{ color: item.color, fontWeight: 700, fontSize: 10, marginBottom: 6 }}>{item.phase}</div>
+            <div style={{ color: "#B8BCC0", fontSize: 11, lineHeight: 1.5 }}>{item.desc}</div>
           </div>
         ))}
       </div>
 
       <SectionHeading>Foreground vs. Background</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         When you run a command in the terminal, it runs in the <strong style={{ color: "#E8ECF0" }}>foreground</strong> — your terminal is occupied until the command finishes. You can run commands in the <strong style={{ color: "#E8ECF0" }}>background</strong> by adding <Code>&</Code> to the end, which frees your terminal immediately.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         On a server, many processes run in the background permanently: web servers, databases, monitoring agents. These are managed by a <strong style={{ color: "#E8ECF0" }}>service manager</strong> (on modern Linux, this is <Code>systemd</Code>), which starts them at boot, restarts them if they crash, and lets administrators control them.
       </p>
 
       <SectionHeading>Signals — Talking to Processes</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         The OS communicates with processes through <strong style={{ color: "#E8ECF0" }}>signals</strong> — standardized messages. Two are fundamental:
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, margin: "12px 0" }}>
         <div style={{ padding: 14, borderRadius: 8, background: "rgba(255,168,50,0.06)", border: "1px solid rgba(255,168,50,0.2)" }}>
-          <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 14 }}>SIGTERM (Signal 15)</div>
-          <div style={{ color: "#B8BCC0", fontSize: 14, lineHeight: 1.6, marginTop: 4 }}>"Please shut down gracefully." The process can save its state, close files, and exit cleanly.</div>
+          <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 11 }}>SIGTERM (Signal 15)</div>
+          <div style={{ color: "#B8BCC0", fontSize: 11, lineHeight: 1.6, marginTop: 4 }}>"Please shut down gracefully." The process can save its state, close files, and exit cleanly.</div>
         </div>
         <div style={{ padding: 14, borderRadius: 8, background: "rgba(255,68,68,0.06)", border: "1px solid rgba(255,68,68,0.2)" }}>
-          <div style={{ color: "#FF4444", fontWeight: 700, fontSize: 14 }}>SIGKILL (Signal 9)</div>
-          <div style={{ color: "#B8BCC0", fontSize: 14, lineHeight: 1.6, marginTop: 4 }}>"Stop immediately." Terminated by the kernel with no chance to clean up. Use only when SIGTERM fails.</div>
+          <div style={{ color: "#FF4444", fontWeight: 700, fontSize: 11 }}>SIGKILL (Signal 9)</div>
+          <div style={{ color: "#B8BCC0", fontSize: 11, lineHeight: 1.6, marginTop: 4 }}>"Stop immediately." Terminated by the kernel with no chance to clean up. Use only when SIGTERM fails.</div>
         </div>
       </div>
 
       <SignalSimulator onComplete={() => markComplete("s7-sig")} />
 
       <SectionHeading>Daemons — The Silent Workers</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A <strong style={{ color: "#E8ECF0" }}>daemon</strong> is a background process that runs continuously, usually started at boot, providing a service. The SSH server (<Code>sshd</Code>) that lets you connect remotely is a daemon. The logging service (<Code>rsyslog</Code> or <Code>journald</Code>) is a daemon. The time synchronization service (<Code>chronyd</Code> or <Code>ntpd</Code>) is a daemon.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Daemons are the workhorses of a server. Most troubleshooting involves checking whether a daemon is running, why it stopped, or what it is logging.
       </p>
 
@@ -3064,14 +3089,14 @@ function Section7({ markComplete }) {
 function Section8({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>8. Networking Fundamentals</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>The fabric that connects everything in the datacenter.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>8. Networking Fundamentals</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>The fabric that connects everything in the datacenter.</p>
 
       <SectionHeading>IP Addresses — The Mailing Address</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Every device on a network has an <strong style={{ color: "#E8ECF0" }}>IP address</strong> — a numerical identifier that allows other devices to find it and send it data. <strong style={{ color: "#E8ECF0" }}>IPv4</strong> addresses look like <Code>192.168.1.100</Code> — four numbers (0-255) separated by dots, giving roughly 4.3 billion possible addresses.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Some address ranges are reserved for internal (private) networks — not routable on the public internet:
       </p>
       <InfoTable
@@ -3082,12 +3107,12 @@ function Section8({ markComplete }) {
           [<Code>192.168.0.0/16</Code>, "Small private networks (home routers)"],
         ]}
       />
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Datacenters typically use <Code>10.x.x.x</Code> addressing internally because the range is large enough for thousands of servers, switches, and management interfaces.
       </p>
 
       <SectionHeading>Ports — The Apartment Number</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         An IP address identifies a machine. A <strong style={{ color: "#E8ECF0" }}>port</strong> identifies a specific service on that machine. If the IP is the building's street address, the port is the apartment number. Port numbers range from 0 to 65535. Ports below 1024 are "well-known" and reserved for standard services:
       </p>
       <InfoTable
@@ -3101,14 +3126,14 @@ function Section8({ markComplete }) {
       />
 
       <SectionHeading>Protocols — The Language</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A <strong style={{ color: "#E8ECF0" }}>protocol</strong> is a set of rules for how data is formatted and transmitted. <strong style={{ color: "#E8ECF0" }}>TCP</strong> (Transmission Control Protocol) provides reliable, ordered delivery — packets arrive in order, lost ones are retransmitted. Used for SSH, HTTP, databases. <strong style={{ color: "#E8ECF0" }}>UDP</strong> (User Datagram Protocol) is fast with no guarantees — packets are sent without confirmation. Used for DNS queries, video streaming, and monitoring metrics.
       </p>
 
       <NetworkAddressBuilder />
 
       <SectionHeading>DNS — Names to Numbers</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Humans remember names (<Code>google.com</Code>). Computers use IP addresses (<Code>142.250.80.46</Code>). <strong style={{ color: "#E8ECF0" }}>DNS</strong> (Domain Name System) translates between the two. In a datacenter, internal DNS is critical. Servers are referenced by hostname (e.g., <Code>gpu-rack03-node12</Code>), and DNS maps that name to its IP. If DNS breaks, almost everything that uses hostnames breaks with it — even if the network itself is fine.
       </p>
 
@@ -3120,14 +3145,14 @@ function Section8({ markComplete }) {
       />
 
       <SectionHeading>SSH — Remote Access</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         <strong style={{ color: "#E8ECF0" }}>SSH</strong> (Secure Shell) is how you access Linux servers remotely. It creates an encrypted connection between your machine and the server, giving you a command line on the remote system.
       </p>
       <CodeBlock label="CONNECT TO A REMOTE SERVER">{`ssh username@192.168.1.50`}</CodeBlock>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         This connects to the server at <Code>192.168.1.50</Code>, authenticates as <Code>username</Code>, and drops you into a shell on that machine. Every command you type is executed on the remote server, not your local machine.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         SSH is the single most important protocol for datacenter operations. Without it, you would need physical access to every server — impractical when they are racked in a datacenter miles away.
       </p>
 
@@ -3143,11 +3168,11 @@ function Section8({ markComplete }) {
 function Section9({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>9. Servers and the Datacenter Context</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>Where the hardware lives and how it all stays running.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>9. Servers and the Datacenter Context</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>Where the hardware lives and how it all stays running.</p>
 
       <SectionHeading>What Makes a Server a Server?</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         A server is a computer optimized for running services continuously rather than for interactive human use. Physically, a server typically:
       </p>
       <div style={{ display: "grid", gap: 6, margin: "10px 0 20px" }}>
@@ -3159,7 +3184,7 @@ function Section9({ markComplete }) {
           "Has a BMC/IPMI (Baseboard Management Controller) — a small embedded computer on the motherboard for out-of-band management",
           "Has no monitor, keyboard, or mouse attached",
         ].map((item, i) => (
-          <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", color: "#C0C4C8", fontSize: 15, lineHeight: 1.6 }}>
+          <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start", color: "#C0C4C8", fontSize: 11, lineHeight: 1.6 }}>
             <span style={{ color: "#50C8FF", marginTop: 2, flexShrink: 0 }}>›</span>
             <span>{item}</span>
           </div>
@@ -3167,10 +3192,10 @@ function Section9({ markComplete }) {
       </div>
 
       <SectionHeading>Headless Operation</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Servers run <strong style={{ color: "#E8ECF0" }}>headless</strong> — no graphical display. You interact with them entirely over the network via SSH. If the OS crashes and SSH stops working, you use the BMC/IPMI to access a virtual console — a text-based display streamed over the network from the management controller.
       </p>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         This is why the command line is not optional for datacenter work. There is no fallback GUI. The CLI is the interface.
       </p>
 
@@ -3187,7 +3212,7 @@ function Section9({ markComplete }) {
             borderLeft: `3px solid ${item.color}`,
           }}>
             <strong style={{ color: item.color }}>{item.title}</strong>
-            <span style={{ color: "#B8BCC0", fontSize: 15 }}> — {item.desc}</span>
+            <span style={{ color: "#B8BCC0", fontSize: 11 }}> — {item.desc}</span>
           </div>
         ))}
       </div>
@@ -3206,10 +3231,10 @@ function Section9({ markComplete }) {
 function Section10({ markComplete }) {
   return (
     <div>
-      <h2 style={{ color: "#E8ECF0", fontSize: 28, fontWeight: 800, margin: "0 0 6px 0" }}>10. Putting It All Together</h2>
-      <p style={{ color: "#667", fontSize: 15, marginTop: 0, marginBottom: 24, fontStyle: "italic" }}>The mental model you need before Level 2.</p>
+      <h2 style={{ color: "#E8ECF0", fontSize: 18, fontWeight: 700, margin: "0 0 6px 0" }}>10. Putting It All Together</h2>
+      <p style={{ color: "#667", fontSize: 11, marginTop: 0, marginBottom: 16, fontStyle: "italic" }}>The mental model you need before Level 2.</p>
 
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Before you proceed to Level 2, you should be able to hold this complete mental model:
       </p>
 
@@ -3226,24 +3251,24 @@ function Section10({ markComplete }) {
         ].map((item, i) => (
           <div key={i} style={{
             padding: "12px 16px", borderRadius: 8, background: "rgba(255,255,255,0.02)",
-            borderLeft: `3px solid ${item.color}`, color: "#C8CCD0", fontSize: 15, lineHeight: 1.6,
+            borderLeft: `3px solid ${item.color}`, color: "#C8CCD0", fontSize: 11, lineHeight: 1.6,
           }}>{item.text}</div>
         ))}
       </div>
 
       <div style={{
-        padding: 18, borderRadius: 10, margin: "24px 0",
+        padding: 18, borderRadius: 10, margin: "14px 0",
         background: "linear-gradient(135deg, rgba(80,200,255,0.06), rgba(255,168,50,0.04))",
         border: "1px solid rgba(80,200,255,0.2)",
       }}>
-        <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 14, marginBottom: 8 }}>TROUBLESHOOTING MENTAL MODEL</div>
-        <p style={{ color: "#D0D4D8", fontSize: 15, lineHeight: 1.8, margin: 0 }}>
+        <div style={{ color: "#FFA832", fontWeight: 700, fontSize: 11, marginBottom: 8 }}>TROUBLESHOOTING MENTAL MODEL</div>
+        <p style={{ color: "#D0D4D8", fontSize: 11, lineHeight: 1.55, margin: 0 }}>
           <strong style={{ color: "#E8ECF0" }}>When something breaks</strong>, use this mental model to reason about the problem: Is it a <strong style={{ color: "#FF6B6B" }}>hardware</strong> issue (CPU, RAM, disk, network card)? An <strong style={{ color: "#FFA832" }}>OS</strong> issue (process crash, filesystem full, permission denied)? A <strong style={{ color: "#50C8FF" }}>network</strong> issue (DNS, connectivity, firewall)? A <strong style={{ color: "#7AE87A" }}>service</strong> issue (daemon stopped, misconfigured)? Each category has different tools and different symptoms.
         </p>
       </div>
 
       <SectionHeading>Quick Reference — Rapid-Fire Flashcards</SectionHeading>
-      <p style={{ color: "#D0D4D8", fontSize: 16, lineHeight: 1.8 }}>
+      <p style={{ color: "#D0D4D8", fontSize: 12, lineHeight: 1.55 }}>
         Lock in every concept from this module. Type your definition, flip the card, then self-rate. No multiple choice — you have to produce the answer.
       </p>
 

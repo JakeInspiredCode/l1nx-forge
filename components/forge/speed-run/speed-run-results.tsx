@@ -43,10 +43,11 @@ export default function SpeedRunResults({
 
   const avgSecs = (summary.avgResponseMs / 1000).toFixed(1);
 
+  const cardsById = new Map(cards.map((c) => [c.id, c]));
+
   const missedResults = summary.cardResults.filter((r) => r.result !== "correct" && !overrides.has(r.cardId));
-  const missedCards = summary.cardResults
-    .filter((r) => r.result !== "correct" && !overrides.has(r.cardId))
-    .map((r) => cards.find((c) => c.id === r.cardId))
+  const missedCards = missedResults
+    .map((r) => cardsById.get(r.cardId))
     .filter(Boolean) as ForgeCard[];
 
   // Check if this is a new high score
@@ -56,7 +57,7 @@ export default function SpeedRunResults({
   // Tier breakdown
   const tierBreakdown: Record<number, { correct: number; total: number }> = {};
   summary.cardResults.forEach((r) => {
-    const card = cards.find((c) => c.id === r.cardId);
+    const card = cardsById.get(r.cardId);
     if (!card) return;
     if (!tierBreakdown[card.tier]) tierBreakdown[card.tier] = { correct: 0, total: 0 };
     tierBreakdown[card.tier].total++;
@@ -112,7 +113,7 @@ export default function SpeedRunResults({
           {missesExpanded && (
             <div className="border-t border-forge-border divide-y divide-forge-border/50 max-h-[240px] overflow-y-auto">
               {missedResults.map((r) => {
-                const card = cards.find((c) => c.id === r.cardId);
+                const card = cardsById.get(r.cardId);
                 if (!card) return null;
                 const isExpanded = expandedCardId === r.cardId;
                 return (

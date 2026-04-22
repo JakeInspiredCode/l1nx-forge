@@ -18,6 +18,7 @@ import {
   WhyThisMatters,
 } from "./blocks";
 import { Prose } from "./prose";
+import { useLessonScale, scaleLabel } from "@/lib/use-lesson-scale";
 
 function renderBlock(block: Block, idx: number) {
   switch (block.kind) {
@@ -102,8 +103,8 @@ function renderBlock(block: Block, idx: number) {
             border: "1px dashed rgba(255,170,50,0.3)",
             borderRadius: 8,
             color: "#8899AA",
-            fontSize: 13,
-            margin: "16px 0",
+            fontSize: 10,
+            margin: "12px 0",
           }}
         >
           (Custom component &quot;{block.id}&quot; — not yet implemented)
@@ -123,6 +124,7 @@ export default function ChapterRenderer({
   missionMode,
   onMissionComplete,
 }: ChapterRendererProps) {
+  const [lessonScale, cycleLessonScale] = useLessonScale();
   const section = useMemo<ChapterSection | null>(
     () => getChapterSection(sectionId),
     [sectionId]
@@ -155,7 +157,7 @@ export default function ChapterRenderer({
               borderRadius: 8,
               color: "#50C8FF",
               fontWeight: 700,
-              fontSize: 14,
+              fontSize: 11,
               cursor: "pointer",
             }}
           >
@@ -198,7 +200,7 @@ export default function ChapterRenderer({
           href="/"
           style={{
             color: "#50C8FF",
-            fontSize: 14,
+            fontSize: 11,
             textDecoration: "none",
             padding: "4px 8px",
             fontWeight: 600,
@@ -207,7 +209,7 @@ export default function ChapterRenderer({
         >
           ← L1NX
         </a>
-        <span style={{ color: "rgba(255,255,255,0.08)", fontSize: 18 }}>|</span>
+        <span style={{ color: "rgba(255,255,255,0.08)", fontSize: 13 }}>|</span>
         <div
           style={{
             display: "flex",
@@ -221,7 +223,7 @@ export default function ChapterRenderer({
             style={{
               color: "#50C8FF",
               fontWeight: 800,
-              fontSize: 15,
+              fontSize: 11,
               whiteSpace: "nowrap",
               textTransform: "uppercase",
               letterSpacing: "0.5px",
@@ -229,11 +231,11 @@ export default function ChapterRenderer({
           >
             {section.topicId} chapter
           </span>
-          <span style={{ color: "#445", fontSize: 14 }}>|</span>
+          <span style={{ color: "#445", fontSize: 11 }}>|</span>
           <span
             style={{
               color: "#AAB4BE",
-              fontSize: 14,
+              fontSize: 11,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -243,17 +245,42 @@ export default function ChapterRenderer({
             {section.title}
           </span>
         </div>
+        <button
+          onClick={cycleLessonScale}
+          title={`Text size: ${scaleLabel(lessonScale)} (click to cycle XS → S → M → L)`}
+          aria-label={`Change text size (currently ${scaleLabel(lessonScale)})`}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 6,
+            color: "#AAB4BE",
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "0 8px",
+            height: 24,
+            cursor: "pointer",
+            flexShrink: 0,
+            letterSpacing: "0.5px",
+          }}
+        >
+          <span style={{ fontFamily: "'Geist', sans-serif", fontSize: 13, letterSpacing: 0 }}>Aa</span>
+          <span>{scaleLabel(lessonScale)}</span>
+        </button>
       </div>
 
       <div
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "32px 24px 80px",
+          padding: "20px 24px 56px",
           maxWidth: 820,
           width: "100%",
           margin: "0 auto",
           boxSizing: "border-box",
+          zoom: lessonScale,
         }}
       >
         <Heading level={2} text={section.title} subtitle={section.subtitle} />
@@ -284,7 +311,7 @@ export default function ChapterRenderer({
                   borderRadius: 8,
                   color: "#50C8FF",
                   fontWeight: 700,
-                  fontSize: 15,
+                  fontSize: 11,
                   cursor: "pointer",
                   width: "100%",
                   maxWidth: 360,

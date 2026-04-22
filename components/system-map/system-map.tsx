@@ -306,7 +306,6 @@ export default function SystemMap() {
                 <CentralStar
                   cx={500}
                   cy={380}
-                  icon={activeCampaign?.icon ?? "⭐"}
                   title={activeCampaign?.title ?? ""}
                   color={campaignColor}
                   completedMissions={completedCount}
