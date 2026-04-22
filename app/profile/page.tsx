@@ -8,6 +8,10 @@ import ScanOverlay from "@/components/ui/scan-overlay";
 import StarfieldCanvas from "@/components/star-map/starfield-canvas";
 import { TOPICS } from "@/lib/types";
 import { useSoundEngine } from "@/lib/sound-engine";
+import { resetPersistedData } from "@/lib/data/persistence";
+
+const RESET_PHRASE = "RESET";
+const dangerColor = "#ef4444";
 
 type Tab = "stats" | "badges" | "settings";
 
@@ -103,7 +107,19 @@ export default function ProfilePage() {
     newCards: number; weakFlag: boolean;
   }> | undefined;
   const [activeTab, setActiveTab] = useState<Tab>("stats");
+  const [resetArming, setResetArming] = useState(false);
+  const [resetPhrase, setResetPhrase] = useState("");
   const sound = useSoundEngine();
+
+  const handleReset = () => {
+    resetPersistedData();
+    window.location.reload();
+  };
+
+  const cancelReset = () => {
+    setResetArming(false);
+    setResetPhrase("");
+  };
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "stats", label: "Stats" },
@@ -316,6 +332,124 @@ export default function ProfilePage() {
                       Sound: {sound.isEnabled() ? "ON" : "OFF"}
                     </span>
                   </button>
+                </div>
+
+                <div>
+                  <h2
+                    className="text-[9px] tracking-widest uppercase mb-3"
+                    style={{ color: dangerColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.85 }}
+                  >
+                    Danger Zone
+                  </h2>
+                  <div
+                    className="rounded-lg p-3 sm:p-4 space-y-3"
+                    style={{
+                      background: `${dangerColor}08`,
+                      border: `1px solid ${dangerColor}28`,
+                    }}
+                  >
+                    <p className="text-[11px] leading-relaxed" style={{ color: "#e6ebf5" }}>
+                      Wipes all local progress, stories, profile, and session data from this
+                      browser. The app reseeds defaults on reload. This cannot be undone.
+                    </p>
+
+                    {!resetArming ? (
+                      <button
+                        onClick={() => setResetArming(true)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200"
+                        style={{
+                          background: `${dangerColor}10`,
+                          border: `1px solid ${dangerColor}40`,
+                          color: dangerColor,
+                        }}
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke={dangerColor}
+                          strokeWidth="1.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 4h10" />
+                          <path d="M5 4V2.5h6V4" />
+                          <path d="M4 4l1 9.5h6L12 4" />
+                          <line x1="6.5" y1="7" x2="6.5" y2="11" />
+                          <line x1="9.5" y1="7" x2="9.5" y2="11" />
+                        </svg>
+                        <span
+                          className="text-[10px] display-font tracking-wider uppercase"
+                          style={{ color: dangerColor }}
+                        >
+                          Reset all local data
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <label
+                          className="block text-[10px] display-font tracking-wider uppercase"
+                          style={{ color: "#e6ebf5" }}
+                        >
+                          Type <span style={{ color: dangerColor }}>{RESET_PHRASE}</span> to confirm
+                        </label>
+                        <input
+                          type="text"
+                          autoFocus
+                          value={resetPhrase}
+                          onChange={(e) => setResetPhrase(e.target.value)}
+                          placeholder={RESET_PHRASE}
+                          className="w-full px-3 py-2 rounded-lg text-[12px] outline-none"
+                          style={{
+                            background: "rgba(10,14,22,0.6)",
+                            border: `1px solid ${dangerColor}30`,
+                            color: "#ffffff",
+                            fontFamily: "'JetBrains Mono', monospace",
+                            letterSpacing: "0.1em",
+                          }}
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleReset}
+                            disabled={resetPhrase !== RESET_PHRASE}
+                            className="px-3 py-1.5 rounded-lg transition-all duration-200 disabled:cursor-not-allowed"
+                            style={{
+                              background:
+                                resetPhrase === RESET_PHRASE
+                                  ? `${dangerColor}20`
+                                  : `${dangerColor}06`,
+                              border: `1px solid ${
+                                resetPhrase === RESET_PHRASE
+                                  ? `${dangerColor}70`
+                                  : `${dangerColor}20`
+                              }`,
+                              color:
+                                resetPhrase === RESET_PHRASE ? dangerColor : "#6a7288",
+                              opacity: resetPhrase === RESET_PHRASE ? 1 : 0.55,
+                            }}
+                          >
+                            <span className="text-[10px] display-font tracking-wider uppercase">
+                              Confirm Reset
+                            </span>
+                          </button>
+                          <button
+                            onClick={cancelReset}
+                            className="px-3 py-1.5 rounded-lg transition-all duration-200"
+                            style={{
+                              background: `${accentColor}06`,
+                              border: `1px solid ${accentColor}20`,
+                              color: "#e6ebf5",
+                            }}
+                          >
+                            <span className="text-[10px] display-font tracking-wider uppercase">
+                              Cancel
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
