@@ -4,9 +4,14 @@ node_modules/
 # next.js
 .next/
 out/
+.next-export/
 
 # production
 build/
+
+# claude tooling — local-only state
+.claude/settings.local.json
+.claude/worktrees/
 
 # env files
 .env

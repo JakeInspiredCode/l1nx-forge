@@ -85,6 +85,43 @@ lib/
 4. **Unlock** — When 80%+ of a tier's cards reach "qualified" status (interval >= 7 days), the next tier unlocks.
 5. **Interview** — Mock interview mode presents scenario cards under timed conditions with structured rubric feedback.
 
+## Deployment
+
+L1NX has **one source of truth** (`main` branch) and **two functional deployment targets**, differentiated only by build-time env vars. There is no `demo` branch — the same code feeds both. Any improvement merged to `main` reaches both targets the next time each is built.
+
+| Target                                          | Purpose          | Build mode    | Env vars set during build                                  | How it deploys                                |
+|-------------------------------------------------|------------------|---------------|------------------------------------------------------------|-----------------------------------------------|
+| **Vercel** (production)                         | Real app for use | Next.js SSR   | _(none)_                                                   | Auto on every push to `main`                  |
+| **jakebuildsfunthings.com/l1nx** (static demo)  | Showcase build   | Static export | `L1NX_STATIC_EXPORT=1`, `NEXT_PUBLIC_L1NX_DEMO_MODE=1`      | Manual: build locally, upload `.next-export/` |
+
+### How the split works
+
+Three pieces of code branch on env vars at build time:
+
+- **`next.config.js`** — When `L1NX_STATIC_EXPORT=1`, switches to `output: "export"` with `distDir: ".next-export"`. Otherwise keeps the SSR config + redirects (Vercel default).
+- **`lib/data/provider.tsx`** — When `NEXT_PUBLIC_L1NX_DEMO_MODE=1`, also runs `seedDemoIfEmpty()` so the demo opens onto a "lived-in" account (mastery, streak, history) instead of a blank dashboard.
+- **`lib/data/demo-seed.ts`** — The demo-only seeder. Idempotent; only fills empty tables.
+
+The `[missionId]` and `[topicId]` routes are split into thin server components (with `generateStaticParams()`) plus client components, so static export can prerender every mission/topic at build time. This is also a quiet win for Vercel — those pages now SSG instead of fully client-rendering.
+
+### Building the static demo
+
+```bash
+git pull                    # make sure you have the latest main
+npm install                 # if package.json changed
+L1NX_STATIC_EXPORT=1 NEXT_PUBLIC_L1NX_DEMO_MODE=1 npm run build
+# upload the contents of .next-export/ to jakebuildsfunthings.com/l1nx
+```
+
+The output directory `.next-export/` is gitignored — it's regenerated each build.
+
+### When you ship a fix or feature
+
+1. Commit and push to `main`. Vercel auto-deploys.
+2. To update the demo too: pull, run the build command above, upload `.next-export/`.
+
+That's it. No branch maintenance, no cherry-picking.
+
 ## License
 
 MIT
