@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import type {
   Mission,
   MissionStatus,
@@ -31,36 +30,6 @@ export default function MissionPreviewPanel({
   onDeploy,
   onSkipToCheck,
 }: MissionPreviewPanelProps) {
-  const [overflowOpen, setOverflowOpen] = useState(false);
-  const overflowRef = useRef<HTMLDivElement>(null);
-
-  // Reset overflow state when mission changes
-  useEffect(() => {
-    setOverflowOpen(false);
-  }, [mission.id]);
-
-  // Close overflow on outside click / Escape
-  useEffect(() => {
-    if (!overflowOpen) return;
-    const handleClick = (e: MouseEvent) => {
-      if (
-        overflowRef.current &&
-        !overflowRef.current.contains(e.target as Node)
-      ) {
-        setOverflowOpen(false);
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOverflowOpen(false);
-    };
-    window.addEventListener("mousedown", handleClick);
-    window.addEventListener("keydown", handleKey);
-    return () => {
-      window.removeEventListener("mousedown", handleClick);
-      window.removeEventListener("keydown", handleKey);
-    };
-  }, [overflowOpen]);
-
   const totalMinutes = mission.defaultLoadout.reduce(
     (sum, s) => sum + s.estimatedMinutes,
     0,
@@ -71,10 +40,7 @@ export default function MissionPreviewPanel({
   const isAccomplished = status === "accomplished";
 
   const handleDeploy = () => onDeploy(mission.id, mission.defaultLoadout);
-  const handleSkip = () => {
-    setOverflowOpen(false);
-    onSkipToCheck(mission.id);
-  };
+  const handleSkip = () => onSkipToCheck(mission.id);
 
   return (
     <div
@@ -134,38 +100,14 @@ export default function MissionPreviewPanel({
             </span>
           </div>
         ) : (
-          <div className="flex items-stretch gap-2">
-            <ActionButton
-              onClick={handleDeploy}
-              variant={isAccomplished ? "secondary" : "primary"}
-              size="lg"
-              className="flex-1"
-            >
-              {isAccomplished ? "Review Mission" : "▶ Deploy Mission"}
-            </ActionButton>
-            <div className="relative" ref={overflowRef}>
-              <button
-                onClick={() => setOverflowOpen((v) => !v)}
-                aria-label="More actions"
-                className="h-full px-2.5 text-[#8eafc8] hover:text-[#e0e4ec] border border-v2-border hover:border-[#8eafc8]/40 rounded text-base leading-none transition-colors"
-              >
-                ⋯
-              </button>
-              {overflowOpen && !isAccomplished && (
-                <div
-                  className="absolute right-0 top-full mt-1 z-20 holo-panel min-w-[150px] p-1 animate-[holoMaterialize_0.18s_ease-out]"
-                  style={{ borderColor: `${campaignColor}30` }}
-                >
-                  <button
-                    onClick={handleSkip}
-                    className="w-full text-left px-2 py-1.5 text-[11px] text-[#c8d6e5] hover:bg-v2-bg-elevated/60 rounded"
-                  >
-                    Skip to Check
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          <ActionButton
+            onClick={handleDeploy}
+            variant={isAccomplished ? "secondary" : "primary"}
+            size="lg"
+            className="w-full"
+          >
+            {isAccomplished ? "Review Mission" : "▶ Deploy Mission"}
+          </ActionButton>
         )}
       </div>
 
@@ -206,7 +148,7 @@ export default function MissionPreviewPanel({
 
       {/* Knowledge Check */}
       <div
-        className="px-2 py-2 rounded"
+        className="px-2.5 py-2.5 rounded"
         style={{
           background: `${campaignColor}08`,
           border: `1px solid ${campaignColor}12`,
@@ -221,6 +163,38 @@ export default function MissionPreviewPanel({
         <span className="text-[9px] telemetry-font text-[#8eafc8]">
           Pass: {Math.round(mission.knowledgeCheck.passThreshold * 100)}%
         </span>
+
+        {/* Final Boss shortcut — skip the loadout, go straight to the assessment.
+            Red styling makes it clear this is the challenge path. */}
+        {isDeployable && !isAccomplished && (
+          <button
+            onClick={handleSkip}
+            className="w-full mt-2.5 px-2 py-1.5 rounded text-[11px] display-font tracking-[0.14em] uppercase font-bold transition-all"
+            style={{
+              background:
+                "linear-gradient(180deg, #dc2626 0%, #991b1b 100%)",
+              border: "1px solid #ef4444",
+              color: "#fff5f5",
+              textShadow: "0 0 6px rgba(220, 38, 38, 0.6)",
+              boxShadow:
+                "0 0 12px rgba(220, 38, 38, 0.35), inset 0 0 8px rgba(254, 202, 202, 0.1)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background =
+                "linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)";
+              e.currentTarget.style.boxShadow =
+                "0 0 18px rgba(239, 68, 68, 0.55), inset 0 0 8px rgba(254, 202, 202, 0.18)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background =
+                "linear-gradient(180deg, #dc2626 0%, #991b1b 100%)";
+              e.currentTarget.style.boxShadow =
+                "0 0 12px rgba(220, 38, 38, 0.35), inset 0 0 8px rgba(254, 202, 202, 0.1)";
+            }}
+          >
+            ▶▶ Jump to Mission Final Boss
+          </button>
+        )}
       </div>
     </div>
   );
