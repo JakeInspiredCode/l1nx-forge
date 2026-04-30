@@ -22,6 +22,8 @@ interface StatsSidebarProps {
   decayingMissionIds: string[];
   hasNoCampaign: boolean;
   campaignColor: string;
+  enrolled: boolean;
+  onEnroll: () => void;
 }
 
 type PanelSize = "full" | "mid" | "compact";
@@ -364,6 +366,8 @@ export default function StatsSidebar({
   decayingMissionIds,
   hasNoCampaign,
   campaignColor,
+  enrolled,
+  onEnroll,
 }: StatsSidebarProps) {
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -460,6 +464,22 @@ export default function StatsSidebar({
                   </span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Start Campaign CTA — shown when campaign is selected but not enrolled */}
+          {campaign && !enrolled && (
+            <div className="mb-3">
+              <ActionButton
+                onClick={onEnroll}
+                size="sm"
+                className="w-full"
+              >
+                Start Campaign
+              </ActionButton>
+              <p className="text-[10px] telemetry-font text-[#8eafc8] text-center mt-1.5 opacity-80">
+                Enroll to unlock missions
+              </p>
             </div>
           )}
 

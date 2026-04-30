@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "@/lib/convex-shim";
+import { useQuery } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import { ALL_CAMPAIGNS, getMissionsForCampaign, ALL_SECTORS } from "@/lib/seeds/campaigns";
 import type { Sector, SectorProgress, MissionStatus } from "@/lib/types/campaign";
@@ -11,7 +11,7 @@ import ScanOverlay from "@/components/ui/scan-overlay";
 import GalaxyHeader from "./galaxy-header";
 import SectorNode from "./sector-node";
 
-import SectorOverlay from "./sector-overlay";
+import SectorPreviewPanel from "./sector-preview-panel";
 import StatsPanel from "./stats-panel";
 
 /** Animated energy particles flowing along a bezier curve */
@@ -88,11 +88,9 @@ export default function GalaxyMap() {
   const campaignStates = useQuery<Doc<CampaignProgressFields>[]>(api.forgeCampaigns.getAllCampaignStates);
   const missionStates = useQuery<Doc<MissionProgressFields>[]>(api.forgeMissions.getAllMissionStates);
   const topicProgress = useQuery<Doc<ProgressFields>[]>(api.forgeProgress.getAll);
-  const enrollCampaign = useMutation(api.forgeCampaigns.enrollCampaign);
 
-  const [hoveredSector, setHoveredSector] = useState<Sector | null>(null);
-  const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [previewSector, setPreviewSector] = useState<Sector | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isLoading = !profile || !campaignStates || !missionStates;
 
@@ -168,36 +166,43 @@ export default function GalaxyMap() {
     : undefined;
 
   const handleSectorHover = useCallback((sector: Sector | null) => {
-    setHoveredSector(sector);
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    if (sector) {
+      setPreviewSector(sector);
+    } else {
+      hideTimerRef.current = setTimeout(() => {
+        setPreviewSector(null);
+      }, 300);
+    }
   }, []);
 
   const handleSectorClick = useCallback((sector: Sector) => {
-    setSelectedSector(sector);
-    setHoveredSector(null);
+    const campaignId = sector.campaignIds[0];
+    if (!campaignId) return;
+    router.push(`/missions?campaign=${campaignId}`);
+  }, [router]);
+
+  const handlePanelEnter = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
   }, []);
 
-  const handleDismissOverlay = useCallback(() => {
-    setSelectedSector(null);
+  const handlePanelLeave = useCallback(() => {
+    hideTimerRef.current = setTimeout(() => {
+      setPreviewSector(null);
+    }, 300);
   }, []);
 
-  const handleVolunteer = useCallback(async (campaignId: string) => {
-    await enrollCampaign({ campaignId });
-  }, [enrollCampaign]);
-
-  const handleEmbark = useCallback(() => {
-    const campaignId = selectedSector?.campaignIds[0];
-    router.push(campaignId ? `/missions?campaign=${campaignId}` : "/missions");
-  }, [router, selectedSector]);
-
-  // Same optimization as system-map: only track mouse position while a sector
-  // is hovered, so idle movement doesn't cascade re-renders across the map.
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!hoveredSector) return;
-      setMousePos({ x: e.clientX, y: e.clientY });
-    },
-    [hoveredSector],
-  );
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
 
   // Energy stream connections
   const lanes: [Sector, Sector][] = useMemo(() => {
@@ -215,7 +220,7 @@ export default function GalaxyMap() {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-56px)] w-full relative overflow-hidden" onMouseMove={handleMouseMove}>
+    <div className="h-[calc(100vh-56px)] w-full relative overflow-hidden">
       {/* Starfield background */}
       <StarfieldCanvas />
       <ScanOverlay />
@@ -281,38 +286,38 @@ export default function GalaxyMap() {
           </div>
         </div>
 
-        {/* Stats panel — glass panel */}
-        <div className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none">
+        {/* Right sidebar — Navigation Board (default) or Sector Preview (on hover) */}
+        <div
+          className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none"
+          onMouseEnter={handlePanelEnter}
+          onMouseLeave={handlePanelLeave}
+        >
           <div className="glass-panel-header">
-            <span>Navigation Board</span>
+            <span>{previewSector ? "Sector Preview" : "Navigation Board"}</span>
           </div>
           <div className="flex-1 glass-panel rounded-b-lg overflow-hidden">
-            <StatsPanel
-              totalXp={profile?.totalPoints ?? 0}
-              streak={profile?.streak ?? 0}
-              sectorsExplored={sectorsExplored}
-              totalSectors={ALL_SECTORS.length}
-              missionsAccomplished={totalAccomplished}
-              totalMissions={totalMissions}
-              activeCampaignTitle={activeCampaign?.title}
-              activeCampaignPct={activeCampaignPct}
-              topicProgress={topicProgress ?? []}
-            />
+            {previewSector ? (
+              <SectorPreviewPanel
+                sector={previewSector}
+                progress={sectorProgressMap[previewSector.id]}
+                missionStatuses={missionStatusMap}
+              />
+            ) : (
+              <StatsPanel
+                totalXp={profile?.totalPoints ?? 0}
+                streak={profile?.streak ?? 0}
+                sectorsExplored={sectorsExplored}
+                totalSectors={ALL_SECTORS.length}
+                missionsAccomplished={totalAccomplished}
+                totalMissions={totalMissions}
+                activeCampaignTitle={activeCampaign?.title}
+                activeCampaignPct={activeCampaignPct}
+                topicProgress={topicProgress ?? []}
+              />
+            )}
           </div>
         </div>
       </div>
-
-      {/* Sector overlay */}
-      {selectedSector && (
-        <SectorOverlay
-          sector={selectedSector}
-          progress={sectorProgressMap[selectedSector.id]}
-          missionStatuses={missionStatusMap}
-          onVolunteer={handleVolunteer}
-          onEmbark={handleEmbark}
-          onDismiss={handleDismissOverlay}
-        />
-      )}
     </div>
   );
 }

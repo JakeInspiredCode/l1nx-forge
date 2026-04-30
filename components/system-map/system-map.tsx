@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@/lib/convex-shim";
+import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
 import type { Doc, CampaignProgressFields, MissionProgressFields, ProfileFields } from "@/lib/data/schema";
 import { ALL_CAMPAIGNS, getMissionsForCampaign } from "@/lib/seeds/campaigns";
@@ -13,7 +13,7 @@ import ScanOverlay from "@/components/ui/scan-overlay";
 import CentralStar from "./central-star";
 import MissionNode from "./mission-node";
 import CampaignPath from "./campaign-path";
-import MissionOverlay from "./mission-overlay";
+import MissionPreviewPanel from "./mission-preview-panel";
 import StatsSidebar from "./stats-sidebar";
 
 // ── Orbital position computation ──
@@ -98,10 +98,12 @@ export default function SystemMap() {
   const profile = useQuery<Doc<ProfileFields> | null>(api.forgeProfile.get);
   const campaignStates = useQuery<Doc<CampaignProgressFields>[]>(api.forgeCampaigns.getAllCampaignStates);
   const missionStates = useQuery<Doc<MissionProgressFields>[]>(api.forgeMissions.getAllMissionStates);
+  const enrollCampaign = useMutation(api.forgeCampaigns.enrollCampaign);
 
   const [hoveredMission, setHoveredMission] = useState<Mission | null>(null);
-  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+  const [pinnedMission, setPinnedMission] = useState<Mission | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isLoading = !profile || !campaignStates || !missionStates;
 
@@ -185,23 +187,53 @@ export default function SystemMap() {
     [missions, orbitalPositions],
   );
 
-  // Selected mission number
-  const selectedMissionNumber = selectedMission
-    ? missions.findIndex((m) => m.id === selectedMission.id) + 1
+  // displayMission is what the side panel shows: pin overrides hover.
+  const displayMission = pinnedMission ?? hoveredMission;
+  const displayMissionNumber = displayMission
+    ? missions.findIndex((m) => m.id === displayMission.id) + 1
     : 0;
 
   const handleMissionHover = useCallback((mission: Mission | null) => {
-    setHoveredMission(mission);
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    if (mission) {
+      setHoveredMission(mission);
+    } else {
+      hideTimerRef.current = setTimeout(() => {
+        setHoveredMission(null);
+      }, 300);
+    }
   }, []);
 
   const handleMissionClick = useCallback((mission: Mission) => {
-    setSelectedMission(mission);
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+    setPinnedMission(mission);
     setHoveredMission(null);
   }, []);
 
-  const handleDismissOverlay = useCallback(() => {
-    setSelectedMission(null);
+  const handleUnpin = useCallback(() => {
+    setPinnedMission(null);
+    setHoveredMission(null);
   }, []);
+
+  const handlePanelEnter = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }, []);
+
+  const handlePanelLeave = useCallback(() => {
+    if (pinnedMission) return;
+    hideTimerRef.current = setTimeout(() => {
+      setHoveredMission(null);
+    }, 300);
+  }, [pinnedMission]);
 
   const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
     sessionStorage.setItem(
@@ -214,6 +246,17 @@ export default function SystemMap() {
   const handleSkipToCheck = useCallback((missionId: string) => {
     router.push(`/missions/${missionId}?skipToCheck=true`);
   }, [router]);
+
+  const handleEnroll = useCallback(async () => {
+    if (!activeCampaignId) return;
+    await enrollCampaign({ campaignId: activeCampaignId });
+  }, [activeCampaignId, enrollCampaign]);
+
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
 
   // Only track mouse position while a mission is hovered. Without this guard,
   // every idle mouse movement re-renders the whole map (hundreds of times per
@@ -369,32 +412,57 @@ export default function SystemMap() {
           </div>
         </div>
 
-        {/* Stats sidebar — glass panel, wider */}
-        <div className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none">
+        {/* Right sidebar — Mission Briefing (default) or Mission Preview (on hover/pin) */}
+        <div
+          className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none"
+          onMouseEnter={handlePanelEnter}
+          onMouseLeave={handlePanelLeave}
+        >
           <div className="glass-panel-header">
-            <span>Mission Briefing</span>
+            <span>
+              {displayMission
+                ? `Mission ${displayMissionNumber}${pinnedMission ? " · Pinned" : ""}`
+                : "Mission Briefing"}
+            </span>
           </div>
           <div className="flex-1 glass-panel rounded-b-lg overflow-hidden">
-            <StatsSidebar
-              campaign={activeCampaign}
-              missions={missions}
-              missionStatuses={effectiveStatuses}
-              completedCount={completedCount}
-              totalMissions={missions.length}
-              currentMissionIndex={currentMissionIndex}
-              campaignXp={campaignXp}
-              totalXp={profile?.totalPoints ?? 0}
-              streak={profile?.streak ?? 0}
-              decayingMissionIds={decayingMissionIds}
-              hasNoCampaign={hasNoCampaign}
-              campaignColor={campaignColor}
-            />
+            {displayMission ? (
+              <MissionPreviewPanel
+                mission={displayMission}
+                status={effectiveStatuses[displayMission.id] ?? "locked"}
+                missionNumber={displayMissionNumber}
+                totalMissions={missions.length}
+                campaignColor={campaignColor}
+                enrolled={enrolledState?.enrolled ?? false}
+                pinned={!!pinnedMission}
+                onDeploy={handleDeploy}
+                onSkipToCheck={handleSkipToCheck}
+                onUnpin={handleUnpin}
+              />
+            ) : (
+              <StatsSidebar
+                campaign={activeCampaign}
+                missions={missions}
+                missionStatuses={effectiveStatuses}
+                completedCount={completedCount}
+                totalMissions={missions.length}
+                currentMissionIndex={currentMissionIndex}
+                campaignXp={campaignXp}
+                totalXp={profile?.totalPoints ?? 0}
+                streak={profile?.streak ?? 0}
+                decayingMissionIds={decayingMissionIds}
+                hasNoCampaign={hasNoCampaign}
+                campaignColor={campaignColor}
+                enrolled={enrolledState?.enrolled ?? false}
+                onEnroll={handleEnroll}
+              />
+            )}
           </div>
         </div>
       </div>
 
-      {/* Hover tooltip */}
-      {hoveredMission && !selectedMission && (
+      {/* Hover tooltip — small badge near cursor for instant spatial feedback */}
+      {hoveredMission && !pinnedMission && (
         <MissionTooltip
           mission={hoveredMission}
           missionIndex={missions.findIndex((m) => m.id === hoveredMission.id)}
@@ -402,21 +470,6 @@ export default function SystemMap() {
           status={effectiveStatuses[hoveredMission.id] ?? "locked"}
           mousePos={mousePos}
           campaignColor={campaignColor}
-        />
-      )}
-
-      {/* Mission overlay */}
-      {selectedMission && (
-        <MissionOverlay
-          mission={selectedMission}
-          status={effectiveStatuses[selectedMission.id] ?? "locked"}
-          missionNumber={selectedMissionNumber}
-          totalMissions={missions.length}
-          campaignColor={campaignColor}
-          enrolled={enrolledState?.enrolled ?? false}
-          onDeploy={handleDeploy}
-          onSkipToCheck={handleSkipToCheck}
-          onDismiss={handleDismissOverlay}
         />
       )}
     </div>
