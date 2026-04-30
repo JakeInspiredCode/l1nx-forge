@@ -133,12 +133,12 @@ function BountyActivity({ bountyId }: { bountyId: string }) {
           <button onClick={() => router.back()} className="text-[#8eafc8] hover:text-white text-sm transition-colors" style={{ fontFamily: "'Chakra Petch', sans-serif" }}>← Back</button>
           <div className="h-4 w-px bg-v2-border" />
           <div>
-            <span className="text-[9px] tracking-widest uppercase" style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif" }}>Bounty</span>
+            <span className="text-[11px] tracking-widest uppercase" style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif" }}>Bounty</span>
             <h1 className="display-font text-sm tracking-wider" style={{ color: "#e0e4ec" }}>{bounty.title}</h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-[9px] telemetry-font text-[#8eafc8]">~{bounty.estimatedMinutes} min</span>
-            <span className="text-[9px] telemetry-font" style={{ color: accentColor }}>+{bounty.xpReward} XP</span>
+            <span className="text-[11px] telemetry-font text-[#8eafc8]">~{bounty.estimatedMinutes} min</span>
+            <span className="text-[11px] telemetry-font" style={{ color: accentColor }}>+{bounty.xpReward} XP</span>
           </div>
         </div>
         <div className="flex-1 min-h-0 overflow-auto">
@@ -202,7 +202,7 @@ export default function Arsenal() {
         {/* Category sidebar — glass panel */}
         <div className="w-16 sm:w-20 shrink-0 flex flex-col">
           <div className="glass-panel-header text-center">
-            <span className="text-[8px]">Rack</span>
+            <span>Rack</span>
           </div>
           <div className="flex-1 glass-panel rounded-b-lg flex flex-col items-center py-3 gap-1 overflow-hidden">
             {CATEGORIES.map(({ key, label }) => (
@@ -218,7 +218,7 @@ export default function Arsenal() {
               >
                 <CategoryIcon cat={key} active={activeCategory === key} />
                 <span
-                  className="text-[7px] tracking-widest uppercase"
+                  className="text-[10px] tracking-widest uppercase"
                   style={{
                     fontFamily: "'Chakra Petch', sans-serif",
                     color: activeCategory === key ? accentColor : "#6a7288",
@@ -269,7 +269,7 @@ export default function Arsenal() {
                         style={{ background: accentColor, boxShadow: `0 0 4px ${accentColor}60` }}
                       />
                       <h3
-                        className="text-[11px] display-font tracking-wider uppercase truncate group-hover:text-white transition-colors"
+                        className="text-[13px] display-font tracking-wider uppercase truncate group-hover:text-white transition-colors"
                         style={{ color: "#e0e4ec" }}
                       >
                         {activity.title}
@@ -277,20 +277,20 @@ export default function Arsenal() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-[10px] text-[#8eafc8] leading-snug mb-2 line-clamp-1 pl-3">
+                    <p className="text-[12px] text-[#8eafc8] leading-snug mb-2 line-clamp-1 pl-3">
                       {activity.description}
                     </p>
 
                     {/* Meta row */}
                     <div className="flex items-center gap-2 pl-3">
-                      <span className="text-[8px] telemetry-font text-[#6a7288]">
+                      <span className="text-[11px] telemetry-font text-[#6a7288]">
                         ~{activity.estimatedMinutes}m
                       </span>
                       {activity.difficulty && (
                         <>
-                          <span className="text-[8px] text-[#333845]">|</span>
+                          <span className="text-[11px] text-[#333845]">|</span>
                           <span
-                            className="text-[8px] telemetry-font uppercase tracking-wider"
+                            className="text-[11px] telemetry-font uppercase tracking-wider"
                             style={{ color: diffColor(activity.difficulty) }}
                           >
                             {activity.difficulty}
@@ -299,8 +299,8 @@ export default function Arsenal() {
                       )}
                       {activity.topics.length > 0 && (
                         <>
-                          <span className="text-[8px] text-[#333845]">|</span>
-                          <span className="text-[8px] telemetry-font text-[#6a7288] truncate">
+                          <span className="text-[11px] text-[#333845]">|</span>
+                          <span className="text-[11px] telemetry-font text-[#6a7288] truncate">
                             {activity.topics.slice(0, 2).join(", ")}
                           </span>
                         </>

@@ -116,7 +116,7 @@ export default function SectorOverlay({
               >
                 {sector.title}
               </h2>
-              <span className="text-[9px] telemetry-font text-v2-text-muted uppercase tracking-wider">
+              <span className="text-[11px] telemetry-font text-v2-text-muted uppercase tracking-wider">
                 Sector
               </span>
             </div>
@@ -180,7 +180,7 @@ export default function SectorOverlay({
                     >
                       {getMissionStatusIcon(mission.id)}
                     </span>
-                    <span className="text-v2-text-dim telemetry-font text-[9px] w-4 text-right opacity-50">
+                    <span className="text-v2-text-dim telemetry-font text-[11px] w-4 text-right opacity-50">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span
@@ -195,7 +195,7 @@ export default function SectorOverlay({
                     >
                       {mission.title}
                     </span>
-                    <span className="text-[9px] telemetry-font text-v2-text-muted">
+                    <span className="text-[11px] telemetry-font text-v2-text-muted">
                       {mission.estimatedMinutes}m
                     </span>
                   </div>

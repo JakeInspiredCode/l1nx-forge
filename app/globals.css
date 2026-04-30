@@ -114,14 +114,10 @@ code, pre, .mono {
    Room Accent System — CSS custom properties shift per room
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* 10px root — the Tailwind rem scale is relative to html font-size, so all
-   text-*, p-*, w-*, gap-*, rounded-* utilities shrink proportionally (1rem = 10px).
-   Effect: text-base 16→10px, text-sm 14→8.75, text-2xl 24→15, text-4xl 36→22.5.
-   Inline px-based lesson styles (components/chapter/*, linux-foundations) are
-   unaffected and remain controlled by the per-lesson size toggle. */
-html {
-  font-size: 62.5%;
-}
+/* Standard 16px root — Tailwind's text-*, p-*, gap-*, rounded-* utilities
+   render at their designed sizes (text-base = 16px, text-sm = 14px, etc.).
+   Inline px-based lesson styles (components/chapter/*, linux-foundations)
+   remain controlled by the per-lesson size toggle. */
 
 :root {
   --room-accent: var(--color-v2-cyan);

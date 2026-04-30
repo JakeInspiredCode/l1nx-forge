@@ -129,7 +129,7 @@ export default function MissionOverlay({
                 {missionNumber}
               </div>
               <div>
-                <span className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider">
+                <span className="text-[11px] telemetry-font text-[#8eafc8] uppercase tracking-wider">
                   Mission {missionNumber}
                 </span>
                 <h2
@@ -160,7 +160,7 @@ export default function MissionOverlay({
 
             {/* Loadout with inline toggles */}
             <div className="mb-4">
-              <h3 className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider mb-2">
+              <h3 className="text-[11px] telemetry-font text-[#8eafc8] uppercase tracking-wider mb-2">
                 Mission Loadout
               </h3>
               <div className="space-y-1">
@@ -186,7 +186,7 @@ export default function MissionOverlay({
                       }`}
                     >
                       {(enabled[step.id] || step.required) && (
-                        <span className="text-v2-cyan text-[8px]">✓</span>
+                        <span className="text-v2-cyan text-[10px]">✓</span>
                       )}
                     </div>
 
@@ -194,25 +194,25 @@ export default function MissionOverlay({
                       {STEP_TYPE_ICONS[step.type] ?? "•"}
                     </span>
                     <span className="text-v2-text-dim flex-1 truncate">{step.label}</span>
-                    <span className="text-[9px] telemetry-font text-v2-text-muted">
+                    <span className="text-[11px] telemetry-font text-v2-text-muted">
                       {step.estimatedMinutes}m
                     </span>
                     {step.required && (
-                      <span className="text-[8px] telemetry-font text-v2-text-muted opacity-50">
+                      <span className="text-[10px] telemetry-font text-v2-text-muted opacity-50">
                         REQ
                       </span>
                     )}
                   </button>
                 ))}
               </div>
-              <div className="text-[9px] telemetry-font text-v2-text-muted mt-2">
+              <div className="text-[11px] telemetry-font text-v2-text-muted mt-2">
                 {activeSteps.length} steps · ~{totalMinutes} min
               </div>
             </div>
 
             {/* Knowledge Check */}
             <div className="mb-4 px-2.5 py-2.5 rounded" style={{ background: `${campaignColor}08`, border: `1px solid ${campaignColor}12` }}>
-              <h3 className="text-[9px] telemetry-font text-[#8eafc8] uppercase tracking-wider mb-1">
+              <h3 className="text-[11px] telemetry-font text-[#8eafc8] uppercase tracking-wider mb-1">
                 Knowledge Check
               </h3>
               <p className="text-[11px] text-[#c8d6e5]">{mission.knowledgeCheck.description}</p>

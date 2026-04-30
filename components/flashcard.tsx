@@ -101,7 +101,7 @@ export default function Flashcard({ card, onRate, index, total }: FlashcardProps
                 </div>
               </div>
               <div className="text-center mt-2">
-                <span className="text-[10px] text-forge-text-muted">Space or tap to reveal</span>
+                <span className="text-[11px] text-forge-text-muted">Space or tap to reveal</span>
               </div>
             </div>
           </div>

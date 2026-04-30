@@ -48,7 +48,7 @@ function GlowGauge({
   const displayValue = max ? `${value}/${max}` : value.toLocaleString();
 
   const px = size === "mid" ? "44px" : "60px";
-  const labelSize = size === "mid" ? "text-[9px]" : "text-[10px]";
+  const labelSize = size === "mid" ? "text-[10px]" : "text-[11px]";
 
   return (
     <div className="flex flex-col items-center gap-0.5">

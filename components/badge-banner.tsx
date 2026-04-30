@@ -83,7 +83,7 @@ export default function BadgeBanner() {
               {icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-widest text-forge-accent mono mb-0.5">
+              <p className="text-[11px] uppercase tracking-widest text-forge-accent mono mb-0.5">
                 Badge Earned
               </p>
               <p className="text-base font-bold text-forge-text truncate">

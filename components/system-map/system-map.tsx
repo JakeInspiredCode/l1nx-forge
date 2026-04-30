@@ -475,12 +475,12 @@ function MissionTooltip({
         />
         <div className="flex items-center gap-2 mb-1">
           <span
-            className="text-[8px] telemetry-font tracking-wider uppercase"
+            className="text-[10px] telemetry-font tracking-wider uppercase"
             style={{ color: statusColor[status] }}
           >
             {statusLabel[status]}
           </span>
-          <span className="text-[7px] telemetry-font text-[#6a7288]">
+          <span className="text-[10px] telemetry-font text-[#6a7288]">
             Mission {missionIndex + 1}
           </span>
         </div>
@@ -490,7 +490,7 @@ function MissionTooltip({
         >
           {mission.title}
         </div>
-        <div className="flex items-center gap-2 text-[9px] telemetry-font text-[#8eafc8]">
+        <div className="flex items-center gap-2 text-[11px] telemetry-font text-[#8eafc8]">
           <span>{mission.estimatedMinutes} min</span>
           <span className="text-[#444b5c]">|</span>
           <span>{mission.defaultLoadout.length} steps</span>

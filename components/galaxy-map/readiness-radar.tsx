@@ -342,7 +342,7 @@ export default function ReadinessRadar({ progress }: ReadinessRadarProps) {
     <div className="flex flex-col items-center h-full">
       {/* Header */}
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[7px] telemetry-font tracking-[0.18em] text-v2-cyan/50 uppercase">
+        <span className="text-[10px] telemetry-font tracking-[0.18em] text-v2-cyan/50 uppercase">
           Readiness
         </span>
         <span

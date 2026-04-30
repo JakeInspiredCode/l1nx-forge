@@ -71,7 +71,7 @@ function ProfileGauge({ value, label, suffix, color, max }: { value: number | st
           )}
         </svg>
       </div>
-      <span className="text-[7px] display-font tracking-[0.14em] text-[#8eafc8] uppercase">{label}</span>
+      <span className="text-[10px] display-font tracking-[0.14em] text-[#8eafc8] uppercase">{label}</span>
     </div>
   );
 }
@@ -174,12 +174,12 @@ export default function ProfilePage() {
             </div>
 
             <div
-              className="text-[10px] display-font tracking-[0.2em] uppercase mb-1"
+              className="text-[11px] display-font tracking-[0.2em] uppercase mb-1"
               style={{ color: accentColor }}
             >
               Operator
             </div>
-            <div className="text-[9px] telemetry-font text-[#8eafc8] mb-4">
+            <div className="text-[11px] telemetry-font text-[#8eafc8] mb-4">
               {profile?.streak ?? 0}d streak
             </div>
 
@@ -208,7 +208,7 @@ export default function ProfilePage() {
                   color: activeTab === tab.id ? accentColor : "#6a7288",
                   borderBottom: activeTab === tab.id ? `1px solid ${accentColor}60` : "1px solid transparent",
                   fontFamily: "'Chakra Petch', sans-serif",
-                  fontSize: 10,
+                  fontSize: 12,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                 }}
@@ -224,7 +224,7 @@ export default function ProfilePage() {
               <div className="max-w-xl space-y-4">
                 <div>
                   <h2
-                    className="text-[9px] tracking-widest uppercase mb-3"
+                    className="text-[11px] tracking-widest uppercase mb-3"
                     style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.7 }}
                   >
                     Topic Mastery
@@ -254,12 +254,12 @@ export default function ProfilePage() {
               <div className="max-w-xl">
                 <div className="flex items-center justify-between mb-3">
                   <h2
-                    className="text-[9px] tracking-widest uppercase"
+                    className="text-[11px] tracking-widest uppercase"
                     style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.7 }}
                   >
                     Earned Badges
                   </h2>
-                  <span className="text-[9px] telemetry-font text-[#6a7288]">
+                  <span className="text-[11px] telemetry-font text-[#6a7288]">
                     {profile?.badges?.length ?? 0} earned
                   </span>
                 </div>
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                         }}
                       >
                         <BadgeIcon earned />
-                        <span className="text-[9px] text-[#8eafc8] text-center display-font tracking-wider uppercase">
+                        <span className="text-[11px] text-[#8eafc8] text-center display-font tracking-wider uppercase">
                           {badge.replace(/-/g, " ")}
                         </span>
                       </div>
@@ -300,7 +300,7 @@ export default function ProfilePage() {
               <div className="max-w-xl space-y-4">
                 <div>
                   <h2
-                    className="text-[9px] tracking-widest uppercase mb-3"
+                    className="text-[11px] tracking-widest uppercase mb-3"
                     style={{ color: accentColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.7 }}
                   >
                     Audio
@@ -326,7 +326,7 @@ export default function ProfilePage() {
                       )}
                     </svg>
                     <span
-                      className="text-[10px] display-font tracking-wider uppercase"
+                      className="text-[11px] display-font tracking-wider uppercase"
                       style={{ color: sound.isEnabled() ? accentColor : "#6a7288" }}
                     >
                       Sound: {sound.isEnabled() ? "ON" : "OFF"}
@@ -336,7 +336,7 @@ export default function ProfilePage() {
 
                 <div>
                   <h2
-                    className="text-[9px] tracking-widest uppercase mb-3"
+                    className="text-[11px] tracking-widest uppercase mb-3"
                     style={{ color: dangerColor, fontFamily: "'Chakra Petch', sans-serif", opacity: 0.85 }}
                   >
                     Danger Zone
@@ -380,7 +380,7 @@ export default function ProfilePage() {
                           <line x1="9.5" y1="7" x2="9.5" y2="11" />
                         </svg>
                         <span
-                          className="text-[10px] display-font tracking-wider uppercase"
+                          className="text-[11px] display-font tracking-wider uppercase"
                           style={{ color: dangerColor }}
                         >
                           Reset all local data
@@ -389,7 +389,7 @@ export default function ProfilePage() {
                     ) : (
                       <div className="space-y-2">
                         <label
-                          className="block text-[10px] display-font tracking-wider uppercase"
+                          className="block text-[11px] display-font tracking-wider uppercase"
                           style={{ color: "#e6ebf5" }}
                         >
                           Type <span style={{ color: dangerColor }}>{RESET_PHRASE}</span> to confirm
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                               opacity: resetPhrase === RESET_PHRASE ? 1 : 0.55,
                             }}
                           >
-                            <span className="text-[10px] display-font tracking-wider uppercase">
+                            <span className="text-[11px] display-font tracking-wider uppercase">
                               Confirm Reset
                             </span>
                           </button>
@@ -442,7 +442,7 @@ export default function ProfilePage() {
                               color: "#e6ebf5",
                             }}
                           >
-                            <span className="text-[10px] display-font tracking-wider uppercase">
+                            <span className="text-[11px] display-font tracking-wider uppercase">
                               Cancel
                             </span>
                           </button>
