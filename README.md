@@ -89,38 +89,70 @@ lib/
 
 L1NX has **one source of truth** (`main` branch) and **two functional deployment targets**, differentiated only by build-time env vars. There is no `demo` branch — the same code feeds both. Any improvement merged to `main` reaches both targets the next time each is built.
 
-| Target                                          | Purpose          | Build mode    | Env vars set during build                                  | How it deploys                                |
-|-------------------------------------------------|------------------|---------------|------------------------------------------------------------|-----------------------------------------------|
-| **Vercel** (production)                         | Real app for use | Next.js SSR   | _(none)_                                                   | Auto on every push to `main`                  |
-| **jakebuildsfunthings.com/l1nx** (static demo)  | Showcase build   | Static export | `L1NX_STATIC_EXPORT=1`, `NEXT_PUBLIC_L1NX_DEMO_MODE=1`      | Manual: build locally, upload `.next-export/` |
+| Target                                                | Purpose          | Build mode    | Env vars during build                                                                | How it deploys                                                                              |
+|-------------------------------------------------------|------------------|---------------|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| **Vercel** (production)                               | Real app for use | Next.js SSR   | _(none)_                                                                             | Auto on every push to `main`                                                                |
+| **jakebuildsfunthings.com/l1nx-forge** (static demo)  | Showcase build   | Static export | `L1NX_STATIC_EXPORT=1`<br>`NEXT_PUBLIC_L1NX_DEMO_MODE=1`<br>`L1NX_BASE_PATH=/l1nx-forge` | `npm run deploy:demo` — builds, copies into the personal-site repo, runs `wrangler deploy`  |
 
 ### How the split works
 
-Three pieces of code branch on env vars at build time:
+Three pieces of code branch on env vars at build time, so the same source produces both targets:
 
-- **`next.config.js`** — When `L1NX_STATIC_EXPORT=1`, switches to `output: "export"` with `distDir: ".next-export"`. Otherwise keeps the SSR config + redirects (Vercel default).
-- **`lib/data/provider.tsx`** — When `NEXT_PUBLIC_L1NX_DEMO_MODE=1`, also runs `seedDemoIfEmpty()` so the demo opens onto a "lived-in" account (mastery, streak, history) instead of a blank dashboard.
-- **`lib/data/demo-seed.ts`** — The demo-only seeder. Idempotent; only fills empty tables.
+- **[next.config.js](next.config.js)** — When `L1NX_STATIC_EXPORT=1`, switches to `output: "export"` with `distDir: ".next-export"`, `trailingSlash: true`, unoptimized images, and `basePath: process.env.L1NX_BASE_PATH || ""`. Otherwise keeps the SSR config + redirects (Vercel default).
+- **[lib/data/provider.tsx](lib/data/provider.tsx)** — When `NEXT_PUBLIC_L1NX_DEMO_MODE=1`, also runs `seedDemoIfEmpty()` so the demo opens onto a "lived-in" account (mastery, streak, review history, sample stories) instead of a blank dashboard.
+- **[lib/data/demo-seed.ts](lib/data/demo-seed.ts)** — The demo-only seeder. Idempotent; only fills empty tables after the normal seed runs.
 
-The `[missionId]` and `[topicId]` routes are split into thin server components (with `generateStaticParams()`) plus client components, so static export can prerender every mission/topic at build time. This is also a quiet win for Vercel — those pages now SSG instead of fully client-rendering.
+The `[missionId]` and `[topicId]` routes are also split into thin server components (with `generateStaticParams()`) plus client components, so static export can prerender every mission/topic at build time. This is unconditional, but it's a quiet win for Vercel too — those pages now SSG instead of fully client-rendering.
 
-### Building the static demo
+### How the static demo is hosted
 
-```bash
-git pull                    # make sure you have the latest main
-npm install                 # if package.json changed
-L1NX_STATIC_EXPORT=1 NEXT_PUBLIC_L1NX_DEMO_MODE=1 npm run build
-# upload the contents of .next-export/ to jakebuildsfunthings.com/l1nx
+The static demo lives at the path `/l1nx-forge` on the personal site **jakebuildsfunthings.com**, which is a Cloudflare Workers static-asset deployment from a separate repo at [github.com/jakeinspiredcode/jakebuildsfunthings](https://github.com/jakeinspiredcode/jakebuildsfunthings).
+
+```
+~/Projects/jakebuildsfunthings/        # the personal site repo (Cloudflare Workers)
+├── index.html                         # site home
+├── wrangler.jsonc                     # `wrangler deploy` ships the whole dir
+└── l1nx-forge/                        # ← THIS is generated by `npm run deploy:demo`
+    ├── _next/                         #   from the L1NX repo. Don't hand-edit.
+    ├── missions/, study/, …           #   Tracked in git so the demo state is
+    └── index.html                     #   reproducible from a clean checkout.
 ```
 
-The output directory `.next-export/` is gitignored — it's regenerated each build.
+Because `l1nx-forge/` is served from a subdirectory, the build needs `L1NX_BASE_PATH=/l1nx-forge` so all routes and asset URLs are prefixed correctly. The deploy script handles this automatically.
+
+### One-shot deploy: `npm run deploy:demo`
+
+The script at [scripts/deploy-demo.sh](scripts/deploy-demo.sh) does the whole thing:
+
+1. Builds the static export with all three env vars set.
+2. Replaces `~/Projects/jakebuildsfunthings/l1nx-forge/` with the fresh `.next-export/`.
+3. Runs `npx wrangler deploy` from the personal-site repo.
+
+```bash
+git pull                  # make sure you have the latest main
+npm install               # if package.json changed
+npm run deploy:demo
+```
+
+**One-time prereqs:**
+- The jakebuildsfunthings repo is checked out at `~/Projects/jakebuildsfunthings`. Override with `JAKE_SITE_PATH=/elsewhere npm run deploy:demo` if it lives somewhere else.
+- You've run `npx wrangler login` once on this machine and selected the Cloudflare account that owns the `jakebuildsfunthings` worker.
+
+After the deploy, the regenerated files in `~/Projects/jakebuildsfunthings/l1nx-forge/` will be **uncommitted in that repo**. Cloudflare is already serving the new build, but if you want the rendered demo state mirrored to GitHub, commit it there:
+
+```bash
+cd ~/Projects/jakebuildsfunthings
+git add l1nx-forge
+git commit -m "Update l1nx-forge demo"
+git push
+```
 
 ### When you ship a fix or feature
 
 1. Commit and push to `main`. Vercel auto-deploys.
-2. To update the demo too: pull, run the build command above, upload `.next-export/`.
+2. To update the demo too: `npm run deploy:demo`.
 
-That's it. No branch maintenance, no cherry-picking.
+That's it. No branch maintenance, no cherry-picking. The build output `.next-export/` is gitignored on the L1NX side and regenerated each run.
 
 ## License
 
