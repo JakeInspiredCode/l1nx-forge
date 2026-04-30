@@ -11,21 +11,25 @@ This file is loaded automatically into your context. The README is the canonical
 
 ## Deploying the static demo
 
-Use [`scripts/deploy-demo.sh`](scripts/deploy-demo.sh), wired up as `npm run deploy:demo`. It builds, copies into the personal-site repo, and runs `wrangler deploy`.
+Use [`scripts/deploy-demo.sh`](scripts/deploy-demo.sh), wired up as `npm run deploy:demo`. The script:
 
-**Important: you (the LLM) cannot run the full deploy from a non-interactive shell.** `wrangler deploy` needs OAuth-cached creds from `wrangler login`, and that login flow opens a browser. From a non-TTY shell with no `CLOUDFLARE_API_TOKEN`, the deploy step will fail. The script's pre-flight `wrangler whoami` check will catch this and tell you to use the build-only mode:
+1. Builds with the three env vars set.
+2. Replaces `~/Projects/jakebuildsfunthings/l1nx-forge/` with the fresh `.next-export/`.
+3. Commits + pushes the personal-site repo's `l1nx-forge/`.
+4. Cloudflare Workers Build auto-deploys from `origin/main` ~60s later.
+
+**Critical: GitHub is the source of truth, not local files.** Cloudflare Workers Build is wired to the personal-site repo and redeploys from `origin/main` on every push. So a local-only `wrangler deploy` is overwritten by the next push to that repo. The script always commits + pushes; never skip that step.
+
+**You can run this end-to-end from a non-interactive shell.** No Cloudflare OAuth needed — the script doesn't call `wrangler deploy` directly, just `git push`, which uses the same credentials any normal push would.
+
+To watch the deploy land after pushing:
 
 ```bash
-npm run deploy:demo -- --build-only
+NEW_HASH=$(grep -oE '_next/static/css/[a-z0-9]+\.css' ~/Projects/jakebuildsfunthings/l1nx-forge/index.html | head -1 | sed 's|.*/||;s|\.css$||')
+until curl -s https://jakebuildsfunthings.com/l1nx-forge/ | grep -q "$NEW_HASH"; do sleep 5; done; echo "Live."
 ```
 
-That builds, copies into `~/Projects/jakebuildsfunthings/l1nx-forge/`, and stops. Then tell the user to finish from their terminal:
-
-```bash
-cd ~/Projects/jakebuildsfunthings && npx wrangler deploy
-```
-
-Vercel deploys are easier: just `git push origin main` and Vercel handles the rest. No special steps.
+Vercel deploys are easier: just `git push origin main` from this repo and Vercel handles the rest.
 
 ## Things that look weird but are intentional
 
@@ -43,8 +47,6 @@ It's regenerated from this repo every time `npm run deploy:demo` runs. Any chang
 # 1. Push to main → Vercel auto-deploys
 git push origin main
 
-# 2. Update the static demo
-npm run deploy:demo                    # if user is in their terminal
-# OR
-npm run deploy:demo -- --build-only    # if you're an LLM, then ask user to finish
+# 2. Update the static demo (works from any shell, no OAuth)
+npm run deploy:demo
 ```

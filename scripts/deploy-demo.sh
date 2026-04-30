@@ -1,48 +1,44 @@
 #!/usr/bin/env bash
-# Build the L1NX static demo and deploy it to jakebuildsfunthings.com/l1nx-forge.
+# Build the L1NX static demo and deploy to jakebuildsfunthings.com/l1nx-forge.
+#
+# How it deploys:
+#   Cloudflare's Workers Build is connected to the jakebuildsfunthings
+#   GitHub repo and auto-deploys on every push to main, ~60 seconds after
+#   the push lands. So this script does NOT run `wrangler deploy` directly
+#   — instead it commits + pushes the regenerated l1nx-forge/ and lets
+#   Workers Build do the deploy.
+#
+#   GitHub `origin/main` of the personal-site repo IS the source of truth
+#   for what Cloudflare serves. A local-only `wrangler deploy` (without
+#   committing) is silently overwritten the next time anyone pushes to
+#   that repo, because Workers Build redeploys from origin/main.
 #
 # Flow:
-#   1. Pre-flight: confirm wrangler is authenticated against Cloudflare
-#      (skipped with --build-only).
-#   2. Run `next build` with static-export + demo-mode + basePath env vars set.
-#      Output lands in .next-export/.
-#   3. Replace ~/Projects/jakebuildsfunthings/l1nx-forge/ with the fresh build.
-#   4. Run `npx wrangler deploy` from the personal-site repo (Cloudflare
-#      Workers, name "jakebuildsfunthings", custom domain jakebuildsfunthings.com).
+#   1. Build with env vars (L1NX_STATIC_EXPORT=1, NEXT_PUBLIC_L1NX_DEMO_MODE=1,
+#      L1NX_BASE_PATH=/l1nx-forge). Output lands in .next-export/.
+#   2. Replace ~/Projects/jakebuildsfunthings/l1nx-forge/ with the fresh build.
+#   3. Commit l1nx-forge/ in the personal-site repo with a message that
+#      records the source L1NX commit hash for provenance.
+#   4. Push to origin → Workers Build deploys ~60 seconds later.
 #
 # Prereqs (one-time):
-#   - The jakebuildsfunthings repo is checked out at ~/Projects/jakebuildsfunthings
-#     (override with JAKE_SITE_PATH=/elsewhere).
-#   - You have run `npx wrangler login` once on this machine in an interactive
-#     terminal, and the Cloudflare account that owns the worker is selected.
+#   - jakebuildsfunthings repo at ~/Projects/jakebuildsfunthings (override
+#     with JAKE_SITE_PATH=/elsewhere).
+#   - The personal-site repo's `origin` is a remote you can push to (SSH
+#     key or HTTPS token already set up — same auth you use for any other
+#     git push from that repo).
 #
 # Usage:
-#   npm run deploy:demo                    # full build + deploy
-#   npm run deploy:demo -- --build-only    # build + copy, skip wrangler deploy
-#                                          # (use this from non-interactive shells
-#                                          # like LLM agents that can't open a
-#                                          # browser for OAuth)
+#   npm run deploy:demo
 #
-# After a full deploy, the rendered files in jakebuildsfunthings/l1nx-forge
-# will be uncommitted in that repo. Commit them there if you want the demo
-# state mirrored to GitHub — Cloudflare itself is already updated.
+# This works fine from non-interactive shells (LLM agents) — no Cloudflare
+# OAuth needed because we never call `wrangler deploy` directly.
 
 set -euo pipefail
 
 SITE_PATH="${JAKE_SITE_PATH:-$HOME/Projects/jakebuildsfunthings}"
 DEMO_DIR="$SITE_PATH/l1nx-forge"
 EXPORT_DIR=".next-export"
-
-BUILD_ONLY=0
-case "${1:-}" in
-  --build-only|--skip-deploy) BUILD_ONLY=1 ;;
-  "") ;;
-  *)
-    echo "Unknown argument: $1" >&2
-    echo "Usage: $0 [--build-only]" >&2
-    exit 2
-    ;;
-esac
 
 if [ ! -d "$SITE_PATH" ]; then
   echo "Error: personal-site repo not found at $SITE_PATH" >&2
@@ -56,28 +52,12 @@ if [ ! -f "$SITE_PATH/wrangler.jsonc" ] && [ ! -f "$SITE_PATH/wrangler.toml" ]; 
   exit 1
 fi
 
-# Pre-flight wrangler auth check — fail fast before the (slow) build if we
-# already know the deploy will fail.
-if [ "$BUILD_ONLY" = "0" ]; then
-  echo "→ Checking Cloudflare authentication…"
-  if ! ( cd "$SITE_PATH" && npx --yes wrangler whoami >/dev/null 2>&1 ); then
-    cat <<'EOF' >&2
-Error: wrangler is not authenticated against the Cloudflare account that
-owns the jakebuildsfunthings worker.
-
-From an interactive terminal, run:
-  cd ~/Projects/jakebuildsfunthings
-  npx wrangler login
-
-Then retry: npm run deploy:demo
-
-If you're an LLM agent (or any non-interactive shell) and can't open a
-browser, run the build/copy half on its own and hand the deploy step
-back to the human:
-  npm run deploy:demo -- --build-only
-EOF
-    exit 1
-  fi
+# Capture the L1NX source commit so the personal-site commit message records
+# what was deployed. Helps when debugging which build is live.
+SOURCE_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+SOURCE_DIRTY=""
+if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+  SOURCE_DIRTY=" (dirty)"
 fi
 
 echo "→ Building static export (basePath=/l1nx-forge, demo seed on)…"
@@ -95,32 +75,46 @@ echo "→ Replacing $DEMO_DIR with the fresh build…"
 rm -rf "$DEMO_DIR"
 cp -R "$EXPORT_DIR" "$DEMO_DIR"
 
-if [ "$BUILD_ONLY" = "1" ]; then
+echo "→ Committing l1nx-forge/ in personal-site repo…"
+cd "$SITE_PATH"
+
+# Stage just l1nx-forge/. If anything else is uncommitted in this repo
+# (e.g. you were also editing the home page), it stays uncommitted.
+git add l1nx-forge
+
+if git diff --cached --quiet -- l1nx-forge; then
   cat <<EOF
 
-✔ Build copied to $DEMO_DIR. Wrangler deploy SKIPPED (--build-only).
-
-To finish the deploy, run from your interactive terminal:
-  cd $SITE_PATH
-  npx wrangler deploy
+✓ Build matches what's already in $SITE_PATH at HEAD.
+  Nothing to commit. Cloudflare is already serving this build.
 
 EOF
   exit 0
 fi
 
-echo "→ Deploying personal site to Cloudflare via wrangler…"
-( cd "$SITE_PATH" && npx --yes wrangler deploy )
+git commit -m "$(cat <<EOF
+Update l1nx-forge demo (from L1NX $SOURCE_COMMIT$SOURCE_DIRTY)
+
+Regenerated by L1NX repo's \`npm run deploy:demo\` script.
+EOF
+)"
+
+echo "→ Pushing to origin (triggers Cloudflare Workers Build auto-deploy)…"
+git push origin main
 
 cat <<EOF
 
-✔ Demo deployed: https://jakebuildsfunthings.com/l1nx-forge/
+✔ Pushed. Cloudflare Workers Build will redeploy from GitHub in ~60 seconds.
 
-Cloudflare is now serving the new build. The change in $SITE_PATH is
-uncommitted; commit it there if you want the demo state mirrored to GitHub:
+Once it finishes, verify at:
+  https://jakebuildsfunthings.com/l1nx-forge/
 
-  cd $SITE_PATH
-  git add l1nx-forge
-  git commit -m "Update l1nx-forge demo"
-  git push
+If you want to watch the deploy land, this command polls the live site
+until the new build is detected:
+
+  cd $(pwd) && \\
+    until curl -s https://jakebuildsfunthings.com/l1nx-forge/ \\
+      | grep -q "$(grep -oE '_next/static/css/[a-z0-9]+\.css' "$DEMO_DIR/index.html" | head -1 | sed 's|.*/||;s|\.css$||')"; \\
+    do sleep 5; done && echo "Live."
 
 EOF
