@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "@/lib/convex-shim";
 import { api } from "@/convex/_generated/api";
@@ -100,19 +100,71 @@ export default function SystemMap() {
   const missionStates = useQuery<Doc<MissionProgressFields>[]>(api.forgeMissions.getAllMissionStates);
   const enrollCampaign = useMutation(api.forgeCampaigns.enrollCampaign);
 
-  const [hoveredMission, setHoveredMission] = useState<Mission | null>(null);
+  // activeHover = what's under the cursor right now (drives cursor tooltip + planet ring/badge)
+  // pinnedMission = what the side panel shows; sticky — only changes when a different
+  //   mission is hovered, so users can move into the panel and click Deploy/⋯ without
+  //   the panel evaporating.
+  const [activeHover, setActiveHover] = useState<Mission | null>(null);
+  const [pinnedMission, setPinnedMission] = useState<Mission | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Last-visited campaign memory: when Missions is clicked without a ?campaign=
+  // param, fall back to whichever campaign the user was last viewing.
+  const LAST_CAMPAIGN_KEY = "l1nx-last-campaign";
+  const [savedCampaign, setSavedCampaign] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setSavedCampaign(localStorage.getItem(LAST_CAMPAIGN_KEY));
+    } catch {
+      // localStorage unavailable — fall through to data-driven fallback
+    }
+  }, []);
 
   const isLoading = !profile || !campaignStates || !missionStates;
 
-  // Resolve active campaign
-  const activeCampaignId = campaignIdParam
-    ?? campaignStates?.find((c) => c.enrolled)?.campaignId;
+  // Resolve active campaign with fallback chain:
+  //   URL ?campaign=X → localStorage last-visited → most recent activity → first enrolled
+  const activeCampaignId = useMemo(() => {
+    if (campaignIdParam) return campaignIdParam;
+
+    const enrolled = campaignStates?.filter((c) => c.enrolled) ?? [];
+    if (enrolled.length === 0) return undefined;
+
+    // Tier 1: localStorage last-visited (only if still enrolled)
+    if (savedCampaign && enrolled.some((c) => c.campaignId === savedCampaign)) {
+      return savedCampaign;
+    }
+
+    // Tier 2: most recently active enrolled campaign
+    const sorted = [...enrolled].sort((a, b) => {
+      const ta = a.lastActivityAt ? new Date(a.lastActivityAt).getTime() : 0;
+      const tb = b.lastActivityAt ? new Date(b.lastActivityAt).getTime() : 0;
+      return tb - ta;
+    });
+    return sorted[0]?.campaignId;
+  }, [campaignIdParam, campaignStates, savedCampaign]);
+
   const activeCampaign = activeCampaignId
     ? ALL_CAMPAIGNS.find((c) => c.id === activeCampaignId)
     : undefined;
   const enrolledState = campaignStates?.find((c) => c.campaignId === activeCampaignId);
+
+  // Persist the resolved campaign so future Missions clicks land here
+  useEffect(() => {
+    if (!activeCampaignId) return;
+    try {
+      localStorage.setItem(LAST_CAMPAIGN_KEY, activeCampaignId);
+    } catch {
+      // ignore
+    }
+  }, [activeCampaignId]);
+
+  // Reset the pinned preview when the campaign changes (otherwise the sidebar
+  // would keep showing a mission from a different campaign)
+  useEffect(() => {
+    setPinnedMission(null);
+    setActiveHover(null);
+  }, [activeCampaignId]);
 
   // Campaign sector for theming
   const sector = activeCampaignId ? getSectorForCampaign(activeCampaignId) : undefined;
@@ -186,22 +238,18 @@ export default function SystemMap() {
     [missions, orbitalPositions],
   );
 
-  const hoveredMissionNumber = hoveredMission
-    ? missions.findIndex((m) => m.id === hoveredMission.id) + 1
+  const pinnedMissionNumber = pinnedMission
+    ? missions.findIndex((m) => m.id === pinnedMission.id) + 1
     : 0;
 
+  // Hover over a mission node:
+  //   - sets activeHover (transient — drives cursor tooltip + planet ring/badge)
+  //   - pins the mission in the sidebar (sticky — drives the side panel)
+  // Mouseleave clears activeHover but leaves pinnedMission alone, so users
+  // can move the cursor off the planet to interact with the sidebar.
   const handleMissionHover = useCallback((mission: Mission | null) => {
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-    if (mission) {
-      setHoveredMission(mission);
-    } else {
-      hideTimerRef.current = setTimeout(() => {
-        setHoveredMission(null);
-      }, 300);
-    }
+    setActiveHover(mission);
+    if (mission) setPinnedMission(mission);
   }, []);
 
   const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
@@ -223,19 +271,6 @@ export default function SystemMap() {
     [effectiveStatuses, handleDeploy],
   );
 
-  const handlePanelEnter = useCallback(() => {
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-  }, []);
-
-  const handlePanelLeave = useCallback(() => {
-    hideTimerRef.current = setTimeout(() => {
-      setHoveredMission(null);
-    }, 300);
-  }, []);
-
   const handleSkipToCheck = useCallback((missionId: string) => {
     router.push(`/missions/${missionId}?skipToCheck=true`);
   }, [router]);
@@ -245,21 +280,14 @@ export default function SystemMap() {
     await enrollCampaign({ campaignId: activeCampaignId });
   }, [activeCampaignId, enrollCampaign]);
 
-  useEffect(() => {
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
-  }, []);
-
-  // Only track mouse position while a mission is hovered. Without this guard,
-  // every idle mouse movement re-renders the whole map (hundreds of times per
-  // second of movement).
+  // Only track mouse position while a mission is actively under the cursor.
+  // Without this guard, every idle mouse movement re-renders the whole map.
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!hoveredMission) return;
+      if (!activeHover) return;
       setMousePos({ x: e.clientX, y: e.clientY });
     },
-    [hoveredMission],
+    [activeHover],
   );
 
   const hasNoCampaign = !isLoading && !activeCampaign;
@@ -363,7 +391,7 @@ export default function SystemMap() {
                       celestialType={pos.celestialType}
                       campaignColor={campaignColor}
                       isCurrent={i === currentMissionIndex}
-                      isHovered={hoveredMission?.id === mission.id}
+                      isHovered={activeHover?.id === mission.id}
                       enrolled={enrolledState?.enrolled ?? false}
                       onHover={handleMissionHover}
                       onClick={handleMissionClick}
@@ -406,25 +434,21 @@ export default function SystemMap() {
           </div>
         </div>
 
-        {/* Right sidebar — Mission Briefing (default) or Mission Preview (on hover/pin) */}
-        <div
-          className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none"
-          onMouseEnter={handlePanelEnter}
-          onMouseLeave={handlePanelLeave}
-        >
+        {/* Right sidebar — Mission Briefing (default) or Mission Preview (sticky) */}
+        <div className="md:w-[280px] lg:w-[320px] xl:w-[340px] shrink-0 flex flex-col min-h-0 max-h-[40vh] md:max-h-none">
           <div className="glass-panel-header">
             <span>
-              {hoveredMission
-                ? `Mission ${hoveredMissionNumber}`
+              {pinnedMission
+                ? `Mission ${pinnedMissionNumber}`
                 : "Mission Briefing"}
             </span>
           </div>
           <div className="flex-1 glass-panel rounded-b-lg overflow-hidden">
-            {hoveredMission ? (
+            {pinnedMission ? (
               <MissionPreviewPanel
-                mission={hoveredMission}
-                status={effectiveStatuses[hoveredMission.id] ?? "locked"}
-                missionNumber={hoveredMissionNumber}
+                mission={pinnedMission}
+                status={effectiveStatuses[pinnedMission.id] ?? "locked"}
+                missionNumber={pinnedMissionNumber}
                 totalMissions={missions.length}
                 campaignColor={campaignColor}
                 enrolled={enrolledState?.enrolled ?? false}
@@ -453,13 +477,13 @@ export default function SystemMap() {
         </div>
       </div>
 
-      {/* Hover tooltip — small badge near cursor for instant spatial feedback */}
-      {hoveredMission && (
+      {/* Hover tooltip — small badge near cursor while actively hovering a planet */}
+      {activeHover && (
         <MissionTooltip
-          mission={hoveredMission}
-          missionIndex={missions.findIndex((m) => m.id === hoveredMission.id)}
+          mission={activeHover}
+          missionIndex={missions.findIndex((m) => m.id === activeHover.id)}
           totalMissions={missions.length}
-          status={effectiveStatuses[hoveredMission.id] ?? "locked"}
+          status={effectiveStatuses[activeHover.id] ?? "locked"}
           mousePos={mousePos}
           campaignColor={campaignColor}
         />
