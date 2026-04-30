@@ -101,7 +101,6 @@ export default function SystemMap() {
   const enrollCampaign = useMutation(api.forgeCampaigns.enrollCampaign);
 
   const [hoveredMission, setHoveredMission] = useState<Mission | null>(null);
-  const [pinnedMission, setPinnedMission] = useState<Mission | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -187,10 +186,8 @@ export default function SystemMap() {
     [missions, orbitalPositions],
   );
 
-  // displayMission is what the side panel shows: pin overrides hover.
-  const displayMission = pinnedMission ?? hoveredMission;
-  const displayMissionNumber = displayMission
-    ? missions.findIndex((m) => m.id === displayMission.id) + 1
+  const hoveredMissionNumber = hoveredMission
+    ? missions.findIndex((m) => m.id === hoveredMission.id) + 1
     : 0;
 
   const handleMissionHover = useCallback((mission: Mission | null) => {
@@ -207,19 +204,24 @@ export default function SystemMap() {
     }
   }, []);
 
-  const handleMissionClick = useCallback((mission: Mission) => {
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-    setPinnedMission(mission);
-    setHoveredMission(null);
-  }, []);
+  const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
+    sessionStorage.setItem(
+      `loadout:${missionId}`,
+      JSON.stringify(loadout.map((s) => s.id)),
+    );
+    router.push(`/missions/${missionId}?autostart=true`);
+  }, [router]);
 
-  const handleUnpin = useCallback(() => {
-    setPinnedMission(null);
-    setHoveredMission(null);
-  }, []);
+  // Click on a mission node = deploy directly. Standard web norm: cards are
+  // clickable and click triggers the action. Hover = preview, click = act.
+  const handleMissionClick = useCallback(
+    (mission: Mission) => {
+      const status = effectiveStatuses[mission.id];
+      if (status === "locked") return;
+      handleDeploy(mission.id, mission.defaultLoadout);
+    },
+    [effectiveStatuses, handleDeploy],
+  );
 
   const handlePanelEnter = useCallback(() => {
     if (hideTimerRef.current) {
@@ -229,19 +231,10 @@ export default function SystemMap() {
   }, []);
 
   const handlePanelLeave = useCallback(() => {
-    if (pinnedMission) return;
     hideTimerRef.current = setTimeout(() => {
       setHoveredMission(null);
     }, 300);
-  }, [pinnedMission]);
-
-  const handleDeploy = useCallback((missionId: string, loadout: MissionStep[]) => {
-    sessionStorage.setItem(
-      `loadout:${missionId}`,
-      JSON.stringify(loadout.map((s) => s.id)),
-    );
-    router.push(`/missions/${missionId}?autostart=true`);
-  }, [router]);
+  }, []);
 
   const handleSkipToCheck = useCallback((missionId: string) => {
     router.push(`/missions/${missionId}?skipToCheck=true`);
@@ -370,6 +363,7 @@ export default function SystemMap() {
                       celestialType={pos.celestialType}
                       campaignColor={campaignColor}
                       isCurrent={i === currentMissionIndex}
+                      isHovered={hoveredMission?.id === mission.id}
                       enrolled={enrolledState?.enrolled ?? false}
                       onHover={handleMissionHover}
                       onClick={handleMissionClick}
@@ -420,24 +414,22 @@ export default function SystemMap() {
         >
           <div className="glass-panel-header">
             <span>
-              {displayMission
-                ? `Mission ${displayMissionNumber}${pinnedMission ? " · Pinned" : ""}`
+              {hoveredMission
+                ? `Mission ${hoveredMissionNumber}`
                 : "Mission Briefing"}
             </span>
           </div>
           <div className="flex-1 glass-panel rounded-b-lg overflow-hidden">
-            {displayMission ? (
+            {hoveredMission ? (
               <MissionPreviewPanel
-                mission={displayMission}
-                status={effectiveStatuses[displayMission.id] ?? "locked"}
-                missionNumber={displayMissionNumber}
+                mission={hoveredMission}
+                status={effectiveStatuses[hoveredMission.id] ?? "locked"}
+                missionNumber={hoveredMissionNumber}
                 totalMissions={missions.length}
                 campaignColor={campaignColor}
                 enrolled={enrolledState?.enrolled ?? false}
-                pinned={!!pinnedMission}
                 onDeploy={handleDeploy}
                 onSkipToCheck={handleSkipToCheck}
-                onUnpin={handleUnpin}
               />
             ) : (
               <StatsSidebar
@@ -462,7 +454,7 @@ export default function SystemMap() {
       </div>
 
       {/* Hover tooltip — small badge near cursor for instant spatial feedback */}
-      {hoveredMission && !pinnedMission && (
+      {hoveredMission && (
         <MissionTooltip
           mission={hoveredMission}
           missionIndex={missions.findIndex((m) => m.id === hoveredMission.id)}

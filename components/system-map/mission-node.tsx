@@ -14,6 +14,7 @@ interface MissionNodeProps {
   celestialType: "asteroid" | "moon" | "planet" | "station";
   campaignColor: string;
   isCurrent: boolean;
+  isHovered: boolean;
   enrolled: boolean;
   onHover: (mission: Mission | null) => void;
   onClick: (mission: Mission) => void;
@@ -53,6 +54,7 @@ export default function MissionNode({
   celestialType,
   campaignColor,
   isCurrent,
+  isHovered,
   enrolled,
   onHover,
   onClick,
@@ -61,6 +63,7 @@ export default function MissionNode({
   const isLocked = status === "locked";
   const isInteractive = !isLocked || enrolled;
   const isAccomplished = status === "accomplished";
+  const showHoverAffordance = isHovered && isInteractive;
 
   const h = hashId(mission.id);
   const palette = SURFACE_PALETTES[h % SURFACE_PALETTES.length];
@@ -107,6 +110,50 @@ export default function MissionNode({
         strokeWidth={orbitWidth} opacity={orbitOpacity}
         strokeDasharray={orbitDash}
       />
+
+      {/* Hover affordance — pulsing target ring around the planet */}
+      {showHoverAffordance && (
+        <>
+          <circle
+            cx={cx} cy={cy} r={size + 8}
+            fill={`${campaignColor}10`}
+            stroke={campaignColor}
+            strokeWidth={1.5}
+            opacity={0.7}
+            strokeDasharray="3 3"
+            style={{ filter: `drop-shadow(0 0 8px ${campaignColor})` }}
+          >
+            <animate
+              attributeName="r"
+              values={`${size + 6};${size + 11};${size + 6}`}
+              dur="1.6s"
+              repeatCount="indefinite"
+            />
+            <animate
+              attributeName="opacity"
+              values="0.4;0.85;0.4"
+              dur="1.6s"
+              repeatCount="indefinite"
+            />
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from={`0 ${cx} ${cy}`}
+              to={`360 ${cx} ${cy}`}
+              dur="8s"
+              repeatCount="indefinite"
+            />
+          </circle>
+          {/* Outer halo */}
+          <circle
+            cx={cx} cy={cy} r={size + 16}
+            fill="none"
+            stroke={campaignColor}
+            strokeWidth={0.6}
+            opacity={0.25}
+          />
+        </>
+      )}
 
       {/* ─── ASTEROID ─── */}
       {celestialType === "asteroid" && (
@@ -350,6 +397,41 @@ export default function MissionNode({
           fill="#22c55e"
           style={{ filter: "drop-shadow(0 0 4px #22c55e)" }}
         />
+      )}
+
+      {/* Hover-state Deploy hint — anchored above the planet so it stays
+          readable regardless of orbit position */}
+      {showHoverAffordance && (
+        <g className="pointer-events-none select-none">
+          <rect
+            x={cx - 36}
+            y={cy - size - 24}
+            width={72}
+            height={16}
+            rx={8}
+            ry={8}
+            fill="#0b1220"
+            stroke={campaignColor}
+            strokeWidth={1}
+            opacity={0.95}
+            style={{ filter: `drop-shadow(0 0 6px ${campaignColor}aa)` }}
+          />
+          <text
+            x={cx}
+            y={cy - size - 16}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill={campaignColor}
+            fontSize={10}
+            fontFamily="'Chakra Petch', sans-serif"
+            fontWeight={700}
+            letterSpacing="0.18em"
+            className="uppercase"
+            style={{ textShadow: `0 0 6px ${campaignColor}cc` }}
+          >
+            ▶ Deploy
+          </text>
+        </g>
       )}
     </g>
   );
