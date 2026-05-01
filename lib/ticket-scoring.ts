@@ -195,9 +195,11 @@ export function computeXp(
   difficulty: TicketDifficulty,
   score: number,
   usedHint: boolean,
+  usedReveal: boolean = false,
 ): number {
   const base = TICKET_LEVELS[difficulty].xpBase;
   let xp = Math.round(base * (score / 100));
   if (usedHint) xp = Math.round(xp * 0.5);
+  if (usedReveal) xp = Math.round(xp * 0.5);
   return Math.max(xp, score > 0 ? 1 : 0);
 }

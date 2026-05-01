@@ -50,6 +50,7 @@ export default function TicketTerminal({
   const [commandsMatched, setCommandsMatched] = useState<string[]>([]);
   const [phase, setPhase] = useState<"working" | "answer" | "result">("working");
   const [showHint, setShowHint] = useState(false);
+  const [showCommandReveal, setShowCommandReveal] = useState(false);
   const [result, setResult] = useState<TicketResult | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
@@ -91,7 +92,7 @@ export default function TicketTerminal({
           matchesExpectedCommand(cmd, currentExpected, currentAlternatives);
         if (isMatch) {
           const score = 100;
-          const xp = computeXp(ticket.difficulty, score, showHint);
+          const xp = computeXp(ticket.difficulty, score, showHint, showCommandReveal);
           const res: TicketResult = {
             score,
             matchedTerms: [],
@@ -104,7 +105,7 @@ export default function TicketTerminal({
         }
       }
     },
-    [currentExpected, currentAlternatives, isCommandLevel, showHint, ticket.difficulty],
+    [currentExpected, currentAlternatives, isCommandLevel, showHint, showCommandReveal, ticket.difficulty],
   );
 
   const handleReadyToAnswer = useCallback(() => {
@@ -146,7 +147,7 @@ export default function TicketTerminal({
             ticket.acceptAlternatives,
             finalResult.score,
           );
-          const xp = computeXp(ticket.difficulty, finalScore, showHint);
+          const xp = computeXp(ticket.difficulty, finalScore, showHint, showCommandReveal);
           setResult({
             score: finalScore,
             matchedTerms: finalResult.matchedTerms,
@@ -175,7 +176,7 @@ export default function TicketTerminal({
         answerResult.score,
       );
 
-      const xp = computeXp(ticket.difficulty, finalScore, showHint);
+      const xp = computeXp(ticket.difficulty, finalScore, showHint, showCommandReveal);
 
       setResult({
         score: finalScore,
@@ -194,6 +195,7 @@ export default function TicketTerminal({
       ticket,
       commandsRun,
       showHint,
+      showCommandReveal,
     ],
   );
 
@@ -244,9 +246,11 @@ export default function TicketTerminal({
             phase={phase}
             onSubmitAnswer={handleSubmitAnswer}
             onRequestHint={() => setShowHint(true)}
+            onRevealCommand={() => setShowCommandReveal(true)}
             onNextTicket={handleNext}
             onReadyToAnswer={handleReadyToAnswer}
             showHint={showHint}
+            showCommandReveal={showCommandReveal}
             result={result ?? undefined}
             currentStep={isMultiStep ? currentStep : undefined}
             totalSteps={isMultiStep ? totalSteps : undefined}

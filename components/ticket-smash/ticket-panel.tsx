@@ -22,9 +22,11 @@ interface TicketPanelProps {
   phase: "working" | "answer" | "result";
   onSubmitAnswer: (answer: string) => void;
   onRequestHint: () => void;
+  onRevealCommand: () => void;
   onNextTicket: () => void;
   onReadyToAnswer: () => void;
   showHint: boolean;
+  showCommandReveal: boolean;
   result?: TicketResult;
   currentStep?: number;
   totalSteps?: number;
@@ -40,9 +42,11 @@ export default function TicketPanel({
   phase,
   onSubmitAnswer,
   onRequestHint,
+  onRevealCommand,
   onNextTicket,
   onReadyToAnswer,
   showHint,
+  showCommandReveal,
   result,
   currentStep,
   totalSteps,
@@ -52,6 +56,8 @@ export default function TicketPanel({
   const [showWhy, setShowWhy] = useState(false);
   const level = TICKET_LEVELS[ticket.difficulty];
   const isCommandLevel = level.order <= 2;
+  const isInferenceLevel = level.order === 2;
+  const showExpectedCommand = isCommandLevel && (!isInferenceLevel || showCommandReveal);
   const needsAnswer = !!ticket.answerPrompt;
 
   // Shift+Enter advances to next ticket from result screen
@@ -118,8 +124,8 @@ export default function TicketPanel({
               </div>
             )}
 
-            {/* Command tracking for L0-L2 */}
-            {isCommandLevel && (
+            {/* Command tracking for L0/L1, and L2 only when revealed */}
+            {showExpectedCommand && (
               <div className="space-y-0.5">
                 <span className="text-[9px] uppercase tracking-wider text-v2-text-muted">Expected command</span>
                 {ticket.expectedCommands.map((cmd) => {
@@ -143,6 +149,16 @@ export default function TicketPanel({
                   );
                 })}
               </div>
+            )}
+
+            {/* L2: reveal-command affordance (hidden by default to avoid spoiling the inference) */}
+            {isInferenceLevel && !showCommandReveal && (
+              <button
+                onClick={onRevealCommand}
+                className="text-[9px] text-v2-text-muted hover:text-v2-warning transition-colors"
+              >
+                Reveal command (−50% XP)
+              </button>
             )}
 
             {/* Command tracker for L4-L5 */}
